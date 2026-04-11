@@ -956,9 +956,7 @@ function handleTap(clientX, clientY) {
 
   // Empty space tap
   if (selectedPaletteEl && atoms.size === 0) {
-    const pt = pickWorldPoint(clientX, clientY);
-    pt.z = 0;
-    actAddFirstAtom(selectedPaletteEl, pt);
+    actAddFirstAtom(selectedPaletteEl, new THREE.Vector3(0, 0, 0));
   } else if (selectedAtomId !== null) {
     selectedAtomId = null;
     clearSelectionRing();
