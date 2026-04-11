@@ -40,7 +40,12 @@
     min-height: 0;
     overflow: hidden;
   }
-  #viewport canvas { display: block; touch-action: none; }
+  #viewport canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none;
+  }
 
   /* Name bar */
   #nameBar {
@@ -263,7 +268,7 @@ function resize() {
   const w = viewport.clientWidth;
   const h = viewport.clientHeight;
   if (w === 0 || h === 0) return;
-  renderer.setSize(w, h, false);
+  renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
@@ -579,6 +584,12 @@ function onStateChanged() {
 function actAddFirstAtom(el, pos) {
   const atom = createAtom(el, pos);
   history.push({ type: 'addAtom', atomId: atom.id, bondRef: null });
+  if (mode === 'build') {
+    camera.position.set(0, 0, 18);
+    camera.lookAt(0, 0, 0);
+    root.position.set(0, 0, 0);
+    root.rotation.set(0, 0, 0);
+  }
   onStateChanged();
 }
 function actAddAtomBonded(el, parent) {
