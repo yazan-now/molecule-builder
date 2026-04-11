@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Molecule Builder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0d0d2b;
+    color: #ffffff;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* Header */
+  #header {
+    background: #1a1a4e;
+    padding: 10px 14px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #2a2a6e;
+  }
+  #header h1 { font-size: 16px; font-weight: 600; color: #ffffff; }
+  #header .target { font-size: 12px; color: #4fc3f7; margin-top: 3px; }
+
+  /* Viewport */
+  #viewport {
+    flex: 1 1 auto;
+    position: relative;
+    background: #0d0d2b;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #viewport canvas { display: block; touch-action: none; }
+
+  /* Name bar */
+  #nameBar {
+    background: #161638;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-top: 1px solid #2a2a6e;
+  }
+  #modeToggle {
+    background: #2a2a6e;
+    color: white;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  #modeToggle:active { background: #3a3a8e; }
+  #liveName {
+    font-size: 13px;
+    color: #4fc3f7;
+    flex: 1;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* Palette */
+  #palette {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    padding: 12px;
+    background: #11112e;
+    flex-shrink: 0;
+  }
+  .atomBtn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .atomBtn[data-el="C"] { background: #505050; }
+  .atomBtn[data-el="N"] { background: #3050D0; }
+  .atomBtn[data-el="O"] { background: #D03030; }
+  .atomBtn.selected {
+    border-color: #4fc3f7;
+    box-shadow: 0 0 14px rgba(79, 195, 247, 0.8);
+  }
+  .atomBtn:active { transform: scale(0.94); }
+
+  /* Controls */
+  #controls {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px 14px;
+    background: #11112e;
+    flex-shrink: 0;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  #controls button {
+    flex: 1;
+    background: #2a2a6e;
+    color: white;
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #controls button:active { background: #3a3a8e; }
+
+  /* Toast */
+  #toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(20, 20, 40, 0.96);
+    border: 1px solid #3a3a8e;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    max-width: 85%;
+    text-align: center;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Win overlay */
+  #winOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 170, 0, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+  #winOverlay.show { display: flex; }
+  #winOverlay h2 {
+    font-size: 48px;
+    margin-bottom: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  #winOverlay p {
+    font-size: 15px;
+    margin-bottom: 28px;
+    opacity: 0.95;
+    max-width: 320px;
+  }
+  #winOverlay button {
+    background: white;
+    color: #00AA00;
+    border: none;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #winOverlay button:active { background: #e0e0e0; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Molecule Builder</h1>
+  <div class="target">Target: 4-amino-6-ethyl-3-methyl-2-octanol</div>
+</div>
+
+<div id="viewport">
+  <div id="toast"></div>
+  <div id="winOverlay">
+    <h2>Correct!</h2>
+    <p id="winName">4-amino-6-ethyl-3-methyl-2-octanol</p>
+    <button id="buildAgain">Build Again</button>
+  </div>
+</div>
+
+<div id="nameBar">
+  <button id="modeToggle">Build Mode</button>
+  <div id="liveName">Tap an atom to start</div>
+</div>
+
+<div id="palette">
+  <button class="atomBtn" data-el="C">C</button>
+  <button class="atomBtn" data-el="N">N</button>
+  <button class="atomBtn" data-el="O">O</button>
+</div>
+
+<div id="controls">
+  <button id="undoBtn">Undo</button>
+  <button id="clearBtn">Clear All</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================================
+   MOLECULE BUILDER  —  single-file build
+   Phase 1: scaffold (HTML/CSS above)
+   Phase 2: Three.js scene
+   Phase 3: Atom placement & auto-hydrogens
+   Phase 4: Bond validation
+   Phase 5: Bond between existing atoms
+   Phase 6: Undo / Clear All
+   Phase 7: IUPAC naming engine (old-style)
+   Phase 8: Win condition
+   Phase 9: View Mode (rotate / pinch)
+   Phase 10: Polish
+   ========================================================================= */
+
+const TARGET_NAME = '4-amino-6-ethyl-3-methyl-2-octanol';
+const MAX_BONDS   = { C: 4, N: 3, O: 2, H: 1 };
+const ATOM_COLOR  = { C: 0x505050, N: 0x3050D0, O: 0xD03030, H: 0xE0E0E0 };
+const ATOM_RADIUS = { C: 0.50,     N: 0.48,     O: 0.45,     H: 0.30 };
+
+/* ---------- Three.js setup (Phase 2) ---------- */
+const viewport = document.getElementById('viewport');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d2b);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
+camera.position.set(0, 0, 18);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+viewport.appendChild(renderer.domElement);
+
+function resize() {
+  const w = viewport.clientWidth;
+  const h = viewport.clientHeight;
+  if (w === 0 || h === 0) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+
+/* Lighting */
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+dirLight.position.set(-6, 10, 12);
+scene.add(dirLight);
+const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.25);
+dirLight2.position.set(6, -4, 8);
+scene.add(dirLight2);
+
+/* Root group — rotated in View Mode */
+const root = new THREE.Group();
+scene.add(root);
+const hGroup = new THREE.Group(); // hydrogen meshes (rebuilt each update)
+root.add(hGroup);
+
+/* Reusable geometries / materials */
+const sphereGeoCache = {};
+function getSphereGeo(el) {
+  if (!sphereGeoCache[el])
+    sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 28, 20);
+  return sphereGeoCache[el];
+}
+const bondGeo = new THREE.CylinderGeometry(0.08, 0.08, 1, 14);
+const bondMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, shininess: 30 });
+const atomMats = {};
+for (const el of ['C','N','O','H']) {
+  atomMats[el] = new THREE.MeshPhongMaterial({ color: ATOM_COLOR[el], shininess: 70 });
+}
+const ringMat = new THREE.MeshBasicMaterial({
+  color: 0x4fc3f7, side: THREE.DoubleSide, transparent: true, opacity: 0.9,
+});
+
+/* ---------- State ---------- */
+let nextId = 1;
+const atoms = new Map();  // id -> { id, element, pos:Vector3, mesh, neighbors:Set<id> }
+const bonds = [];         // { a:id, b:id, mesh }
+const history = [];       // { type, ... } actions, for undo
+
+let selectedPaletteEl = null; // 'C' | 'N' | 'O' | null
+let selectedAtomId    = null; // atom id chosen for bond-between-existing
+let selectionRing     = null;
+
+let mode = 'build';  // 'build' | 'view'
+let won  = false;
+
+/* ---------- Small helpers ---------- */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function canBond(atom) {
+  return atom.neighbors.size < MAX_BONDS[atom.element];
+}
+
+function makeBondMesh(pa, pb) {
+  const m = new THREE.Mesh(bondGeo, bondMat);
+  orientBond(m, pa, pb);
+  return m;
+}
+function orientBond(mesh, pa, pb) {
+  const mid = new THREE.Vector3().addVectors(pa, pb).multiplyScalar(0.5);
+  const diff = new THREE.Vector3().subVectors(pb, pa);
+  const len = diff.length();
+  mesh.position.copy(mid);
+  mesh.scale.set(1, len, 1);
+  mesh.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    diff.clone().normalize()
+  );
+}
+
+/* ---------- Auto-position new atom (Phase 3) ---------- */
+function findPositionForNewAtom(parent) {
+  const neighborAngles = [];
+  for (const nid of parent.neighbors) {
+    const n = atoms.get(nid);
+    const dx = n.pos.x - parent.pos.x;
+    const dy = n.pos.y - parent.pos.y;
+    if (dx*dx + dy*dy > 0.0001)
+      neighborAngles.push(Math.atan2(dy, dx));
+  }
+  let angle;
+  if (neighborAngles.length === 0) {
+    angle = 0;
+  } else if (neighborAngles.length === 1) {
+    angle = neighborAngles[0] + Math.PI;
+  } else {
+    neighborAngles.sort((a,b) => a - b);
+    let maxGap = -1, chosen = 0;
+    for (let i = 0; i < neighborAngles.length; i++) {
+      const a1 = neighborAngles[i];
+      const a2 = neighborAngles[(i+1) % neighborAngles.length]
+                 + (i === neighborAngles.length - 1 ? Math.PI*2 : 0);
+      const gap = a2 - a1;
+      if (gap > maxGap) { maxGap = gap; chosen = a1 + gap/2; }
+    }
+    angle = chosen;
+  }
+  const dist = 2.0;
+  return new THREE.Vector3(
+    parent.pos.x + Math.cos(angle) * dist,
+    parent.pos.y + Math.sin(angle) * dist,
+    0
+  );
+}
+
+/* ---------- Create / remove atoms & bonds ---------- */
+function createAtom(el, pos) {
+  const atom = {
+    id: nextId++,
+    element: el,
+    pos: pos.clone(),
+    neighbors: new Set(),
+  };
+  const mesh = new THREE.Mesh(getSphereGeo(el), atomMats[el]);
+  mesh.position.copy(pos);
+  mesh.userData.atomId = atom.id;
+  atom.mesh = mesh;
+  root.add(mesh);
+  atoms.set(atom.id, atom);
+  return atom;
+}
+
+function createBond(a, b) {
+  if (a.id === b.id) return null;
+  if (a.neighbors.has(b.id)) return null;
+  if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return null; }
+  if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return null; }
+  a.neighbors.add(b.id);
+  b.neighbors.add(a.id);
+  const mesh = makeBondMesh(a.pos, b.pos);
+  const bond = { a: a.id, b: b.id, mesh };
+  bonds.push(bond);
+  root.add(mesh);
+  return bond;
+}
+
+function removeAtom(atomId) {
+  const atom = atoms.get(atomId);
+  if (!atom) return;
+  for (let i = bonds.length - 1; i >= 0; i--) {
+    const b = bonds[i];
+    if (b.a === atomId || b.b === atomId) {
+      const other = atoms.get(b.a === atomId ? b.b : b.a);
+      if (other) other.neighbors.delete(atomId);
+      root.remove(b.mesh);
+      bonds.splice(i, 1);
+    }
+  }
+  root.remove(atom.mesh);
+  atoms.delete(atomId);
+}
+
+function removeBondRef(bondRef) {
+  const idx = bonds.indexOf(bondRef);
+  if (idx === -1) return;
+  const a = atoms.get(bondRef.a);
+  const b = atoms.get(bondRef.b);
+  if (a) a.neighbors.delete(bondRef.b);
+  if (b) b.neighbors.delete(bondRef.a);
+  root.remove(bondRef.mesh);
+  bonds.splice(idx, 1);
+}
+
+/* ---------- Hydrogen rendering ---------- */
+function clearHydrogens() {
+  while (hGroup.children.length) hGroup.remove(hGroup.children[0]);
+}
+function renderHydrogens() {
+  clearHydrogens();
+  for (const atom of atoms.values()) {
+    const hCount = MAX_BONDS[atom.element] - atom.neighbors.size;
+    if (hCount <= 0) continue;
+
+    // angles taken by heavy-atom neighbours (XY plane)
+    const taken = [];
+    for (const nid of atom.neighbors) {
+      const n = atoms.get(nid);
+      taken.push(Math.atan2(n.pos.y - atom.pos.y, n.pos.x - atom.pos.x));
+    }
+    const picks = [];
+    if (taken.length === 0) {
+      for (let i = 0; i < hCount; i++)
+        picks.push((Math.PI * 2 * i) / hCount);
+    } else {
+      // build gaps on a circle
+      taken.sort((a,b) => a - b);
+      let gaps = [];
+      for (let i = 0; i < taken.length; i++) {
+        const s = taken[i];
+        const e = (i < taken.length - 1) ? taken[i+1] : taken[0] + Math.PI*2;
+        gaps.push({ start: s, end: e, size: e - s });
+      }
+      for (let i = 0; i < hCount; i++) {
+        gaps.sort((a,b) => b.size - a.size);
+        const g = gaps.shift();
+        const mid = g.start + g.size / 2;
+        picks.push(mid);
+        gaps.push({ start: g.start, end: mid, size: g.size / 2 });
+        gaps.push({ start: mid,     end: g.end, size: g.size / 2 });
+      }
+    }
+
+    for (const ang of picks) {
+      const hPos = new THREE.Vector3(
+        atom.pos.x + Math.cos(ang) * 1.1,
+        atom.pos.y + Math.sin(ang) * 1.1,
+        atom.pos.z
+      );
+      const hMesh = new THREE.Mesh(getSphereGeo('H'), atomMats.H);
+      hMesh.position.copy(hPos);
+      hGroup.add(hMesh);
+      hGroup.add(makeBondMesh(atom.pos, hPos));
+    }
+  }
+}
+
+/* ---------- Selection ring ---------- */
+function clearSelectionRing() {
+  if (selectionRing) {
+    root.remove(selectionRing);
+    selectionRing = null;
+  }
+}
+function showSelectionRing(atom) {
+  clearSelectionRing();
+  const r0 = ATOM_RADIUS[atom.element] * 1.35;
+  const r1 = ATOM_RADIUS[atom.element] * 1.65;
+  const geo = new THREE.RingGeometry(r0, r1, 32);
+  const ring = new THREE.Mesh(geo, ringMat);
+  ring.position.copy(atom.pos);
+  ring.position.z += 0.05;
+  selectionRing = ring;
+  root.add(ring);
+}
+
+/* ---------- Picking ---------- */
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+function setRayFromClient(x, y) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  ndc.x =  ((x - rect.left) / rect.width)  * 2 - 1;
+  ndc.y = -((y - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+}
+function pickAtom(x, y) {
+  setRayFromClient(x, y);
+  const meshes = [];
+  for (const a of atoms.values()) meshes.push(a.mesh);
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) return atoms.get(hits[0].object.userData.atomId);
+  return null;
+}
+function pickWorldPoint(x, y) {
+  setRayFromClient(x, y);
+  const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+  const pt = new THREE.Vector3();
+  raycaster.ray.intersectPlane(plane, pt);
+  return pt;
+}
+
+/* ---------- Auto-frame camera (build mode) ---------- */
+function autoFrame() {
+  if (atoms.size === 0 || mode !== 'build') {
+    if (mode === 'build') {
+      camera.position.set(0, 0, 18);
+      camera.lookAt(0, 0, 0);
+    }
+    return;
+  }
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for (const a of atoms.values()) {
+    if (a.pos.x < minX) minX = a.pos.x;
+    if (a.pos.x > maxX) maxX = a.pos.x;
+    if (a.pos.y < minY) minY = a.pos.y;
+    if (a.pos.y > maxY) maxY = a.pos.y;
+  }
+  // include hydrogens radius ~1.5
+  minX -= 2; maxX += 2; minY -= 2; maxY += 2;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const w = maxX - minX;
+  const h = maxY - minY;
+  const aspect = Math.max(0.0001, renderer.domElement.width / Math.max(1, renderer.domElement.height));
+  const fovY = camera.fov * Math.PI / 180;
+  const distY = (h / 2) / Math.tan(fovY / 2);
+  const distX = (w / 2) / Math.tan(fovY / 2) / aspect;
+  const dist = Math.max(distX, distY, 8) + 2;
+  camera.position.set(cx, cy, dist);
+  camera.lookAt(cx, cy, 0);
+}
+
+/* ---------- State change pipeline ---------- */
+function onStateChanged() {
+  renderHydrogens();
+  if (mode === 'build') autoFrame();
+  const name = generateName();
+  document.getElementById('liveName').textContent = name;
+  if (!won && name === TARGET_NAME) showWin();
+}
+
+/* ---------- Action wrappers (with undo history) ---------- */
+function actAddFirstAtom(el, pos) {
+  const atom = createAtom(el, pos);
+  history.push({ type: 'addAtom', atomId: atom.id, bondRef: null });
+  onStateChanged();
+}
+function actAddAtomBonded(el, parent) {
+  if (!canBond(parent)) {
+    toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`);
+    return;
+  }
+  const pos = findPositionForNewAtom(parent);
+  const atom = createAtom(el, pos);
+  const bondRef = createBond(parent, atom);
+  history.push({ type: 'addAtom', atomId: atom.id, bondRef });
+  onStateChanged();
+}
+function actAddBond(a, b) {
+  const bondRef = createBond(a, b);
+  if (bondRef) {
+    history.push({ type: 'addBond', bondRef });
+    onStateChanged();
+  }
+}
+function undo() {
+  const action = history.pop();
+  if (!action) return;
+  if (action.type === 'addAtom') removeAtom(action.atomId);
+  else if (action.type === 'addBond') removeBondRef(action.bondRef);
+  selectedAtomId = null;
+  clearSelectionRing();
+  onStateChanged();
+}
+function clearAll() {
+  const ids = [...atoms.keys()];
+  for (const id of ids) removeAtom(id);
+  history.length = 0;
+  selectedAtomId = null;
+  clearSelectionRing();
+  won = false;
+  document.getElementById('winOverlay').classList.remove('show');
+  onStateChanged();
+}
+
+/* ===========================================================
+   NAMING ENGINE (Phase 7) — old-style IUPAC
+   =========================================================== */
+
+const PARENT_ROOTS = [null, 'meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct'];
+const BRANCH_NAMES = [null, 'methyl', 'ethyl', 'propyl'];
+const MULTI_PREFIX = [null, '', 'di', 'tri', 'tetra'];
+
+function generateName() {
+  if (atoms.size === 0) return 'Tap an atom to start';
+
+  // Single non-carbon atoms
+  if (atoms.size === 1) {
+    const only = [...atoms.values()][0];
+    if (only.element === 'C') return 'methane';
+    if (only.element === 'O') return 'water';
+    if (only.element === 'N') return 'ammonia';
+  }
+
+  // Must only contain C, N, O
+  for (const a of atoms.values())
+    if (!['C','N','O'].includes(a.element)) return 'Invalid structure';
+
+  const carbons = [...atoms.values()].filter(a => a.element === 'C');
+  if (carbons.length === 0) return 'Invalid structure';
+  if (carbons.length > 20) return 'Structure too complex';
+
+  // Detect OH / NH2 functional groups
+  const ohCarbons  = new Set();
+  const nh2Carbons = new Set();
+  for (const a of atoms.values()) {
+    if (a.element === 'O') {
+      if (a.neighbors.size === 0) return 'Building...';
+      if (a.neighbors.size !== 1) return 'Invalid structure';
+      const nid = [...a.neighbors][0];
+      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
+      ohCarbons.add(nid);
+    } else if (a.element === 'N') {
+      if (a.neighbors.size === 0) return 'Building...';
+      if (a.neighbors.size !== 1) return 'Invalid structure';
+      const nid = [...a.neighbors][0];
+      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
+      nh2Carbons.add(nid);
+    }
+  }
+
+  // Carbon subgraph must be a tree and connected
+  const cIds = carbons.map(c => c.id);
+  const cSet = new Set(cIds);
+  const visited = new Set();
+  const q = [cIds[0]]; visited.add(cIds[0]);
+  let edges = 0;
+  while (q.length) {
+    const x = q.shift();
+    for (const nid of atoms.get(x).neighbors) {
+      if (!cSet.has(nid)) continue;
+      edges++;
+      if (!visited.has(nid)) { visited.add(nid); q.push(nid); }
+    }
+  }
+  if (visited.size !== cIds.length) return 'Invalid structure';
+  edges /= 2;
+  if (edges !== cIds.length - 1) return 'Invalid structure'; // cycle
+
+  // Unique path between any two carbons in the tree
+  function pathBetween(s, e) {
+    const parent = new Map();
+    parent.set(s, null);
+    const qq = [s];
+    while (qq.length) {
+      const x = qq.shift();
+      if (x === e) break;
+      for (const nid of atoms.get(x).neighbors) {
+        if (!cSet.has(nid) || parent.has(nid)) continue;
+        parent.set(nid, x);
+        qq.push(nid);
+      }
+    }
+    if (!parent.has(e)) return null;
+    const path = [];
+    let x = e;
+    while (x !== null) { path.push(x); x = parent.get(x); }
+    return path.reverse();
+  }
+
+  const hasOH  = ohCarbons.size  > 0;
+  const hasNH2 = nh2Carbons.size > 0;
+  const suffixGroup = hasOH ? 'ol' : (hasNH2 ? 'amine' : 'ane');
+  const requiredCarbons = hasOH ? ohCarbons : (hasNH2 ? nh2Carbons : null);
+
+  // Longest path through carbon tree, optionally containing a required C
+  let bestChain = null;
+  for (let i = 0; i < cIds.length; i++) {
+    for (let j = i; j < cIds.length; j++) {
+      const path = pathBetween(cIds[i], cIds[j]);
+      if (!path) continue;
+      if (requiredCarbons) {
+        let ok = false;
+        for (const cid of path) if (requiredCarbons.has(cid)) { ok = true; break; }
+        if (!ok) continue;
+      }
+      if (!bestChain || path.length > bestChain.length) bestChain = path;
+    }
+  }
+  if (!bestChain) return 'Building...';
+
+  function analyze(chain) {
+    const inChain = new Set(chain);
+    const subs = [];
+    let fgLocant = null;
+    for (let i = 0; i < chain.length; i++) {
+      const locant = i + 1;
+      const cid = chain[i];
+      const c = atoms.get(cid);
+
+      if (hasOH && ohCarbons.has(cid)) {
+        if (fgLocant === null) fgLocant = locant;
+        else return null; // multiple OH unsupported
+      }
+      if (nh2Carbons.has(cid)) {
+        if (hasOH) {
+          subs.push({ name: 'amino', locant });
+        } else if (hasNH2) {
+          if (fgLocant === null) fgLocant = locant;
+          else return null;
+        }
+      }
+
+      for (const nid of c.neighbors) {
+        if (inChain.has(nid)) continue;
+        const n = atoms.get(nid);
+        if (n.element !== 'C') continue; // O/N already handled
+        // Traverse linear branch; must be unbranched and <=3 C's
+        const seen = new Set([cid]);
+        const branch = [];
+        let cur = nid;
+        while (true) {
+          if (seen.has(cur)) return null;
+          seen.add(cur);
+          branch.push(cur);
+          if (branch.length > 3) return null;
+          const nexts = [];
+          for (const nn of atoms.get(cur).neighbors) {
+            if (seen.has(nn)) continue;
+            if (!cSet.has(nn)) return null;
+            nexts.push(nn);
+          }
+          if (nexts.length === 0) break;
+          if (nexts.length > 1) return null;
+          cur = nexts[0];
+        }
+        subs.push({ name: BRANCH_NAMES[branch.length], locant });
+      }
+    }
+    return { subs, fgLocant };
+  }
+
+  const fwd = analyze(bestChain);
+  const rev = analyze([...bestChain].reverse());
+  if (!fwd && !rev) return 'Structure too complex';
+
+  function pickBetter(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    if (a.fgLocant !== null && b.fgLocant !== null) {
+      if (a.fgLocant !== b.fgLocant)
+        return a.fgLocant < b.fgLocant ? a : b;
+    }
+    const la = a.subs.map(s => s.locant).sort((x,y)=>x-y);
+    const lb = b.subs.map(s => s.locant).sort((x,y)=>x-y);
+    for (let i = 0; i < Math.min(la.length, lb.length); i++) {
+      if (la[i] !== lb[i]) return la[i] < lb[i] ? a : b;
+    }
+    return a;
+  }
+  const chosen = pickBetter(fwd, rev);
+
+  const n = bestChain.length;
+  const root = PARENT_ROOTS[n];
+  if (!root) return 'Structure too complex';
+
+  // Group substituents by name for di/tri prefixes
+  const groups = {};
+  for (const s of chosen.subs) {
+    (groups[s.name] ||= []).push(s.locant);
+  }
+  const sortedNames = Object.keys(groups).sort(); // alphabetical
+  const parts = [];
+  for (const name of sortedNames) {
+    const locants = groups[name].sort((a,b)=>a-b);
+    const count = locants.length;
+    const prefix = count > 1 ? MULTI_PREFIX[count] : '';
+    if (!prefix && count > 1) return 'Structure too complex';
+    parts.push(`${locants.join(',')}-${prefix}${name}`);
+  }
+
+  // Suffix with / without functional-group locant
+  let fgLocStr = '';
+  let suffix;
+  if (suffixGroup === 'ol') {
+    suffix = root + 'anol';
+    if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
+  } else if (suffixGroup === 'amine') {
+    suffix = root + 'anamine';
+    if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
+  } else {
+    suffix = root + 'ane';
+  }
+
+  let name = '';
+  if (parts.length) {
+    name += parts.join('-');
+    if (fgLocStr) name += '-';
+  }
+  name += fgLocStr + suffix;
+  return name;
+}
+
+/* ===========================================================
+   INTERACTION (Phase 3–5, 9)
+   =========================================================== */
+
+document.querySelectorAll('.atomBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const el = btn.dataset.el;
+    selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
+    document.querySelectorAll('.atomBtn').forEach(b =>
+      b.classList.toggle('selected', b.dataset.el === selectedPaletteEl)
+    );
+    selectedAtomId = null;
+    clearSelectionRing();
+  });
+});
+
+document.getElementById('undoBtn').addEventListener('click', undo);
+document.getElementById('clearBtn').addEventListener('click', clearAll);
+document.getElementById('buildAgain').addEventListener('click', clearAll);
+
+const modeBtn = document.getElementById('modeToggle');
+modeBtn.addEventListener('click', () => {
+  mode = (mode === 'build') ? 'view' : 'build';
+  modeBtn.textContent = mode === 'build' ? 'Build Mode' : 'View Mode';
+  selectedAtomId = null;
+  clearSelectionRing();
+  if (mode === 'build') {
+    root.rotation.set(0, 0, 0);
+    root.position.set(0, 0, 0);
+    autoFrame();
+  } else {
+    // re-center camera on molecule for rotation
+    if (atoms.size > 0) {
+      let cx=0, cy=0;
+      for (const a of atoms.values()) { cx += a.pos.x; cy += a.pos.y; }
+      cx /= atoms.size; cy /= atoms.size;
+      root.position.set(-cx, -cy, 0);
+      camera.position.set(0, 0, Math.max(14, camera.position.z));
+      camera.lookAt(0, 0, 0);
+    }
+  }
+});
+
+/* ---------- Canvas pointer / touch handling ---------- */
+const canvas = renderer.domElement;
+const ts = {
+  active: false, moved: false,
+  startX: 0, startY: 0, lastX: 0, lastY: 0,
+  pinchStart: 0, pinchCamStart: 0,
+  twoFinger: false,
+};
+
+function pointerDown(x, y) {
+  ts.active = true;
+  ts.moved  = false;
+  ts.startX = ts.lastX = x;
+  ts.startY = ts.lastY = y;
+}
+function pointerMove(x, y) {
+  if (!ts.active) return;
+  const dx = x - ts.startX;
+  const dy = y - ts.startY;
+  if (!ts.moved && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) ts.moved = true;
+  if (mode === 'view' && ts.moved) {
+    const ddx = x - ts.lastX;
+    const ddy = y - ts.lastY;
+    root.rotation.y += ddx * 0.01;
+    root.rotation.x += ddy * 0.01;
+  }
+  ts.lastX = x; ts.lastY = y;
+}
+function pointerUp(x, y) {
+  if (!ts.active) return;
+  ts.active = false;
+  if (ts.moved) return;
+  handleTap(x, y);
+}
+
+function handleTap(clientX, clientY) {
+  if (mode !== 'build') return;
+  const hit = pickAtom(clientX, clientY);
+
+  if (hit) {
+    if (selectedPaletteEl) {
+      actAddAtomBonded(selectedPaletteEl, hit);
+    } else {
+      if (selectedAtomId === null) {
+        selectedAtomId = hit.id;
+        showSelectionRing(hit);
+      } else if (selectedAtomId === hit.id) {
+        selectedAtomId = null;
+        clearSelectionRing();
+      } else {
+        const a = atoms.get(selectedAtomId);
+        actAddBond(a, hit);
+        selectedAtomId = null;
+        clearSelectionRing();
+      }
+    }
+    return;
+  }
+
+  // Empty space tap
+  if (selectedPaletteEl && atoms.size === 0) {
+    const pt = pickWorldPoint(clientX, clientY);
+    pt.z = 0;
+    actAddFirstAtom(selectedPaletteEl, pt);
+  } else if (selectedAtomId !== null) {
+    selectedAtomId = null;
+    clearSelectionRing();
+  }
+}
+
+canvas.addEventListener('mousedown', e => { pointerDown(e.clientX, e.clientY); });
+canvas.addEventListener('mousemove', e => { pointerMove(e.clientX, e.clientY); });
+canvas.addEventListener('mouseup',   e => { pointerUp(e.clientX, e.clientY); });
+
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    ts.twoFinger = false;
+    pointerDown(e.touches[0].clientX, e.touches[0].clientY);
+  } else if (e.touches.length === 2) {
+    ts.active = false;
+    ts.twoFinger = true;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    ts.pinchStart = Math.hypot(dx, dy);
+    ts.pinchCamStart = camera.position.z;
+  }
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && !ts.twoFinger) {
+    pointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  } else if (e.touches.length === 2 && mode === 'view') {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 0 && ts.pinchStart > 0) {
+      const ratio = ts.pinchStart / dist;
+      camera.position.z = Math.max(5, Math.min(80, ts.pinchCamStart * ratio));
+    }
+  }
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  if (e.touches.length === 0 && !ts.twoFinger && e.changedTouches.length > 0) {
+    pointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  }
+  if (e.touches.length === 0) ts.twoFinger = false;
+  e.preventDefault();
+}, { passive: false });
+
+/* Prevent page scroll/zoom on non-canvas touch too */
+document.addEventListener('touchmove', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+/* ---------- Win ---------- */
+function showWin() {
+  won = true;
+  document.getElementById('winName').textContent = TARGET_NAME;
+  document.getElementById('winOverlay').classList.add('show');
+}
+
+/* ---------- Animation loop ---------- */
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+/* ---------- Init ---------- */
+resize();
+setTimeout(resize, 50);
+animate();
+onStateChanged();
+</script>
+</body>
+</html>
