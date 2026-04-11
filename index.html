@@ -883,15 +883,24 @@ modeBtn.addEventListener('click', () => {
 /* ---------- Canvas pointer / touch handling ---------- */
 const canvas = renderer.domElement;
 const ts = {
-  active: false, moved: false,
+  active: false, moved: false, panning: false,
   startX: 0, startY: 0, lastX: 0, lastY: 0,
   pinchStart: 0, pinchCamStart: 0,
+  pinchMidX: 0, pinchMidY: 0,
   twoFinger: false,
 };
 
-function pointerDown(x, y) {
+/* Screen-pixel → world-unit factor at current camera distance */
+function pxToWorld() {
+  const h = renderer.domElement.clientHeight || 1;
+  const worldH = 2 * Math.abs(camera.position.z) * Math.tan((camera.fov * Math.PI / 180) / 2);
+  return worldH / h;
+}
+
+function pointerDown(x, y, shift) {
   ts.active = true;
   ts.moved  = false;
+  ts.panning = !!shift;
   ts.startX = ts.lastX = x;
   ts.startY = ts.lastY = y;
 }
@@ -903,8 +912,14 @@ function pointerMove(x, y) {
   if (mode === 'view' && ts.moved) {
     const ddx = x - ts.lastX;
     const ddy = y - ts.lastY;
-    root.rotation.y += ddx * 0.01;
-    root.rotation.x += ddy * 0.01;
+    if (ts.panning) {
+      const k = pxToWorld();
+      root.position.x += ddx * k;
+      root.position.y -= ddy * k;
+    } else {
+      root.rotation.y += ddx * 0.01;
+      root.rotation.x += ddy * 0.01;
+    }
   }
   ts.lastX = x; ts.lastY = y;
 }
@@ -950,14 +965,23 @@ function handleTap(clientX, clientY) {
   }
 }
 
-canvas.addEventListener('mousedown', e => { pointerDown(e.clientX, e.clientY); });
+canvas.addEventListener('mousedown', e => {
+  pointerDown(e.clientX, e.clientY, e.shiftKey || e.button === 2);
+});
 canvas.addEventListener('mousemove', e => { pointerMove(e.clientX, e.clientY); });
 canvas.addEventListener('mouseup',   e => { pointerUp(e.clientX, e.clientY); });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => {
+  if (mode !== 'view') return;
+  const factor = Math.exp(e.deltaY * 0.001);
+  camera.position.z = Math.max(5, Math.min(120, camera.position.z * factor));
+  e.preventDefault();
+}, { passive: false });
 
 canvas.addEventListener('touchstart', e => {
   if (e.touches.length === 1) {
     ts.twoFinger = false;
-    pointerDown(e.touches[0].clientX, e.touches[0].clientY);
+    pointerDown(e.touches[0].clientX, e.touches[0].clientY, false);
   } else if (e.touches.length === 2) {
     ts.active = false;
     ts.twoFinger = true;
@@ -965,6 +989,8 @@ canvas.addEventListener('touchstart', e => {
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     ts.pinchStart = Math.hypot(dx, dy);
     ts.pinchCamStart = camera.position.z;
+    ts.pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    ts.pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
   }
   e.preventDefault();
 }, { passive: false });
@@ -976,10 +1002,19 @@ canvas.addEventListener('touchmove', e => {
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     const dist = Math.hypot(dx, dy);
+    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    // Pinch zoom
     if (dist > 0 && ts.pinchStart > 0) {
       const ratio = ts.pinchStart / dist;
-      camera.position.z = Math.max(5, Math.min(80, ts.pinchCamStart * ratio));
+      camera.position.z = Math.max(5, Math.min(120, ts.pinchCamStart * ratio));
     }
+    // Two-finger pan: midpoint delta
+    const k = pxToWorld();
+    root.position.x += (midX - ts.pinchMidX) * k;
+    root.position.y -= (midY - ts.pinchMidY) * k;
+    ts.pinchMidX = midX;
+    ts.pinchMidY = midY;
   }
   e.preventDefault();
 }, { passive: false });
