@@ -46,6 +46,7 @@
   }
   #header .titleRow .right { font-size: 16px; font-weight: 600; color: #ffffff; }
   #header .target { font-size: 12px; color: #4fc3f7; margin-top: 3px; }
+  #header .target .levelLabel { color: #ffd84d; font-weight: 700; margin-right: 4px; }
 
   /* Viewport */
   #viewport {
@@ -173,6 +174,34 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* Floating Next button (shown in view mode after a correct build) */
+  #floatingNextBtn {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #4fc3f7;
+    color: #0d0d2b;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 14px rgba(79, 195, 247, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 150;
+  }
+  #floatingNextBtn.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  #floatingNextBtn:active { background: #3bb4ea; }
+
   /* Win overlay */
   #winOverlay {
     position: absolute;
@@ -200,6 +229,14 @@
     opacity: 0.95;
     max-width: 320px;
   }
+  #winOverlay .winButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+    max-width: 280px;
+  }
   #winOverlay button {
     background: white;
     color: #00AA00;
@@ -211,6 +248,55 @@
     cursor: pointer;
   }
   #winOverlay button:active { background: #e0e0e0; }
+  #winOverlay button.secondary {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+  }
+  #winOverlay button.secondary:active { background: rgba(255,255,255,0.15); }
+
+  /* Final completion overlay */
+  #finalOverlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #1e3a8a 0%, #0d0d2b 80%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 220;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+  #finalOverlay.show { display: flex; }
+  #finalOverlay h2 {
+    font-size: 54px;
+    margin-bottom: 16px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #ffd84d;
+    text-shadow: 0 0 20px rgba(255, 216, 77, 0.5);
+  }
+  #finalOverlay p {
+    font-size: 18px;
+    margin-bottom: 34px;
+    opacity: 0.95;
+    max-width: 340px;
+    color: #ffffff;
+  }
+  #finalOverlay button {
+    background: #ffd84d;
+    color: #0d0d2b;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 216, 77, 0.4);
+  }
+  #finalOverlay button:active { background: #e5c23e; }
 </style>
 </head>
 <body>
@@ -221,15 +307,24 @@
     <div class="center">Mr. Lalama's Class</div>
     <div class="right">By: Yazan Ali</div>
   </div>
-  <div class="target">Target: 4-amino-6-ethyl-3-methyl-2-octanol</div>
+  <div class="target" id="targetLabel"><span class="levelLabel">Level 1</span> — Target: 4-amino-6-ethyl-3-methyl-2-octanol</div>
 </div>
 
 <div id="viewport">
   <div id="toast"></div>
+  <button id="floatingNextBtn">Next ▶</button>
   <div id="winOverlay">
     <h2>Correct!</h2>
     <p id="winName">4-amino-6-ethyl-3-methyl-2-octanol</p>
-    <button id="buildAgain">Build Again</button>
+    <div class="winButtons">
+      <button id="viewMoleculeBtn">View Molecule</button>
+      <button id="nextChallengeBtn" class="secondary">Next Challenge</button>
+    </div>
+  </div>
+  <div id="finalOverlay">
+    <h2>Congratulations!</h2>
+    <p>You completed all 5 challenges!</p>
+    <button id="playAgainBtn">Play Again</button>
   </div>
 </div>
 
@@ -265,7 +360,21 @@
    Phase 10: Polish
    ========================================================================= */
 
-const TARGET_NAME = '4-amino-6-ethyl-3-methyl-2-octanol';
+const LEVELS = [
+  { level: 1, target: '4-amino-6-ethyl-3-methyl-2-octanol' },
+  { level: 2, target: 'N-methyl-2-pentanamine' },
+  { level: 3, target: 'N,N-dimethyl-1-butanamine' },
+  { level: 4, target: 'N-ethyl-3-methyl-2-hexanamine' },
+  { level: 5, target: '5-ethyl-4-(N-methylamino)-2-heptanol' },
+];
+let currentLevel = 1;
+function currentTarget() { return LEVELS[currentLevel - 1].target; }
+function updateTargetLabel() {
+  const el = document.getElementById('targetLabel');
+  if (!el) return;
+  el.innerHTML = `<span class="levelLabel">Level ${currentLevel}</span> — Target: ${currentTarget()}`;
+}
+
 const MAX_BONDS   = { C: 4, N: 3, O: 2, H: 1 };
 const ATOM_COLOR  = { C: 0x505050, N: 0x3050D0, O: 0xD03030, H: 0xE0E0E0 };
 const ATOM_RADIUS = { C: 0.50,     N: 0.48,     O: 0.45,     H: 0.30 };
@@ -338,6 +447,17 @@ let selectionRing     = null;
 
 let mode = 'build';  // 'build' | 'view'
 let won  = false;
+let postWinView = false;  // true when user pressed View Molecule after completing a level
+
+function updateFloatingNext(isCorrect) {
+  const btn = document.getElementById('floatingNextBtn');
+  if (!btn) return;
+  if (postWinView && isCorrect) {
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+  }
+}
 
 /* ---------- Small helpers ---------- */
 function toast(msg) {
@@ -596,7 +716,10 @@ function onStateChanged() {
   if (mode === 'build') autoFrame();
   const name = generateName();
   document.getElementById('liveName').textContent = name;
-  if (!won && name === TARGET_NAME) showWin();
+  const target = currentTarget();
+  const isCorrect = (name === target);
+  if (!won && isCorrect) showWin();
+  updateFloatingNext(isCorrect);
 }
 
 /* ---------- Action wrappers (with undo history) ---------- */
@@ -645,8 +768,36 @@ function clearAll() {
   selectedAtomId = null;
   clearSelectionRing();
   won = false;
+  postWinView = false;
   document.getElementById('winOverlay').classList.remove('show');
   onStateChanged();
+}
+function advanceLevel() {
+  if (currentLevel >= LEVELS.length) {
+    showFinal();
+    return;
+  }
+  currentLevel++;
+  updateTargetLabel();
+  if (mode === 'view') {
+    mode = 'build';
+    modeBtn.textContent = 'Build Mode';
+    root.rotation.set(0, 0, 0);
+    root.position.set(0, 0, 0);
+  }
+  clearAll();
+}
+function resetGame() {
+  currentLevel = 1;
+  updateTargetLabel();
+  if (mode === 'view') {
+    mode = 'build';
+    modeBtn.textContent = 'Build Mode';
+    root.rotation.set(0, 0, 0);
+    root.position.set(0, 0, 0);
+  }
+  document.getElementById('finalOverlay').classList.remove('show');
+  clearAll();
 }
 
 /* ===========================================================
@@ -672,48 +823,69 @@ function generateName() {
   for (const a of atoms.values())
     if (!['C','N','O'].includes(a.element)) return 'Invalid structure';
 
-  const carbons = [...atoms.values()].filter(a => a.element === 'C');
+  const carbons   = [...atoms.values()].filter(a => a.element === 'C');
+  const oxygens   = [...atoms.values()].filter(a => a.element === 'O');
+  const nitrogens = [...atoms.values()].filter(a => a.element === 'N');
   if (carbons.length === 0) return 'Invalid structure';
   if (carbons.length > 20) return 'Structure too complex';
 
-  // Detect OH / NH2 functional groups
-  const ohCarbons  = new Set();
-  const nh2Carbons = new Set();
-  for (const a of atoms.values()) {
-    if (a.element === 'O') {
-      if (a.neighbors.size === 0) return 'Building...';
-      if (a.neighbors.size !== 1) return 'Invalid structure';
-      const nid = [...a.neighbors][0];
-      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
-      ohCarbons.add(nid);
-    } else if (a.element === 'N') {
-      if (a.neighbors.size === 0) return 'Building...';
-      if (a.neighbors.size !== 1) return 'Invalid structure';
-      const nid = [...a.neighbors][0];
-      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
-      nh2Carbons.add(nid);
+  // Whole-molecule connectivity check — every atom must belong to a single component
+  {
+    const vis = new Set();
+    const firstId = [...atoms.values()][0].id;
+    const q = [firstId]; vis.add(firstId);
+    while (q.length) {
+      const x = q.shift();
+      for (const nid of atoms.get(x).neighbors) {
+        if (!vis.has(nid)) { vis.add(nid); q.push(nid); }
+      }
     }
+    if (vis.size !== atoms.size) return 'Invalid structure';
   }
 
-  // Carbon subgraph must be a tree and connected
+  // Detect OH groups — each O must have exactly one C neighbor
+  const ohCarbons = new Set();
+  for (const o of oxygens) {
+    if (o.neighbors.size === 0) return 'Building...';
+    if (o.neighbors.size !== 1) return 'Invalid structure';
+    const nid = [...o.neighbors][0];
+    if (atoms.get(nid).element !== 'C') return 'Invalid structure';
+    ohCarbons.add(nid);
+  }
+
+  // Validate nitrogens — 1..3 neighbors, all carbons
+  for (const nAtom of nitrogens) {
+    if (nAtom.neighbors.size === 0) return 'Building...';
+    if (nAtom.neighbors.size > 3) return 'Invalid structure';
+    for (const nid of nAtom.neighbors) {
+      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
+    }
+  }
+  if (nitrogens.length > 1) return 'Structure too complex';
+
+  // Carbon subgraph (C-C edges only) — each connected component must be a tree
   const cIds = carbons.map(c => c.id);
   const cSet = new Set(cIds);
-  const visited = new Set();
-  const q = [cIds[0]]; visited.add(cIds[0]);
-  let edges = 0;
-  while (q.length) {
-    const x = q.shift();
-    for (const nid of atoms.get(x).neighbors) {
-      if (!cSet.has(nid)) continue;
-      edges++;
-      if (!visited.has(nid)) { visited.add(nid); q.push(nid); }
+  {
+    const vis = new Set();
+    for (const cid of cIds) {
+      if (vis.has(cid)) continue;
+      const qc = [cid]; vis.add(cid);
+      let nodes = 0, halfEdges = 0;
+      while (qc.length) {
+        const x = qc.shift();
+        nodes++;
+        for (const nid of atoms.get(x).neighbors) {
+          if (!cSet.has(nid)) continue;
+          halfEdges++;
+          if (!vis.has(nid)) { vis.add(nid); qc.push(nid); }
+        }
+      }
+      if (halfEdges / 2 !== nodes - 1) return 'Invalid structure'; // cycle
     }
   }
-  if (visited.size !== cIds.length) return 'Invalid structure';
-  edges /= 2;
-  if (edges !== cIds.length - 1) return 'Invalid structure'; // cycle
 
-  // Unique path between any two carbons in the tree
+  // Unique path between two carbons restricted to C-C edges
   function pathBetween(s, e) {
     const parent = new Map();
     parent.set(s, null);
@@ -734,12 +906,20 @@ function generateName() {
     return path.reverse();
   }
 
-  const hasOH  = ohCarbons.size  > 0;
-  const hasNH2 = nh2Carbons.size > 0;
-  const suffixGroup = hasOH ? 'ol' : (hasNH2 ? 'amine' : 'ane');
-  const requiredCarbons = hasOH ? ohCarbons : (hasNH2 ? nh2Carbons : null);
+  const hasOH  = ohCarbons.size > 0;
+  const hasN   = nitrogens.length > 0;
+  const amineAsParent = hasN && !hasOH;
 
-  // Longest path through carbon tree, optionally containing a required C
+  // Parent chain must contain: an OH carbon (if hasOH), otherwise a C bonded to the N (if amineAsParent)
+  let requiredCarbons = null;
+  if (hasOH) {
+    requiredCarbons = ohCarbons;
+  } else if (amineAsParent) {
+    requiredCarbons = new Set();
+    for (const nid of nitrogens[0].neighbors) requiredCarbons.add(nid);
+  }
+
+  // Find longest path through the C subgraph satisfying requiredCarbons
   let bestChain = null;
   for (let i = 0; i < cIds.length; i++) {
     for (let j = i; j < cIds.length; j++) {
@@ -755,54 +935,140 @@ function generateName() {
   }
   if (!bestChain) return 'Building...';
 
+  // Measure a linear alkyl chain starting at startId, treating excludeId as already visited.
+  // Returns chain length (1..3) or null if branched / too long / invalid element.
+  function measureAlkylChain(startId, excludeId) {
+    const seen = new Set([excludeId]);
+    let cur = startId;
+    let len = 0;
+    while (true) {
+      if (seen.has(cur)) return null;
+      seen.add(cur);
+      const curAtom = atoms.get(cur);
+      if (curAtom.element !== 'C') return null;
+      len++;
+      if (len > 3) return null;
+      const nexts = [];
+      for (const nid of curAtom.neighbors) {
+        if (seen.has(nid)) continue;
+        const nb = atoms.get(nid);
+        if (nb.element !== 'C') return null;
+        nexts.push(nid);
+      }
+      if (nexts.length === 0) break;
+      if (nexts.length > 1) return null;
+      cur = nexts[0];
+    }
+    return len;
+  }
+
+  // Build the "N-methyl" / "N,N-dimethyl" prefix portion (used inside parenthetical branches too)
+  function buildNSubPrefix(lengths) {
+    const names = lengths.map(l => BRANCH_NAMES[l]);
+    const counts = {};
+    for (const nm of names) counts[nm] = (counts[nm] || 0) + 1;
+    const sorted = Object.keys(counts).sort();
+    const parts = [];
+    for (const nm of sorted) {
+      const c = counts[nm];
+      if (c === 1) parts.push('N-' + nm);
+      else if (c === 2) parts.push('N,N-di' + nm);
+      else return null;
+    }
+    return parts.join('-');
+  }
+
   function analyze(chain) {
     const inChain = new Set(chain);
     const subs = [];
     let fgLocant = null;
+    let nChainAttach = 0;
+
     for (let i = 0; i < chain.length; i++) {
       const locant = i + 1;
       const cid = chain[i];
       const c = atoms.get(cid);
 
-      if (hasOH && ohCarbons.has(cid)) {
-        if (fgLocant === null) fgLocant = locant;
-        else return null; // multiple OH unsupported
-      }
-      if (nh2Carbons.has(cid)) {
-        if (hasOH) {
-          subs.push({ name: 'amino', locant });
-        } else if (hasNH2) {
-          if (fgLocant === null) fgLocant = locant;
-          else return null;
-        }
-      }
-
       for (const nid of c.neighbors) {
         if (inChain.has(nid)) continue;
-        const n = atoms.get(nid);
-        if (n.element !== 'C') continue; // O/N already handled
-        // Traverse linear branch; must be unbranched and <=3 C's
-        const seen = new Set([cid]);
-        const branch = [];
-        let cur = nid;
-        while (true) {
-          if (seen.has(cur)) return null;
-          seen.add(cur);
-          branch.push(cur);
-          if (branch.length > 3) return null;
-          const nexts = [];
-          for (const nn of atoms.get(cur).neighbors) {
-            if (seen.has(nn)) continue;
-            if (!cSet.has(nn)) return null;
-            nexts.push(nn);
+        const nb = atoms.get(nid);
+
+        if (nb.element === 'O') {
+          // OH functional group
+          if (fgLocant !== null) return null;
+          fgLocant = locant;
+        } else if (nb.element === 'N') {
+          nChainAttach++;
+          if (nChainAttach > 1) return null;
+
+          const otherCs = [...nb.neighbors].filter(x => x !== cid);
+          const nSubLengths = [];
+          for (const ocid of otherCs) {
+            const len = measureAlkylChain(ocid, nid);
+            if (!len) return null;
+            nSubLengths.push(len);
           }
-          if (nexts.length === 0) break;
-          if (nexts.length > 1) return null;
-          cur = nexts[0];
+
+          if (amineAsParent) {
+            if (fgLocant !== null) return null;
+            fgLocant = locant;
+            for (const len of nSubLengths) {
+              subs.push({
+                name:    BRANCH_NAMES[len],
+                sortKey: BRANCH_NAMES[len],
+                locant:  'N',
+              });
+            }
+          } else {
+            // Amine as branch (OH is parent)
+            if (nSubLengths.length === 0) {
+              subs.push({ name: 'amino', sortKey: 'amino', locant });
+            } else {
+              const nSubStr = buildNSubPrefix(nSubLengths);
+              if (!nSubStr) return null;
+              const fullName = '(' + nSubStr + 'amino)';
+              let sortKey;
+              if (nSubLengths.length === 1) {
+                sortKey = BRANCH_NAMES[nSubLengths[0]] + 'amino';
+              } else {
+                const sortedNames = nSubLengths.map(l => BRANCH_NAMES[l]).sort();
+                sortKey = (sortedNames[0] === sortedNames[1] ? 'di' + sortedNames[0] : sortedNames.join('')) + 'amino';
+              }
+              subs.push({ name: fullName, sortKey, locant });
+            }
+          }
+        } else if (nb.element === 'C') {
+          // Linear alkyl branch (methyl/ethyl/propyl)
+          const seen = new Set([cid]);
+          const branch = [];
+          let cur = nid;
+          while (true) {
+            if (seen.has(cur)) return null;
+            seen.add(cur);
+            const curAtom = atoms.get(cur);
+            if (curAtom.element !== 'C') return null;
+            branch.push(cur);
+            if (branch.length > 3) return null;
+            const nexts = [];
+            for (const nn of curAtom.neighbors) {
+              if (seen.has(nn)) continue;
+              const nnb = atoms.get(nn);
+              if (nnb.element !== 'C') return null;
+              nexts.push(nn);
+            }
+            if (nexts.length === 0) break;
+            if (nexts.length > 1) return null;
+            cur = nexts[0];
+          }
+          const bn = BRANCH_NAMES[branch.length];
+          subs.push({ name: bn, sortKey: bn, locant });
         }
-        subs.push({ name: BRANCH_NAMES[branch.length], locant });
       }
     }
+
+    if (amineAsParent && fgLocant === null) return null;
+    if (hasOH && fgLocant === null) return null;
+
     return { subs, fgLocant };
   }
 
@@ -817,8 +1083,8 @@ function generateName() {
       if (a.fgLocant !== b.fgLocant)
         return a.fgLocant < b.fgLocant ? a : b;
     }
-    const la = a.subs.map(s => s.locant).sort((x,y)=>x-y);
-    const lb = b.subs.map(s => s.locant).sort((x,y)=>x-y);
+    const numLoc = s => s.subs.map(x => x.locant).filter(l => typeof l === 'number').sort((x,y)=>x-y);
+    const la = numLoc(a), lb = numLoc(b);
     for (let i = 0; i < Math.min(la.length, lb.length); i++) {
       if (la[i] !== lb[i]) return la[i] < lb[i] ? a : b;
     }
@@ -827,35 +1093,45 @@ function generateName() {
   const chosen = pickBetter(fwd, rev);
 
   const n = bestChain.length;
-  const root = PARENT_ROOTS[n];
-  if (!root) return 'Structure too complex';
+  const rootName = PARENT_ROOTS[n];
+  if (!rootName) return 'Structure too complex';
 
-  // Group substituents by name for di/tri prefixes
+  // Group substituents by full name for di/tri prefixes (but order by sortKey)
   const groups = {};
   for (const s of chosen.subs) {
-    (groups[s.name] ||= []).push(s.locant);
+    const key = s.name;
+    if (!groups[key]) groups[key] = { sortKey: s.sortKey || s.name, locants: [] };
+    groups[key].locants.push(s.locant);
   }
-  const sortedNames = Object.keys(groups).sort(); // alphabetical
+  const sortedKeys = Object.keys(groups).sort((a, b) =>
+    groups[a].sortKey.localeCompare(groups[b].sortKey)
+  );
   const parts = [];
-  for (const name of sortedNames) {
-    const locants = groups[name].sort((a,b)=>a-b);
+  for (const key of sortedKeys) {
+    const { locants } = groups[key];
+    locants.sort((x, y) => {
+      if (x === 'N' && y === 'N') return 0;
+      if (x === 'N') return -1;
+      if (y === 'N') return 1;
+      return x - y;
+    });
     const count = locants.length;
     const prefix = count > 1 ? MULTI_PREFIX[count] : '';
     if (!prefix && count > 1) return 'Structure too complex';
-    parts.push(`${locants.join(',')}-${prefix}${name}`);
+    parts.push(`${locants.join(',')}-${prefix}${key}`);
   }
 
   // Suffix with / without functional-group locant
   let fgLocStr = '';
   let suffix;
-  if (suffixGroup === 'ol') {
-    suffix = root + 'anol';
+  if (hasOH) {
+    suffix = rootName + 'anol';
     if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
-  } else if (suffixGroup === 'amine') {
-    suffix = root + 'anamine';
+  } else if (amineAsParent) {
+    suffix = rootName + 'anamine';
     if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
   } else {
-    suffix = root + 'ane';
+    suffix = rootName + 'ane';
   }
 
   let name = '';
@@ -885,7 +1161,21 @@ document.querySelectorAll('.atomBtn').forEach(btn => {
 
 document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('clearBtn').addEventListener('click', clearAll);
-document.getElementById('buildAgain').addEventListener('click', clearAll);
+
+document.getElementById('viewMoleculeBtn').addEventListener('click', () => {
+  document.getElementById('winOverlay').classList.remove('show');
+  postWinView = true;
+  if (mode !== 'view') modeBtn.click();
+  updateFloatingNext(true);
+});
+document.getElementById('nextChallengeBtn').addEventListener('click', () => {
+  document.getElementById('winOverlay').classList.remove('show');
+  advanceLevel();
+});
+document.getElementById('floatingNextBtn').addEventListener('click', () => {
+  advanceLevel();
+});
+document.getElementById('playAgainBtn').addEventListener('click', resetGame);
 
 const modeBtn = document.getElementById('modeToggle');
 modeBtn.addEventListener('click', () => {
@@ -893,6 +1183,9 @@ modeBtn.addEventListener('click', () => {
   modeBtn.textContent = mode === 'build' ? 'Build Mode' : 'View Mode';
   selectedAtomId = null;
   clearSelectionRing();
+  // Update floating Next visibility based on current correctness
+  const curName = document.getElementById('liveName').textContent;
+  updateFloatingNext(curName === currentTarget());
   if (mode === 'build') {
     root.rotation.set(0, 0, 0);
     root.position.set(0, 0, 0);
@@ -1063,8 +1356,12 @@ document.addEventListener('touchmove', e => {
 /* ---------- Win ---------- */
 function showWin() {
   won = true;
-  document.getElementById('winName').textContent = TARGET_NAME;
+  document.getElementById('winName').textContent = currentTarget();
   document.getElementById('winOverlay').classList.add('show');
+}
+function showFinal() {
+  const overlay = document.getElementById('finalOverlay');
+  if (overlay) overlay.classList.add('show');
 }
 
 /* ---------- Animation loop ---------- */
@@ -1076,6 +1373,7 @@ function animate() {
 /* ---------- Init ---------- */
 resize();
 setTimeout(resize, 50);
+updateTargetLabel();
 animate();
 onStateChanged();
 </script>
