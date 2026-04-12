@@ -449,6 +449,27 @@ let mode = 'build';  // 'build' | 'view'
 let won  = false;
 let postWinView = false;  // true when user pressed View Molecule after completing a level
 
+/* View-mode orbit pivot: centroid of non-H atoms (recomputed on entry to view mode) */
+const viewCenter = new THREE.Vector3();
+const viewPan    = new THREE.Vector3();
+const _viewTmp   = new THREE.Vector3();
+function computeViewCenter() {
+  viewCenter.set(0, 0, 0);
+  if (atoms.size === 0) return;
+  for (const a of atoms.values()) {
+    viewCenter.x += a.pos.x;
+    viewCenter.y += a.pos.y;
+    viewCenter.z += a.pos.z;
+  }
+  viewCenter.divideScalar(atoms.size);
+}
+function applyViewTransform() {
+  // Position root so that rotation orbits around viewCenter (centroid),
+  // keeping the centroid at world origin where the camera looks.
+  _viewTmp.copy(viewCenter).applyEuler(root.rotation).negate().add(viewPan);
+  root.position.copy(_viewTmp);
+}
+
 function updateFloatingNext(isCorrect) {
   const btn = document.getElementById('floatingNextBtn');
   if (!btn) return;
@@ -784,6 +805,7 @@ function advanceLevel() {
     modeBtn.textContent = 'Build Mode';
     root.rotation.set(0, 0, 0);
     root.position.set(0, 0, 0);
+    viewPan.set(0, 0, 0);
   }
   clearAll();
 }
@@ -795,6 +817,7 @@ function resetGame() {
     modeBtn.textContent = 'Build Mode';
     root.rotation.set(0, 0, 0);
     root.position.set(0, 0, 0);
+    viewPan.set(0, 0, 0);
   }
   document.getElementById('finalOverlay').classList.remove('show');
   clearAll();
@@ -1189,14 +1212,15 @@ modeBtn.addEventListener('click', () => {
   if (mode === 'build') {
     root.rotation.set(0, 0, 0);
     root.position.set(0, 0, 0);
+    viewPan.set(0, 0, 0);
     autoFrame();
   } else {
-    // re-center camera on molecule for rotation
+    // Recompute orbit pivot from centroid of all non-H atoms (live state)
     if (atoms.size > 0) {
-      let cx=0, cy=0;
-      for (const a of atoms.values()) { cx += a.pos.x; cy += a.pos.y; }
-      cx /= atoms.size; cy /= atoms.size;
-      root.position.set(-cx, -cy, 0);
+      computeViewCenter();
+      viewPan.set(0, 0, 0);
+      root.rotation.set(0, 0, 0);
+      applyViewTransform();
       camera.position.set(0, 0, Math.max(14, camera.position.z));
       camera.lookAt(0, 0, 0);
     }
@@ -1237,12 +1261,13 @@ function pointerMove(x, y) {
     const ddy = y - ts.lastY;
     if (ts.panning) {
       const k = pxToWorld();
-      root.position.x += ddx * k;
-      root.position.y -= ddy * k;
+      viewPan.x += ddx * k;
+      viewPan.y -= ddy * k;
     } else {
       root.rotation.y += ddx * 0.01;
       root.rotation.x += ddy * 0.01;
     }
+    applyViewTransform();
   }
   ts.lastX = x; ts.lastY = y;
 }
@@ -1332,10 +1357,11 @@ canvas.addEventListener('touchmove', e => {
     }
     // Two-finger pan: midpoint delta
     const k = pxToWorld();
-    root.position.x += (midX - ts.pinchMidX) * k;
-    root.position.y -= (midY - ts.pinchMidY) * k;
+    viewPan.x += (midX - ts.pinchMidX) * k;
+    viewPan.y -= (midY - ts.pinchMidY) * k;
     ts.pinchMidX = midX;
     ts.pinchMidY = midY;
+    applyViewTransform();
   }
   e.preventDefault();
 }, { passive: false });
