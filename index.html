@@ -29,7 +29,22 @@
     flex-shrink: 0;
     border-bottom: 1px solid #2a2a6e;
   }
-  #header h1 { font-size: 16px; font-weight: 600; color: #ffffff; }
+  #header .titleRow {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #header .titleRow h1 { font-size: 16px; font-weight: 600; color: #ffffff; margin: 0; }
+  #header .titleRow .center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  #header .titleRow .right { font-size: 16px; font-weight: 600; color: #ffffff; }
   #header .target { font-size: 12px; color: #4fc3f7; margin-top: 3px; }
 
   /* Viewport */
@@ -201,7 +216,11 @@
 <body>
 
 <div id="header">
-  <h1>Molecule Builder</h1>
+  <div class="titleRow">
+    <h1>Molecule Builder</h1>
+    <div class="center">Mr. Lalama's Class</div>
+    <div class="right">By: Yazan Ali</div>
+  </div>
   <div class="target">Target: 4-amino-6-ethyl-3-methyl-2-octanol</div>
 </div>
 
