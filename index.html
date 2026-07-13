@@ -3,572 +3,514 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#06080b">
+<meta name="theme-color" content="#f4f0e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Molecule Builder — build organic molecules in 3D and learn IUPAC nomenclature. A chemistry lab in your browser.">
-<title>Molecule Builder — 3D Organic Chemistry Lab</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='9' r='4' fill='%23c8f135'/%3E%3Ccircle cx='8' cy='22' r='4' fill='%232f54d6'/%3E%3Ccircle cx='24' cy='22' r='4' fill='%23e0392f'/%3E%3Cg stroke='%238a97a6' stroke-width='2'%3E%3Cline x1='16' y1='9' x2='8' y2='22'/%3E%3Cline x1='16' y1='9' x2='24' y2='22'/%3E%3C/g%3E%3C/svg%3E">
+<meta name="description" content="Molecule Builder — assemble organic molecules in 3D and learn IUPAC nomenclature live. An interactive chemistry teaching tool.">
+<title>Molecule Builder — Interactive Organic Chemistry</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b3fa6'/%3E%3Cg stroke='white' stroke-width='2'%3E%3Cline x1='16' y1='10' x2='10' y2='22'/%3E%3Cline x1='16' y1='10' x2='22' y2='22'/%3E%3C/g%3E%3Ccircle cx='16' cy='10' r='3.4' fill='white'/%3E%3Ccircle cx='10' cy='22' r='3.4' fill='%23e3b34f'/%3E%3Ccircle cx='22' cy='22' r='3.4' fill='%23d2402f'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink:        #06080b;
-    --surface:    #0f141c;
-    --surface-2:  #161c26;
-    --line:       rgba(255,255,255,0.09);
-    --line-soft:  rgba(255,255,255,0.05);
-    --text:       #eef3f8;
-    --muted:      #8b98a8;
-    --muted-2:    #5d6875;
-    --lime:       #c8f135;
-    --lime-deep:  #a6cf1e;
-    --lime-glow:  rgba(200,241,53,0.55);
-    --amber:      #ffc24b;
-    --amber-glow: rgba(255,194,75,0.5);
-    --cyan:       #35d6e0;
-    --c-carbon:   #5b6470;
-    --c-nitro:    #3a5fe0;
-    --c-oxy:      #e0392f;
-    --shadow:     0 18px 50px rgba(0,0,0,0.55);
-    --panel-bg:   linear-gradient(180deg, rgba(24,30,40,0.74), rgba(13,17,24,0.66));
-    --font-disp:  "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    /* Warm-paper neutral ramp */
+    --paper:      #f4f0e8;
+    --paper-2:    #efe9dd;
+    --surface:    #ffffff;
+    --surface-2:  #faf7f1;
+    --line:       #e6dfd0;
+    --line-2:     #d9d0bd;
+    --ink:        #201d18;
+    --ink-2:      #6a6456;
+    --ink-3:      #9a9384;
+    /* Dark 3D stage */
+    --stage-1:    #1a1e26;
+    --stage-2:    #0d0f14;
+    --stage-line: rgba(255,255,255,0.07);
+    /* Accents */
+    --accent:      #2b3fa6;
+    --accent-2:    #223391;
+    --accent-weak: #e9ebf6;
+    --brass:       #b07a2b;
+    --brass-2:     #8f6220;
+    --brass-weak:  #f5ecda;
+    --success:     #2f7d5b;
+    --success-weak:#e4f0e9;
+    /* CPK-ish palette (buttons) */
+    --c-carbon:   #3b4048;
+    --c-nitro:    #2f4cc4;
+    --c-oxy:      #d2402f;
+    /* radii */
+    --r-card: 16px;
+    --r-btn:  11px;
+    --r-pill: 999px;
+    /* elevation (max 2) */
+    --sh-1: 0 1px 2px rgba(40,34,20,0.05), 0 1px 3px rgba(40,34,20,0.04);
+    --sh-2: 0 10px 34px rgba(40,34,20,0.11), 0 3px 10px rgba(40,34,20,0.06);
+    /* type */
+    --f-display: "Fraunces", Georgia, serif;
+    --f-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --f-mono: "IBM Plex Mono", ui-monospace, monospace;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
-    height: 100%;
-    overflow: hidden;
-    font-family: var(--font-disp);
-    background: var(--ink);
-    color: var(--text);
-    overscroll-behavior: none;
-    touch-action: none;
+    height: 100%; overflow: hidden;
+    font-family: var(--f-body);
+    background: var(--paper);
+    color: var(--ink);
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none; touch-action: none;
   }
   body {
-    height: 100vh;
-    height: 100dvh;
-    position: relative;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    -webkit-user-select: none; user-select: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 
-  /* ---------------- Ambient backdrop ---------------- */
-  #bg {
-    position: fixed; inset: 0; z-index: 0;
-    background:
-      radial-gradient(130% 90% at 50% -15%, rgba(200,241,53,0.10), transparent 52%),
-      radial-gradient(100% 75% at 88% 112%, rgba(53,214,224,0.09), transparent 60%),
-      radial-gradient(90% 60% at 8% 105%, rgba(58,95,224,0.08), transparent 60%),
-      var(--ink);
-  }
-  #bg::before {
-    /* dot grid, faded toward center so it never fights the molecule */
-    content: ""; position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1.4px);
-    background-size: 30px 30px;
-    opacity: 0.35;
-    -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, transparent 34%, #000 82%);
-            mask-image: radial-gradient(120% 120% at 50% 50%, transparent 34%, #000 82%);
-    animation: drift 34s linear infinite;
-  }
-  #bg::after {
-    /* film grain */
-    content: ""; position: absolute; inset: -50%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-    opacity: 0.035; mix-blend-mode: overlay; pointer-events: none;
-  }
-  @keyframes drift { to { background-position: 30px 60px; } }
+  .loc { color: var(--accent); }
 
-  /* ---------------- 3D stage ---------------- */
-  #viewport {
-    position: fixed; inset: 0; z-index: 1;
+  /* ---------------- App bar ---------------- */
+  #appbar {
+    flex-shrink: 0;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 16px; padding: 12px clamp(16px, 3vw, 28px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    z-index: 20;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .brand .mk { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; box-shadow: var(--sh-1); }
+  .brand .wm { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+  .brand .wm b { font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: -0.01em; color: var(--ink); }
+  .brand .wm span { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin-top: 1px; }
+  #appbar .cls {
+    font-family: var(--f-display); font-style: italic; font-weight: 500;
+    font-size: 15px; color: var(--ink-2); white-space: nowrap; text-align: center;
+  }
+  .barRight { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+  .lvlPill {
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    letter-spacing: 0.01em; white-space: nowrap;
+  }
+  .lvlPill b { color: var(--ink); font-weight: 600; }
+  .iconBtn {
+    width: 34px; height: 34px; border-radius: var(--r-pill);
+    border: 1px solid var(--line-2); background: var(--surface);
+    color: var(--ink-2); display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .iconBtn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--ink-3); }
+  .iconBtn svg { width: 17px; height: 17px; }
+
+  /* ---------------- Main layout ---------------- */
+  #main {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 384px;
+    gap: 18px;
+    padding: 18px;
+  }
+
+  /* ---------------- Bench (3D stage) ---------------- */
+  #bench {
+    position: relative; min-width: 0; min-height: 0;
+    border-radius: var(--r-card);
+    background: radial-gradient(120% 120% at 50% 8%, var(--stage-1), var(--stage-2) 78%);
+    box-shadow: var(--sh-2), inset 0 1px 0 rgba(255,255,255,0.05);
+    border: 1px solid rgba(0,0,0,0.35);
     overflow: hidden;
   }
-  #viewport canvas {
-    display: block;
-    width: 100% !important;
-    height: 100% !important;
-    touch-action: none;
+  #bench::before {
+    /* faint bench grid — earned: gives the 3D depth cues, very subtle */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--stage-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--stage-line) 1px, transparent 1px);
+    background-size: 46px 46px;
+    -webkit-mask-image: radial-gradient(90% 90% at 50% 45%, transparent 40%, #000 92%);
+            mask-image: radial-gradient(90% 90% at 50% 45%, transparent 40%, #000 92%);
+    opacity: 0.6;
   }
+  #viewport { position: absolute; inset: 0; }
+  #viewport canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
 
-  /* ---------------- Glass panel base ---------------- */
-  .panel {
-    background: var(--panel-bg);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-            backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-
-  /* ---------------- Top bar ---------------- */
-  #topbar {
-    position: fixed; z-index: 10;
-    top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px;
-    border-radius: 18px;
-    padding: 12px 16px 14px;
-    display: flex; flex-direction: column; gap: 11px;
-  }
-  .brandRow { display: flex; align-items: center; gap: 12px; }
-  .mark {
-    width: 30px; height: 30px; flex-shrink: 0;
-    filter: drop-shadow(0 0 8px rgba(200,241,53,0.4));
-  }
-  .brandText { display: flex; flex-direction: column; line-height: 1.05; }
-  .brandText b {
-    font-family: var(--font-disp); font-weight: 700; font-size: 15px;
-    letter-spacing: -0.01em; color: var(--text);
-  }
-  .brandText span {
-    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--muted-2); margin-top: 2px;
-  }
-  .credits { margin-left: auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
-  .credits .cls {
-    font-family: var(--font-mono); font-size: 10.5px; color: var(--text);
-    letter-spacing: 0.04em; font-weight: 500;
-  }
-  .credits .by { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); }
-  .credits .by b { color: var(--lime); font-weight: 600; }
-
-  /* progress + target */
-  .targetWrap {
-    display: flex; align-items: center; gap: 14px;
-    border-top: 1px solid var(--line-soft);
-    padding-top: 11px;
-  }
-  .levelBadge {
-    flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; width: 46px; height: 46px; border-radius: 13px;
-    background: radial-gradient(circle at 50% 30%, rgba(200,241,53,0.18), rgba(200,241,53,0.04));
-    border: 1px solid rgba(200,241,53,0.3);
-  }
-  .levelBadge .lvlLabel { font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.16em; color: var(--lime); text-transform: uppercase; }
-  .levelBadge .lvlNum { font-family: var(--font-disp); font-weight: 800; font-size: 22px; line-height: 1; color: var(--text); margin-top: 1px; }
-  .targetCol { min-width: 0; flex: 1; }
-  .targetCol .lbl {
+  /* corner label */
+  .benchTag {
+    position: absolute; top: 14px; left: 16px; z-index: 3;
     display: flex; align-items: center; gap: 7px;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(255,255,255,0.42);
   }
-  .tag {
-    font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.08em;
-    padding: 2px 7px; border-radius: 20px; text-transform: uppercase;
-    background: rgba(53,214,224,0.12); color: var(--cyan); border: 1px solid rgba(53,214,224,0.28);
-  }
-  #targetName {
-    font-family: var(--font-mono); font-weight: 500; font-size: clamp(13px, 3.6vw, 16px);
-    color: var(--text); word-break: break-word; line-height: 1.28; letter-spacing: -0.01em;
-  }
-  .loc { color: var(--lime); font-weight: 600; }
-  .dots { display: flex; gap: 6px; flex-shrink: 0; }
-  .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,0.14); transition: all 0.3s ease;
-  }
-  .dot.done { background: var(--lime); box-shadow: 0 0 8px var(--lime-glow); }
-  .dot.active { background: var(--amber); box-shadow: 0 0 10px var(--amber-glow); transform: scale(1.35); }
+  .benchTag .d { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 8px rgba(176,122,43,0.7); }
 
-  /* ---------------- Live readout ---------------- */
+  /* live readout caption */
   #readout {
-    position: fixed; z-index: 10;
-    left: 50%; transform: translateX(-50%);
-    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 14px);
-    max-width: min(560px, calc(100vw - 28px));
-    border-radius: 14px; padding: 9px 16px;
-    display: flex; align-items: center; gap: 11px;
-    transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    z-index: 3; width: max-content; max-width: min(92%, 560px);
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 16px; border-radius: var(--r-pill);
+    background: rgba(12,14,18,0.72);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.09);
   }
-  #readout .rLbl {
-    font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--muted-2); flex-shrink: 0;
-  }
+  #readout .rk { font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; }
   #liveName {
-    font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em;
+    font-family: var(--f-mono); font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.94);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;
   }
-  #liveName.status { color: var(--muted); font-style: italic; }
-  #matchDot {
-    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
-    border: 1.5px solid var(--muted-2); position: relative; transition: all 0.3s ease;
-  }
-  #readout.match {
-    border-color: rgba(200,241,53,0.55);
-    box-shadow: var(--shadow), 0 0 22px rgba(200,241,53,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  #readout.match #matchDot { border-color: var(--lime); background: var(--lime); box-shadow: 0 0 12px var(--lime-glow); }
-  #readout.match #matchDot::after {
-    content: ""; position: absolute; left: 5px; top: 2px; width: 5px; height: 9px;
-    border: solid var(--ink); border-width: 0 2px 2px 0; transform: rotate(42deg);
-  }
-  #readout.match #liveName { color: var(--lime); }
+  #liveName.status { color: rgba(255,255,255,0.5); font-style: normal; font-family: var(--f-body); }
+  #liveName .loc { color: #9fb0ff; }
+  #matchDot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); position: relative; flex-shrink: 0; transition: all .25s; }
+  #readout.match { background: rgba(20,48,36,0.82); border-color: rgba(88,180,140,0.5); }
+  #readout.match #matchDot { background: #58b48c; border-color: #58b48c; }
+  #readout.match #matchDot::after { content: ""; position: absolute; left: 4.5px; top: 1.5px; width: 4px; height: 8px; border: solid #0d1a14; border-width: 0 2px 2px 0; transform: rotate(42deg); }
+  #readout.match #liveName { color: #b8ecd2; }
+  #readout.match #liveName .loc { color: #dff3e8; }
 
-  /* ---------------- Bottom dock ---------------- */
-  #dock {
-    position: fixed; z-index: 10;
-    left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
-    border-radius: 20px; padding: 12px 14px 13px;
-    display: flex; flex-direction: column; gap: 11px;
+  /* floating next */
+  #floatingNextBtn {
+    position: absolute; left: 50%; bottom: 62px; transform: translateX(-50%) translateY(12px);
+    z-index: 4; padding: 12px 30px; border-radius: var(--r-pill); border: none;
+    background: var(--accent); color: #fff; font-weight: 600; font-size: 15px; letter-spacing: 0.01em;
+    box-shadow: 0 10px 28px rgba(43,63,166,0.4);
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
   }
-  #palette { display: flex; justify-content: center; gap: clamp(14px, 5vw, 26px); }
+  #floatingNextBtn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  #floatingNextBtn:hover { background: var(--accent-2); }
+
+  /* ---------------- Control panel ---------------- */
+  #panel {
+    min-height: 0; overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    box-shadow: var(--sh-1);
+    padding: 22px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .task { display: flex; flex-direction: column; }
+  .taskHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .lvlNo { font-family: var(--f-display); font-weight: 600; font-size: 15px; color: var(--ink); }
+  .lvlNo b { color: var(--brass); }
+  .tag {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: var(--r-pill);
+    background: var(--accent-weak); color: var(--accent);
+  }
+  .task .kick { font-size: 11px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  #targetName {
+    font-family: var(--f-display); font-weight: 600; font-style: italic;
+    font-size: clamp(22px, 2vw + 14px, 27px); line-height: 1.22; letter-spacing: -0.01em;
+    color: var(--ink); word-break: break-word; margin-bottom: 18px;
+  }
+  #targetName .loc { font-style: normal; color: var(--accent); }
+  .progress { display: flex; align-items: center; gap: 8px; }
+  .pdot { width: 26px; height: 4px; border-radius: var(--r-pill); background: var(--line-2); transition: background .3s; }
+  .pdot.done { background: var(--brass); }
+  .pdot.active { background: var(--accent); }
+  .pnote { font-size: 12px; color: var(--ink-3); margin-left: 4px; }
+
+  .divider { height: 1px; background: var(--line); }
+
+  .group .glabel { font-size: 11px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+  #palette { display: flex; gap: 12px; }
   .atomBtn {
-    position: relative; width: 60px; height: 60px; border-radius: 50%;
-    border: none; cursor: pointer; flex-shrink: 0;
-    color: #fff; font-family: var(--font-disp); font-size: 24px; font-weight: 800;
+    flex: 1; position: relative; border: 1px solid var(--line);
+    background: var(--surface-2); border-radius: var(--r-btn);
+    padding: 12px 6px 9px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+  }
+  .atomBtn .ball {
+    width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.45), inset 0 -4px 10px rgba(0,0,0,0.35), inset 0 3px 8px rgba(255,255,255,0.25);
-    transition: transform 0.12s ease, box-shadow 0.2s ease;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    color: #fff; font-weight: 700; font-size: 17px;
+    box-shadow: inset 0 -3px 7px rgba(0,0,0,0.3), inset 0 3px 6px rgba(255,255,255,0.28), 0 2px 5px rgba(0,0,0,0.18);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
   }
-  .atomBtn::after {
-    content: attr(data-val); position: absolute; bottom: -17px; left: 50%;
-    transform: translateX(-50%); font-family: var(--font-mono); font-size: 8px;
-    letter-spacing: 0.1em; color: var(--muted-2); white-space: nowrap; text-shadow: none;
+  .atomBtn[data-el="C"] .ball { background: radial-gradient(circle at 34% 28%, #7a808a, var(--c-carbon) 62%, #23272e); }
+  .atomBtn[data-el="N"] .ball { background: radial-gradient(circle at 34% 28%, #8093ea, var(--c-nitro) 60%, #1e2f8a); }
+  .atomBtn[data-el="O"] .ball { background: radial-gradient(circle at 34% 28%, #f18a7c, var(--c-oxy) 58%, #94261b); }
+  .atomBtn .nm { font-size: 11px; font-weight: 500; color: var(--ink-2); }
+  .atomBtn:hover { border-color: var(--ink-3); background: var(--surface); }
+  .atomBtn:active { transform: scale(0.97); }
+  .atomBtn.selected {
+    border-color: var(--accent); background: var(--accent-weak);
+    box-shadow: 0 0 0 1px var(--accent);
   }
-  .atomBtn[data-el="C"] { background: radial-gradient(circle at 34% 28%, #9aa2ad, #4c545f 58%, #2a2f37); }
-  .atomBtn[data-el="N"] { background: radial-gradient(circle at 34% 28%, #8fb0ff, #2f54d6 56%, #1a3099); }
-  .atomBtn[data-el="O"] { background: radial-gradient(circle at 34% 28%, #ff9c8e, #e0392f 55%, #911d18); }
-  .atomBtn:hover { transform: translateY(-3px); }
-  .atomBtn:active { transform: scale(0.93); }
-  .atomBtn .glow {
-    position: absolute; inset: -6px; border-radius: 50%;
-    border: 2.5px solid var(--lime); opacity: 0; transition: opacity 0.18s ease;
-    box-shadow: 0 0 18px var(--lime-glow); pointer-events: none;
-  }
-  .atomBtn.selected .glow { opacity: 1; }
-  .atomBtn.selected { transform: translateY(-3px) scale(1.04); }
+  .atomBtn.selected .nm { color: var(--accent); font-weight: 600; }
 
-  .dockRow { display: flex; gap: 9px; align-items: stretch; }
-  .btn {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
-    background: rgba(255,255,255,0.055); color: var(--text);
-    border: 1px solid var(--line); cursor: pointer;
-    padding: 12px 10px; border-radius: 12px;
-    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.02em;
-    transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ctl {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 12px; border-radius: var(--r-btn);
+    border: 1px solid var(--line-2); background: var(--surface);
+    color: var(--ink); font-size: 13.5px; font-weight: 500;
+    transition: background .15s, border-color .15s, color .15s, transform .1s;
   }
-  .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-  .btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
-  .btn:active { transform: scale(0.96); }
-  .btn.icon { flex: 0 0 46px; }
-  .btn.primary {
-    background: linear-gradient(180deg, var(--lime), var(--lime-deep));
-    color: #10160a; border: none; font-weight: 600;
-    box-shadow: 0 8px 20px rgba(200,241,53,0.25);
-  }
-  .btn.primary:hover { background: linear-gradient(180deg, #d6ff54, var(--lime)); }
-  #modeToggle.on {
-    background: linear-gradient(180deg, rgba(53,214,224,0.22), rgba(53,214,224,0.1));
-    border-color: rgba(53,214,224,0.45); color: var(--cyan);
-  }
+  .ctl svg { width: 16px; height: 16px; }
+  .ctl:hover { background: var(--surface-2); border-color: var(--ink-3); }
+  .ctl:active { transform: scale(0.97); }
+  .ctl.wide { grid-column: 1 / -1; }
+  #modeToggle.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .hint { font-size: 12.5px; line-height: 1.5; color: var(--ink-3); }
+  .hint b { color: var(--ink-2); font-weight: 600; }
+  .panelFoot { margin-top: auto; padding-top: 8px; font-size: 11px; color: var(--ink-3); }
+  .panelFoot b { color: var(--ink-2); font-weight: 600; }
 
   /* ---------------- Toast ---------------- */
   #toast {
-    position: fixed; z-index: 90;
-    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 60px);
-    left: 50%; transform: translateX(-50%) translateY(10px);
-    background: rgba(14,18,26,0.94); border: 1px solid var(--line);
-    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-    color: var(--text); padding: 10px 18px; border-radius: 12px;
-    font-family: var(--font-mono); font-size: 12px;
-    opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none;
-    max-width: 88%; text-align: center; white-space: nowrap; box-shadow: var(--shadow);
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px);
+    z-index: 120; background: var(--ink); color: #fff;
+    padding: 10px 18px; border-radius: var(--r-pill); font-size: 13px; font-weight: 450;
+    box-shadow: var(--sh-2); opacity: 0; pointer-events: none; transition: opacity .22s, transform .22s;
+    max-width: 88%; text-align: center; white-space: nowrap;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ---------------- Floating Next (view mode) ---------------- */
-  #floatingNextBtn {
-    position: fixed; z-index: 90;
-    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 24px);
-    left: 50%; transform: translateX(-50%) translateY(20px);
-    background: linear-gradient(180deg, var(--lime), var(--lime-deep));
-    color: #10160a; border: none; padding: 14px 40px; border-radius: 30px;
-    font-family: var(--font-disp); font-size: 16px; font-weight: 800; letter-spacing: 0.02em;
-    cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 22px var(--lime-glow);
-    opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
-  }
-  #floatingNextBtn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-  #floatingNextBtn:active { transform: translateX(-50%) scale(0.96); }
-
   /* ---------------- Overlays ---------------- */
-  .overlay {
-    position: fixed; inset: 0; z-index: 200;
-    display: none; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px; text-align: center;
-  }
-  .overlay.show { display: flex; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .overlay .scrim {
-    position: absolute; inset: 0;
-    background: radial-gradient(120% 90% at 50% 0%, rgba(6,8,11,0.6), rgba(6,8,11,0.9));
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  }
+  .overlay { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .overlay.show { display: flex; }
+  .scrim { position: absolute; inset: 0; background: rgba(32,29,24,0.34); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
   .card {
-    position: relative; z-index: 1; width: 100%; max-width: 380px;
-    border-radius: 24px; padding: 34px 26px 28px;
-    background: var(--panel-bg);
-    -webkit-backdrop-filter: blur(24px) saturate(150%); backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid var(--line); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.07);
-    animation: pop 0.42s cubic-bezier(0.16,1,0.3,1);
+    position: relative; z-index: 1; width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 20px; box-shadow: var(--sh-2);
+    padding: 32px 30px 28px; text-align: center;
+    animation: rise .34s cubic-bezier(0.16,1,0.3,1);
   }
-  @keyframes pop { from { opacity: 0; transform: translateY(18px) scale(0.94); } to { opacity: 1; transform: none; } }
-  .card .kicker {
-    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
-    color: var(--lime); margin-bottom: 10px;
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .card .seal {
+    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--success-weak); color: var(--success);
   }
-  .card h2 {
-    font-family: var(--font-disp); font-weight: 800; letter-spacing: -0.02em;
-    font-size: 40px; line-height: 1; margin-bottom: 16px;
-  }
+  .card .seal svg { width: 26px; height: 26px; }
+  .card .kick { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .card h2 { font-family: var(--f-display); font-weight: 600; font-size: 32px; letter-spacing: -0.015em; margin-bottom: 14px; color: var(--ink); }
   .card .molName {
-    font-family: var(--font-mono); font-size: 14px; color: var(--text);
-    background: rgba(0,0,0,0.28); border: 1px solid var(--line-soft);
-    padding: 12px 14px; border-radius: 12px; margin-bottom: 22px; word-break: break-word; line-height: 1.35;
+    font-family: var(--f-display); font-style: italic; font-weight: 500; font-size: 17px; line-height: 1.35;
+    color: var(--ink); background: var(--surface-2); border: 1px solid var(--line);
+    padding: 13px 16px; border-radius: 12px; margin-bottom: 22px; word-break: break-word;
   }
-  .card .btnCol { display: flex; flex-direction: column; gap: 10px; }
-  .card .cbtn {
-    padding: 14px; border-radius: 13px; border: none; cursor: pointer;
-    font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
-    transition: transform 0.1s ease, background 0.15s ease;
-  }
-  .card .cbtn:active { transform: scale(0.97); }
-  .card .cbtn.solid { background: linear-gradient(180deg, var(--lime), var(--lime-deep)); color: #10160a; box-shadow: 0 8px 20px rgba(200,241,53,0.22); }
-  .card .cbtn.ghost { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--line); }
-  .card .cbtn.ghost:hover { background: rgba(255,255,255,0.11); }
+  .card .molName .loc { font-style: normal; color: var(--accent); }
+  .btnCol { display: flex; flex-direction: column; gap: 10px; }
+  .cbtn { padding: 14px; border-radius: var(--r-btn); border: none; font-size: 14.5px; font-weight: 600; transition: background .15s, transform .1s, border-color .15s; }
+  .cbtn:active { transform: scale(0.98); }
+  .cbtn.solid { background: var(--accent); color: #fff; }
+  .cbtn.solid:hover { background: var(--accent-2); }
+  .cbtn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
+  .cbtn.ghost:hover { background: var(--surface-2); border-color: var(--ink-3); }
 
-  /* Win card accent */
-  #winOverlay .card { border-top: 2px solid var(--lime); }
-  #winOverlay .card h2 { color: var(--lime); text-shadow: 0 0 26px var(--lime-glow); }
+  #finalOverlay .seal { background: var(--brass-weak); color: var(--brass); }
+  #finalOverlay .card h2 { color: var(--brass-2); }
+  #finalOverlay .cbtn.solid { background: var(--brass); }
+  #finalOverlay .cbtn.solid:hover { background: var(--brass-2); }
 
-  /* Final overlay */
-  #finalOverlay .scrim { background: radial-gradient(120% 90% at 50% 10%, rgba(255,194,75,0.14), rgba(6,8,11,0.92)); }
-  #finalOverlay .card { border-top: 2px solid var(--amber); }
-  #finalOverlay .kicker { color: var(--amber); }
-  #finalOverlay .card h2 { color: var(--amber); text-shadow: 0 0 30px var(--amber-glow); font-size: 38px; }
-  #finalOverlay .trophy { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 6px 18px var(--amber-glow)); }
-  #finalOverlay .cbtn.solid { background: linear-gradient(180deg, var(--amber), #e5a52f); color: #201400; box-shadow: 0 8px 20px var(--amber-glow); }
+  /* help */
+  #helpOverlay { z-index: 220; }
+  #helpOverlay .card { text-align: left; max-width: 440px; }
+  #helpOverlay h2 { margin-bottom: 4px; }
+  #helpOverlay .hsub { font-size: 12px; letter-spacing: 0.02em; color: var(--ink-3); margin-bottom: 22px; }
+  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+  .step .n { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; background: var(--accent-weak); color: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--f-display); font-weight: 600; font-size: 14px; }
+  .step .t { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+  .step .t b { color: var(--ink); font-weight: 600; }
+  #closeHelpBtn { margin-top: 8px; }
 
   /* ---------------- Start screen ---------------- */
   #startScreen {
-    position: fixed; inset: 0; z-index: 300;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 32px 26px calc(32px + env(safe-area-inset-bottom));
-    text-align: center;
-    background:
-      radial-gradient(120% 80% at 50% -10%, rgba(200,241,53,0.14), transparent 55%),
-      radial-gradient(90% 70% at 80% 110%, rgba(53,214,224,0.1), transparent 60%),
-      rgba(6,8,11,0.86);
-    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    position: fixed; inset: 0; z-index: 300; overflow: hidden;
+    display: grid; grid-template-columns: 1.05fr 0.95fr;
+    background: var(--paper);
+    transition: opacity .5s ease, visibility .5s ease;
   }
   #startScreen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
-  .startMark { width: 76px; height: 76px; margin-bottom: 22px; filter: drop-shadow(0 0 22px rgba(200,241,53,0.4)); animation: floaty 5s ease-in-out infinite; }
-  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-9px) rotate(4deg); } }
-  #startScreen .eyebrow {
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase;
-    color: var(--lime); margin-bottom: 14px;
-  }
-  #startScreen h1 {
-    font-family: var(--font-disp); font-weight: 800; letter-spacing: -0.03em;
-    font-size: clamp(40px, 13vw, 66px); line-height: 0.94; margin-bottom: 16px;
-  }
-  #startScreen h1 em { font-style: normal; color: var(--lime); }
-  #startScreen .sub {
-    font-family: var(--font-disp); font-weight: 400; font-size: 15px; color: var(--muted);
-    max-width: 340px; line-height: 1.5; margin-bottom: 30px;
-  }
-  #startScreen .meta {
-    font-family: var(--font-mono); font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em;
-    margin-bottom: 34px; line-height: 1.7;
-  }
-  #startScreen .meta b { color: var(--text); font-weight: 600; }
-  #startScreen .startBtns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
-  #beginBtn {
-    padding: 17px; border-radius: 15px; border: none; cursor: pointer;
-    background: linear-gradient(180deg, var(--lime), var(--lime-deep)); color: #10160a;
-    font-family: var(--font-disp); font-size: 18px; font-weight: 800; letter-spacing: 0.01em;
-    box-shadow: 0 12px 34px rgba(200,241,53,0.3); transition: transform 0.12s ease;
-  }
-  #beginBtn:hover { transform: translateY(-2px); }
-  #beginBtn:active { transform: scale(0.97); }
-  #howBtn {
-    padding: 14px; border-radius: 15px; cursor: pointer;
-    background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--text);
-    font-family: var(--font-mono); font-size: 13px; font-weight: 500;
-  }
-  #howBtn:hover { background: rgba(255,255,255,0.1); }
+  .startCopy { display: flex; flex-direction: column; justify-content: center; padding: clamp(32px, 6vw, 92px); position: relative; }
+  .startCopy .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; }
+  .startCopy .eyebrow .mk2 { width: 22px; height: 22px; border-radius: 6px; }
+  .startCopy h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(40px, 5vw, 68px); line-height: 1.02; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 22px; }
+  .startCopy h1 em { font-style: italic; color: var(--accent); }
+  .startCopy .lede { font-size: clamp(16px, 1vw + 13px, 19px); line-height: 1.6; color: var(--ink-2); max-width: 30ch; margin-bottom: 34px; }
+  .startBtns { display: flex; gap: 12px; align-items: center; margin-bottom: 40px; flex-wrap: wrap; }
+  #beginBtn { padding: 15px 30px; border-radius: var(--r-btn); border: none; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 10px 28px rgba(43,63,166,0.28); transition: background .15s, transform .12s; }
+  #beginBtn:hover { background: var(--accent-2); transform: translateY(-1px); }
+  #howBtn { padding: 15px 22px; border-radius: var(--r-btn); background: transparent; border: none; color: var(--ink-2); font-size: 15px; font-weight: 500; }
+  #howBtn:hover { color: var(--ink); }
+  .startMeta { display: flex; gap: 30px; border-top: 1px solid var(--line); padding-top: 20px; max-width: 30ch; }
+  .startMeta .mi .k { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .startMeta .mi .v { font-family: var(--f-display); font-style: italic; font-size: 15px; color: var(--ink); }
+  .startVisual { position: relative; background: radial-gradient(120% 120% at 60% 20%, var(--stage-1), var(--stage-2) 80%); overflow: hidden; }
+  .startVisual canvas { display: block; width: 100% !important; height: 100% !important; }
+  .startVisual .vcap { position: absolute; bottom: 20px; left: 22px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
 
-  /* ---------------- Help overlay ---------------- */
-  #helpOverlay { z-index: 320; }
-  #helpOverlay .card { max-width: 400px; text-align: left; padding: 28px 24px 24px; }
-  #helpOverlay h2 { font-size: 26px; margin-bottom: 4px; color: var(--text); }
-  #helpOverlay .hsub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
-  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
-  .step .n {
-    flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px;
-    background: rgba(200,241,53,0.12); border: 1px solid rgba(200,241,53,0.3); color: var(--lime);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono); font-weight: 600; font-size: 13px;
-  }
-  .step .t { font-size: 14px; line-height: 1.45; color: var(--muted); }
-  .step .t b { color: var(--text); font-weight: 600; }
-  #closeHelpBtn { margin-top: 6px; }
+  /* ---------------- Confetti ---------------- */
+  #fx { position: fixed; inset: 0; z-index: 400; pointer-events: none; }
 
-  /* ---------------- FX (confetti) ---------------- */
-  #fx { position: fixed; inset: 0; z-index: 500; pointer-events: none; }
-
-  /* ---------------- Desktop refinements ---------------- */
-  @media (min-width: 720px) {
-    #topbar { left: 50%; transform: translateX(-50%); max-width: 720px; }
-    #dock { left: 50%; transform: translateX(-50%); max-width: 560px; }
-    .atomBtn { width: 64px; height: 64px; }
+  /* ---------------- Responsive ---------------- */
+  @media (max-width: 940px) {
+    #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; gap: 12px; padding: 12px; }
+    #panel { padding: 16px; gap: 15px; overflow: visible; }
+    #targetName { margin-bottom: 14px; }
+    .panelFoot { display: none; }
+    #appbar { grid-template-columns: 1fr auto; }
+    #appbar .cls { display: none; }
+    #startScreen { grid-template-columns: 1fr; grid-template-rows: 1fr 0.7fr; }
+    .startVisual { grid-row: 1; min-height: 34vh; }
+    .startCopy { grid-row: 2; padding: 28px 26px calc(28px + env(safe-area-inset-bottom)); justify-content: flex-start; }
+    .startCopy h1 { margin-bottom: 16px; }
+    .startCopy .lede { margin-bottom: 24px; }
+    .startBtns { margin-bottom: 26px; }
   }
-  @media (min-width: 720px) and (min-height: 640px) {
-    #readout { max-width: 620px; }
+  @media (max-width: 560px) {
+    .controls { grid-template-columns: 1fr 1fr; }
+    .startMeta { gap: 22px; }
   }
 </style>
 </head>
 <body>
 
-<div id="bg"></div>
-
-<div id="viewport"></div>
-
-<!-- Top bar -->
-<header id="topbar" class="panel">
-  <div class="brandRow">
-    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
-      <line x1="16" y1="9" x2="8" y2="22" stroke="#8a97a6" stroke-width="2"/>
-      <line x1="16" y1="9" x2="24" y2="22" stroke="#8a97a6" stroke-width="2"/>
-      <circle cx="16" cy="9" r="4.5" fill="#c8f135"/>
-      <circle cx="8" cy="22" r="4.5" fill="#3a5fe0"/>
-      <circle cx="24" cy="22" r="4.5" fill="#e0392f"/>
-    </svg>
-    <div class="brandText">
-      <b>Molecule Builder</b>
-      <span>Organic Chemistry Lab</span>
-    </div>
-    <div class="credits">
-      <div class="cls">Mr. Lalama&rsquo;s Class</div>
-      <div class="by">By <b>Yazan Ali</b></div>
-    </div>
+<!-- App bar -->
+<header id="appbar">
+  <div class="brand">
+    <svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b3fa6"/><g stroke="#fff" stroke-width="2"><line x1="16" y1="10" x2="10" y2="22"/><line x1="16" y1="10" x2="22" y2="22"/></g><circle cx="16" cy="10" r="3.4" fill="#fff"/><circle cx="10" cy="22" r="3.4" fill="#e3b34f"/><circle cx="22" cy="22" r="3.4" fill="#d2402f"/></svg>
+    <span class="wm"><b>Molecule Builder</b><span>Organic Chemistry</span></span>
   </div>
-  <div class="targetWrap">
-    <div class="levelBadge">
-      <div class="lvlLabel">Level</div>
-      <div class="lvlNum" id="levelNum">1</div>
-    </div>
-    <div class="targetCol">
-      <div class="lbl">Target <span class="tag" id="targetTag">Alcohol</span></div>
-      <div id="targetName">&mdash;</div>
-    </div>
-    <div class="dots" id="dots"></div>
+  <div class="cls">Mr. Lalama&rsquo;s Class</div>
+  <div class="barRight">
+    <span class="lvlPill">Level <b id="barLevel">1</b> of 5</span>
+    <button class="iconBtn" id="helpBtn" title="How to play" aria-label="How to play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 0 1 5.3.8c0 1.8-2.6 2.4-2.6 2.4"/><path d="M12 17h.01"/></svg>
+    </button>
   </div>
 </header>
 
-<!-- Live readout -->
-<div id="readout" class="panel">
-  <span class="rLbl">Now building</span>
-  <span id="liveName" class="status">Tap an atom to start</span>
-  <span id="matchDot"></span>
+<!-- Main -->
+<div id="main">
+  <main id="bench">
+    <div class="benchTag"><span class="d"></span> Workspace</div>
+    <div id="viewport"></div>
+    <div id="readout">
+      <span class="rk">Your molecule</span>
+      <span id="liveName" class="status">Tap an atom to begin</span>
+      <span id="matchDot"></span>
+    </div>
+    <button id="floatingNextBtn">Next challenge &rarr;</button>
+  </main>
+
+  <aside id="panel">
+    <div class="task">
+      <div class="taskHead">
+        <span class="lvlNo">Level&nbsp;<b id="levelNum">1</b></span>
+        <span class="tag" id="targetTag">Alcohol</span>
+      </div>
+      <div class="kick">Build this molecule</div>
+      <h2 id="targetName">&mdash;</h2>
+      <div class="progress" id="dots"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="glabel">Add atoms</div>
+      <div id="palette">
+        <button class="atomBtn" data-el="C" title="Carbon — forms 4 bonds"><span class="ball">C</span><span class="nm">Carbon</span></button>
+        <button class="atomBtn" data-el="N" title="Nitrogen — forms 3 bonds"><span class="ball">N</span><span class="nm">Nitrogen</span></button>
+        <button class="atomBtn" data-el="O" title="Oxygen — forms 2 bonds"><span class="ball">O</span><span class="nm">Oxygen</span></button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctl" id="undoBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        Undo
+      </button>
+      <button class="ctl" id="clearBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        Clear
+      </button>
+      <button class="ctl wide" id="modeToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2"/><path d="M12 19v2"/><path d="M3 12h2"/><path d="M19 12h2"/><circle cx="12" cy="12" r="3.4"/></svg>
+        <span id="modeLabel">Inspect in 3D</span>
+      </button>
+    </div>
+
+    <p class="hint">Pick an atom, then tap the workspace to place it. Tap an existing atom to grow the chain, or tap two atoms to bond them. <b>Hydrogens fill in automatically.</b></p>
+
+    <div class="panelFoot">Built by <b>Yazan Ali</b></div>
+  </aside>
 </div>
 
-<!-- Bottom dock -->
-<div id="dock" class="panel">
-  <div id="palette">
-    <button class="atomBtn" data-el="C" data-val="Carbon" title="Carbon — forms 4 bonds"><span class="glow"></span>C</button>
-    <button class="atomBtn" data-el="N" data-val="Nitrogen" title="Nitrogen — forms 3 bonds"><span class="glow"></span>N</button>
-    <button class="atomBtn" data-el="O" data-val="Oxygen" title="Oxygen — forms 2 bonds"><span class="glow"></span>O</button>
-  </div>
-  <div class="dockRow">
-    <button class="btn icon" id="undoBtn" title="Undo" aria-label="Undo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-    </button>
-    <button class="btn" id="clearBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
-      Clear
-    </button>
-    <button class="btn" id="modeToggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>
-      <span id="modeLabel">Build</span>
-    </button>
-    <button class="btn icon" id="helpBtn" title="How to play" aria-label="How to play">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.5.8c0 1.9-2.8 2.5-2.8 2.5"/><path d="M12 17h.01"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- Toast + floating next -->
+<!-- Toast -->
 <div id="toast"></div>
-<button id="floatingNextBtn">Next Challenge &rarr;</button>
 
-<!-- Win overlay -->
+<!-- Win -->
 <div id="winOverlay" class="overlay">
   <div class="scrim"></div>
   <div class="card">
-    <div class="kicker">Structure Confirmed</div>
-    <h2>Correct!</h2>
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <div class="kick">Structure confirmed</div>
+    <h2>Correct</h2>
     <div class="molName" id="winName">&mdash;</div>
     <div class="btnCol">
       <button class="cbtn ghost" id="viewMoleculeBtn">Inspect in 3D</button>
-      <button class="cbtn solid" id="nextChallengeBtn">Next Challenge &rarr;</button>
+      <button class="cbtn solid" id="nextChallengeBtn">Next challenge &rarr;</button>
     </div>
   </div>
 </div>
 
-<!-- Final overlay -->
+<!-- Final -->
 <div id="finalOverlay" class="overlay">
   <div class="scrim"></div>
   <div class="card">
-    <div class="trophy">🏆</div>
-    <div class="kicker">All Levels Complete</div>
-    <h2>Master Chemist</h2>
-    <p class="molName" id="finalMsg">You built all 5 molecules and named every one correctly.</p>
-    <div class="btnCol">
-      <button class="cbtn solid" id="playAgainBtn">Play Again</button>
-    </div>
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg></div>
+    <div class="kick">All five complete</div>
+    <h2>Course mastered</h2>
+    <p class="molName" id="finalMsg" style="font-style:normal;font-family:var(--f-body);font-size:15px;color:var(--ink-2)">You built and correctly named every molecule. Nicely done.</p>
+    <div class="btnCol"><button class="cbtn solid" id="playAgainBtn">Start over</button></div>
   </div>
 </div>
 
-<!-- Help overlay -->
+<!-- Help -->
 <div id="helpOverlay" class="overlay">
   <div class="scrim"></div>
   <div class="card">
-    <h2>How to play</h2>
-    <div class="hsub">Build the target molecule</div>
-    <div class="step"><div class="n">1</div><div class="t"><b>Pick an atom</b> — tap Carbon, Nitrogen, or Oxygen in the dock. Hydrogens fill in automatically.</div></div>
-    <div class="step"><div class="n">2</div><div class="t"><b>Place it</b> — tap empty space for your first atom, then tap an existing atom to grow the chain.</div></div>
-    <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> — with no atom selected in the dock, tap one atom then another to link them.</div></div>
-    <div class="step"><div class="n">4</div><div class="t"><b>Match the name</b> — the readout names your molecule live. Match the <b>target</b> to win.</div></div>
-    <div class="step"><div class="n">5</div><div class="t"><b>Inspect in 3D</b> — switch to <b>View</b> to orbit, pinch, and pan your creation.</div></div>
-    <button class="cbtn solid" id="closeHelpBtn">Got it</button>
+    <h2>How it works</h2>
+    <div class="hsub">Assemble the target molecule, atom by atom</div>
+    <div class="step"><div class="n">1</div><div class="t"><b>Choose an atom</b> — Carbon, Nitrogen, or Oxygen. Hydrogens are added for you automatically.</div></div>
+    <div class="step"><div class="n">2</div><div class="t"><b>Place it</b> — tap empty workspace for your first atom, then tap an existing atom to extend the chain.</div></div>
+    <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> — with no atom selected, tap one atom then another to link them.</div></div>
+    <div class="step"><div class="n">4</div><div class="t"><b>Match the name</b> — your molecule is named live by IUPAC rules. Match the target to advance.</div></div>
+    <div class="step"><div class="n">5</div><div class="t"><b>Inspect in 3D</b> — switch to Inspect to orbit, pinch, and pan your structure.</div></div>
+    <button class="cbtn solid" id="closeHelpBtn">Start building</button>
   </div>
 </div>
 
 <!-- Start screen -->
 <div id="startScreen">
-  <svg class="startMark" viewBox="0 0 64 64" aria-hidden="true">
-    <g stroke="#8a97a6" stroke-width="3">
-      <line x1="32" y1="16" x2="16" y2="42"/>
-      <line x1="32" y1="16" x2="48" y2="42"/>
-      <line x1="16" y1="42" x2="48" y2="42"/>
-    </g>
-    <circle cx="32" cy="16" r="8.5" fill="#c8f135"/>
-    <circle cx="16" cy="42" r="8.5" fill="#3a5fe0"/>
-    <circle cx="48" cy="42" r="8.5" fill="#e0392f"/>
-  </svg>
-  <div class="eyebrow">Organic Chemistry Lab</div>
-  <h1>Molecule<br><em>Builder</em></h1>
-  <p class="sub">Assemble atoms into real organic molecules and watch them get named by IUPAC rules — live, in 3D.</p>
-  <div class="meta">
-    <b>Mr. Lalama&rsquo;s Class</b><br>
-    Built by <b>Yazan Ali</b>
+  <div class="startCopy">
+    <span class="eyebrow"><svg class="mk2" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b3fa6"/><g stroke="#fff" stroke-width="2"><line x1="16" y1="10" x2="10" y2="22"/><line x1="16" y1="10" x2="22" y2="22"/></g><circle cx="16" cy="10" r="3.4" fill="#fff"/><circle cx="10" cy="22" r="3.4" fill="#e3b34f"/><circle cx="22" cy="22" r="3.4" fill="#d2402f"/></svg> Organic Chemistry</span>
+    <h1>Build the molecule.<br><em>Learn its name.</em></h1>
+    <p class="lede">Assemble real organic structures atom by atom and watch them named live by IUPAC rules — in interactive 3D.</p>
+    <div class="startBtns">
+      <button id="beginBtn">Start building &rarr;</button>
+      <button id="howBtn">How it works</button>
+    </div>
+    <div class="startMeta">
+      <div class="mi"><div class="k">Class</div><div class="v">Mr. Lalama&rsquo;s Class</div></div>
+      <div class="mi"><div class="k">Built by</div><div class="v">Yazan Ali</div></div>
+    </div>
   </div>
-  <div class="startBtns">
-    <button id="beginBtn">Start Building &rarr;</button>
-    <button id="howBtn">How to play</button>
+  <div class="startVisual">
+    <div id="heroViewport"></div>
+    <div class="vcap">Ball-and-stick · live IUPAC naming</div>
   </div>
 </div>
 
@@ -579,9 +521,9 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 /* =========================================================================
-   MOLECULE BUILDER  —  single-file build
-   Design overhaul: immersive lab-instrument UI + upgraded Three.js rendering.
-   Naming engine & interaction logic preserved from the original build.
+   MOLECULE BUILDER
+   Editorial-science redesign. IUPAC naming engine + interaction logic
+   preserved verbatim from the working build; only presentation changed.
    ========================================================================= */
 
 const LEVELS = [
@@ -595,7 +537,6 @@ let currentLevel = 1;
 let currentName = '';
 function currentTarget() { return LEVELS[currentLevel - 1].target; }
 
-/* Highlight locants (digits + N-locants) inside a molecule name */
 function fmtFormula(str) {
   return str
     .replace(/\d+/g, m => `<span class="loc">${m}</span>`)
@@ -609,6 +550,7 @@ function molTag(name) {
 function updateTargetLabel() {
   const t = currentTarget();
   document.getElementById('levelNum').textContent = currentLevel;
+  document.getElementById('barLevel').textContent = currentLevel;
   document.getElementById('targetName').innerHTML = fmtFormula(t);
   document.getElementById('targetTag').textContent = molTag(t);
   renderProgress();
@@ -618,137 +560,119 @@ function renderProgress() {
   dots.innerHTML = '';
   for (let i = 1; i <= LEVELS.length; i++) {
     const d = document.createElement('div');
-    d.className = 'dot' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
+    d.className = 'pdot' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
     dots.appendChild(d);
   }
+  const note = document.createElement('span');
+  note.className = 'pnote';
+  note.textContent = (currentLevel - 1) + ' of ' + LEVELS.length + ' solved';
+  dots.appendChild(note);
 }
 
 const MAX_BONDS   = { C: 4, N: 3, O: 2, H: 1 };
-const ATOM_COLOR  = { C: 0x5b6470, N: 0x3a5fe0, O: 0xe0392f, H: 0xeef2f6 };
-const ATOM_EMISS  = { C: 0x11141a, N: 0x0b1030, O: 0x2a0806, H: 0x0a0d12 };
+const ATOM_COLOR  = { C: 0x3b4048, N: 0x2f4cc4, O: 0xd2402f, H: 0xf0eee7 };
+const ATOM_EMISS  = { C: 0x0c0e12, N: 0x0a1030, O: 0x2a0806, H: 0x0d0d10 };
 const ATOM_RADIUS = { C: 0.50,     N: 0.48,     O: 0.45,     H: 0.30 };
 
-/* ---------- Three.js setup ---------- */
-const viewport = document.getElementById('viewport');
-const scene = new THREE.Scene();
-
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
-camera.position.set(0, 0, 18);
-camera.lookAt(0, 0, 0);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
-if ('toneMapping' in renderer) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12; }
-viewport.appendChild(renderer.domElement);
-
-function syncDockHeight() {
-  const dock = document.getElementById('dock');
-  if (dock) document.documentElement.style.setProperty('--dock-h', dock.offsetHeight + 'px');
-}
-function resize() {
-  const w = viewport.clientWidth;
-  const h = viewport.clientHeight;
-  if (w === 0 || h === 0) return;
-  renderer.setSize(w, h);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  syncDockHeight();
-}
-window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', () => setTimeout(resize, 100));
-
-/* Environment map (procedural gradient) for glossy reflections */
+/* ---------- Three.js scene factory (used for bench + hero) ---------- */
 function makeEnvMap() {
   const c = document.createElement('canvas');
   c.width = 16; c.height = 128;
   const g = c.getContext('2d');
   const grad = g.createLinearGradient(0, 0, 0, 128);
-  grad.addColorStop(0.00, '#2b3648');
-  grad.addColorStop(0.42, '#141a24');
-  grad.addColorStop(0.55, '#0c1017');
-  grad.addColorStop(1.00, '#04060a');
+  grad.addColorStop(0.00, '#3a4256');
+  grad.addColorStop(0.45, '#1a1e26');
+  grad.addColorStop(0.58, '#12141a');
+  grad.addColorStop(1.00, '#070a0e');
   g.fillStyle = grad; g.fillRect(0, 0, 16, 128);
-  // a soft warm-lime kick near the top for a hot highlight
-  g.fillStyle = 'rgba(200,241,53,0.20)'; g.fillRect(0, 0, 16, 20);
+  g.fillStyle = 'rgba(255,255,255,0.14)'; g.fillRect(0, 0, 16, 16);
   const tex = new THREE.CanvasTexture(c);
   tex.mapping = THREE.EquirectangularReflectionMapping;
   if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
   return tex;
 }
-const envMap = makeEnvMap();
-scene.environment = envMap;
+const sharedEnv = makeEnvMap();
 
-/* Lighting */
-scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-scene.add(new THREE.HemisphereLight(0xdfeaff, 0x0a0d14, 0.55));
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.15);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
+camera.position.set(0, 0, 18);
+camera.lookAt(0, 0, 0);
+
+const viewport = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+if ('toneMapping' in renderer) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; }
+viewport.appendChild(renderer.domElement);
+scene.environment = sharedEnv;
+
+function resize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  if (w === 0 || h === 0) return;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+
+/* Lighting — soft studio, cool key + warm fill, no colored neon */
+scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+scene.add(new THREE.HemisphereLight(0xdfe7ff, 0x0b0d12, 0.5));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
 dirLight.position.set(-6, 10, 12);
 scene.add(dirLight);
-const rimLight = new THREE.DirectionalLight(0xc8f135, 0.5);
-rimLight.position.set(8, -6, -10);
-scene.add(rimLight);
-const keyPoint = new THREE.PointLight(0xffffff, 0.6, 100);
+const fillLight = new THREE.DirectionalLight(0xffe8cf, 0.35);
+fillLight.position.set(8, -5, -6);
+scene.add(fillLight);
+const keyPoint = new THREE.PointLight(0xffffff, 0.55, 100);
 keyPoint.position.set(4, 6, 14);
 scene.add(keyPoint);
 
-/* Root group — rotated in View Mode */
 const root = new THREE.Group();
 scene.add(root);
-const hGroup = new THREE.Group(); // hydrogen meshes (rebuilt each update)
+const hGroup = new THREE.Group();
 root.add(hGroup);
 
-/* Reusable geometries / materials */
 const sphereGeoCache = {};
 function getSphereGeo(el) {
-  if (!sphereGeoCache[el])
-    sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 40, 28);
+  if (!sphereGeoCache[el]) sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 40, 28);
   return sphereGeoCache[el];
 }
 const bondGeo = new THREE.CylinderGeometry(0.085, 0.085, 1, 20);
-const bondMat = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.55, roughness: 0.45, envMapIntensity: 0.7 });
+const bondMat = new THREE.MeshStandardMaterial({ color: 0xb9c0c8, metalness: 0.4, roughness: 0.5, envMapIntensity: 0.7 });
 const atomMats = {};
 for (const el of ['C','N','O','H']) {
   atomMats[el] = new THREE.MeshStandardMaterial({
-    color: ATOM_COLOR[el],
-    emissive: ATOM_EMISS[el],
-    metalness: el === 'H' ? 0.0 : 0.25,
-    roughness: el === 'H' ? 0.5 : 0.28,
-    envMapIntensity: el === 'H' ? 0.4 : 0.85,
+    color: ATOM_COLOR[el], emissive: ATOM_EMISS[el],
+    metalness: el === 'H' ? 0.0 : 0.22, roughness: el === 'H' ? 0.45 : 0.26,
+    envMapIntensity: el === 'H' ? 0.5 : 0.9,
   });
 }
-const ringMat = new THREE.MeshBasicMaterial({
-  color: 0xc8f135, side: THREE.DoubleSide, transparent: true, opacity: 0.9,
-  blending: THREE.AdditiveBlending, depthWrite: false,
-});
+const ringMat = new THREE.MeshBasicMaterial({ color: 0xe3b34f, side: THREE.DoubleSide, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
 
 /* ---------- State ---------- */
 let nextId = 1;
-const atoms = new Map();  // id -> { id, element, pos:Vector3, mesh, neighbors:Set<id> }
-const bonds = [];         // { a:id, b:id, mesh }
-const history = [];       // { type, ... } actions, for undo
+const atoms = new Map();
+const bonds = [];
+const history = [];
 
-let selectedPaletteEl = null; // 'C' | 'N' | 'O' | null
-let selectedAtomId    = null; // atom id chosen for bond-between-existing
+let selectedPaletteEl = null;
+let selectedAtomId    = null;
 let selectionRing     = null;
 
-let mode = 'build';  // 'build' | 'view'
+let mode = 'build';
 let won  = false;
-let postWinView = false;  // true when user pressed View Molecule after completing a level
+let postWinView = false;
 
-/* View-mode orbit pivot: centroid of non-H atoms (recomputed on entry to view mode) */
 const viewCenter = new THREE.Vector3();
 const viewPan    = new THREE.Vector3();
 const _viewTmp   = new THREE.Vector3();
 function computeViewCenter() {
   viewCenter.set(0, 0, 0);
   if (atoms.size === 0) return;
-  for (const a of atoms.values()) {
-    viewCenter.x += a.pos.x;
-    viewCenter.y += a.pos.y;
-    viewCenter.z += a.pos.z;
-  }
+  for (const a of atoms.values()) { viewCenter.x += a.pos.x; viewCenter.y += a.pos.y; viewCenter.z += a.pos.z; }
   viewCenter.divideScalar(atoms.size);
 }
 function applyViewTransform() {
@@ -763,7 +687,6 @@ function updateFloatingNext(isCorrect) {
   else btn.classList.remove('show');
 }
 
-/* ---------- Small helpers ---------- */
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -771,96 +694,66 @@ function toast(msg) {
   clearTimeout(toast._t);
   toast._t = setTimeout(() => t.classList.remove('show'), 2000);
 }
+function canBond(atom) { return atom.neighbors.size < MAX_BONDS[atom.element]; }
 
-function canBond(atom) {
-  return atom.neighbors.size < MAX_BONDS[atom.element];
-}
-
-function makeBondMesh(pa, pb) {
-  const m = new THREE.Mesh(bondGeo, bondMat);
-  orientBond(m, pa, pb);
-  return m;
-}
+function makeBondMesh(pa, pb) { const m = new THREE.Mesh(bondGeo, bondMat); orientBond(m, pa, pb); return m; }
 function orientBond(mesh, pa, pb) {
   const mid = new THREE.Vector3().addVectors(pa, pb).multiplyScalar(0.5);
   const diff = new THREE.Vector3().subVectors(pb, pa);
   const len = diff.length();
   mesh.position.copy(mid);
   mesh.scale.set(1, len, 1);
-  mesh.quaternion.setFromUnitVectors(
-    new THREE.Vector3(0, 1, 0),
-    diff.clone().normalize()
-  );
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), diff.clone().normalize());
 }
 
-/* ---------- Auto-position new atom ---------- */
 function findPositionForNewAtom(parent) {
   const neighborAngles = [];
   for (const nid of parent.neighbors) {
     const n = atoms.get(nid);
-    const dx = n.pos.x - parent.pos.x;
-    const dy = n.pos.y - parent.pos.y;
-    if (dx*dx + dy*dy > 0.0001)
-      neighborAngles.push(Math.atan2(dy, dx));
+    const dx = n.pos.x - parent.pos.x, dy = n.pos.y - parent.pos.y;
+    if (dx*dx + dy*dy > 0.0001) neighborAngles.push(Math.atan2(dy, dx));
   }
   let angle;
-  if (neighborAngles.length === 0) {
-    angle = 0;
-  } else if (neighborAngles.length === 1) {
-    angle = neighborAngles[0] + Math.PI;
-  } else {
+  if (neighborAngles.length === 0) angle = 0;
+  else if (neighborAngles.length === 1) angle = neighborAngles[0] + Math.PI;
+  else {
     neighborAngles.sort((a,b) => a - b);
     let maxGap = -1, chosen = 0;
     for (let i = 0; i < neighborAngles.length; i++) {
       const a1 = neighborAngles[i];
-      const a2 = neighborAngles[(i+1) % neighborAngles.length]
-                 + (i === neighborAngles.length - 1 ? Math.PI*2 : 0);
+      const a2 = neighborAngles[(i+1) % neighborAngles.length] + (i === neighborAngles.length - 1 ? Math.PI*2 : 0);
       const gap = a2 - a1;
       if (gap > maxGap) { maxGap = gap; chosen = a1 + gap/2; }
     }
     angle = chosen;
   }
   const dist = 2.0;
-  return new THREE.Vector3(
-    parent.pos.x + Math.cos(angle) * dist,
-    parent.pos.y + Math.sin(angle) * dist,
-    0
-  );
+  return new THREE.Vector3(parent.pos.x + Math.cos(angle) * dist, parent.pos.y + Math.sin(angle) * dist, 0);
 }
 
-/* ---------- Create / remove atoms & bonds ---------- */
 function createAtom(el, pos) {
-  const atom = {
-    id: nextId++,
-    element: el,
-    pos: pos.clone(),
-    neighbors: new Set(),
-  };
+  const atom = { id: nextId++, element: el, pos: pos.clone(), neighbors: new Set() };
   const mesh = new THREE.Mesh(getSphereGeo(el), atomMats[el]);
   mesh.position.copy(pos);
   mesh.userData.atomId = atom.id;
-  mesh.scale.setScalar(0.01);          // spawn animation
+  mesh.scale.setScalar(0.01);
   mesh.userData.spawn = 0;
   atom.mesh = mesh;
   root.add(mesh);
   atoms.set(atom.id, atom);
   return atom;
 }
-
 function createBond(a, b) {
   if (a.id === b.id) return null;
   if (a.neighbors.has(b.id)) return null;
   if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return null; }
   if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return null; }
-  a.neighbors.add(b.id);
-  b.neighbors.add(a.id);
+  a.neighbors.add(b.id); b.neighbors.add(a.id);
   const mesh = makeBondMesh(a.pos, b.pos);
   const bond = { a: a.id, b: b.id, mesh };
-  bonds.push(bond);
-  root.add(mesh);
+  bonds.push(bond); root.add(mesh);
   return bond;
 }
-
 function removeAtom(atomId) {
   const atom = atoms.get(atomId);
   if (!atom) return;
@@ -869,45 +762,34 @@ function removeAtom(atomId) {
     if (b.a === atomId || b.b === atomId) {
       const other = atoms.get(b.a === atomId ? b.b : b.a);
       if (other) other.neighbors.delete(atomId);
-      root.remove(b.mesh);
-      bonds.splice(i, 1);
+      root.remove(b.mesh); bonds.splice(i, 1);
     }
   }
-  root.remove(atom.mesh);
-  atoms.delete(atomId);
+  root.remove(atom.mesh); atoms.delete(atomId);
 }
-
 function removeBondRef(bondRef) {
   const idx = bonds.indexOf(bondRef);
   if (idx === -1) return;
-  const a = atoms.get(bondRef.a);
-  const b = atoms.get(bondRef.b);
+  const a = atoms.get(bondRef.a), b = atoms.get(bondRef.b);
   if (a) a.neighbors.delete(bondRef.b);
   if (b) b.neighbors.delete(bondRef.a);
-  root.remove(bondRef.mesh);
-  bonds.splice(idx, 1);
+  root.remove(bondRef.mesh); bonds.splice(idx, 1);
 }
 
-/* ---------- Hydrogen rendering ---------- */
-function clearHydrogens() {
-  while (hGroup.children.length) hGroup.remove(hGroup.children[0]);
-}
+function clearHydrogens() { while (hGroup.children.length) hGroup.remove(hGroup.children[0]); }
 function renderHydrogens() {
   clearHydrogens();
   for (const atom of atoms.values()) {
     const hCount = MAX_BONDS[atom.element] - atom.neighbors.size;
     if (hCount <= 0) continue;
-
     const taken = [];
     for (const nid of atom.neighbors) {
       const n = atoms.get(nid);
       taken.push(Math.atan2(n.pos.y - atom.pos.y, n.pos.x - atom.pos.x));
     }
     const picks = [];
-    if (taken.length === 0) {
-      for (let i = 0; i < hCount; i++)
-        picks.push((Math.PI * 2 * i) / hCount);
-    } else {
+    if (taken.length === 0) { for (let i = 0; i < hCount; i++) picks.push((Math.PI * 2 * i) / hCount); }
+    else {
       taken.sort((a,b) => a - b);
       let gaps = [];
       for (let i = 0; i < taken.length; i++) {
@@ -924,13 +806,8 @@ function renderHydrogens() {
         gaps.push({ start: mid,     end: g.end, size: g.size / 2 });
       }
     }
-
     for (const ang of picks) {
-      const hPos = new THREE.Vector3(
-        atom.pos.x + Math.cos(ang) * 1.1,
-        atom.pos.y + Math.sin(ang) * 1.1,
-        atom.pos.z
-      );
+      const hPos = new THREE.Vector3(atom.pos.x + Math.cos(ang) * 1.1, atom.pos.y + Math.sin(ang) * 1.1, atom.pos.z);
       const hMesh = new THREE.Mesh(getSphereGeo('H'), atomMats.H);
       hMesh.position.copy(hPos);
       hGroup.add(hMesh);
@@ -939,27 +816,18 @@ function renderHydrogens() {
   }
 }
 
-/* ---------- Selection ring ---------- */
-function clearSelectionRing() {
-  if (selectionRing) {
-    root.remove(selectionRing);
-    selectionRing = null;
-  }
-}
+function clearSelectionRing() { if (selectionRing) { root.remove(selectionRing); selectionRing = null; } }
 function showSelectionRing(atom) {
   clearSelectionRing();
-  const r0 = ATOM_RADIUS[atom.element] * 1.35;
-  const r1 = ATOM_RADIUS[atom.element] * 1.62;
+  const r0 = ATOM_RADIUS[atom.element] * 1.35, r1 = ATOM_RADIUS[atom.element] * 1.62;
   const geo = new THREE.RingGeometry(r0, r1, 40);
   const ring = new THREE.Mesh(geo, ringMat.clone());
   ring.position.copy(atom.pos);
   ring.position.z += 0.05;
-  ring.userData.base = (r0 + r1) / 2;
   selectionRing = ring;
   root.add(ring);
 }
 
-/* ---------- Picking ---------- */
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 function setRayFromClient(x, y) {
@@ -976,35 +844,20 @@ function pickAtom(x, y) {
   if (hits.length) return atoms.get(hits[0].object.userData.atomId);
   return null;
 }
-function pickWorldPoint(x, y) {
-  setRayFromClient(x, y);
-  const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
-  const pt = new THREE.Vector3();
-  raycaster.ray.intersectPlane(plane, pt);
-  return pt;
-}
 
-/* ---------- Auto-frame camera (build mode) ---------- */
 function autoFrame() {
   if (atoms.size === 0 || mode !== 'build') {
-    if (mode === 'build') {
-      camera.position.set(0, 0, 18);
-      camera.lookAt(0, 0, 0);
-    }
+    if (mode === 'build') { camera.position.set(0, 0, 18); camera.lookAt(0, 0, 0); }
     return;
   }
   let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
   for (const a of atoms.values()) {
-    if (a.pos.x < minX) minX = a.pos.x;
-    if (a.pos.x > maxX) maxX = a.pos.x;
-    if (a.pos.y < minY) minY = a.pos.y;
-    if (a.pos.y > maxY) maxY = a.pos.y;
+    if (a.pos.x < minX) minX = a.pos.x; if (a.pos.x > maxX) maxX = a.pos.x;
+    if (a.pos.y < minY) minY = a.pos.y; if (a.pos.y > maxY) maxY = a.pos.y;
   }
   minX -= 2; maxX += 2; minY -= 2; maxY += 2;
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  const w = maxX - minX;
-  const h = maxY - minY;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const w = maxX - minX, h = maxY - minY;
   const aspect = Math.max(0.0001, renderer.domElement.width / Math.max(1, renderer.domElement.height));
   const fovY = camera.fov * Math.PI / 180;
   const distY = (h / 2) / Math.tan(fovY / 2);
@@ -1014,7 +867,6 @@ function autoFrame() {
   camera.lookAt(cx, cy, 0);
 }
 
-/* ---------- State change pipeline ---------- */
 function onStateChanged() {
   renderHydrogens();
   if (mode === 'build') autoFrame();
@@ -1022,35 +874,24 @@ function onStateChanged() {
   currentName = name;
   const target = currentTarget();
   const isCorrect = (name === target);
-
   const liveEl = document.getElementById('liveName');
   const readout = document.getElementById('readout');
   const isStatus = /^(Tap an atom|Building|Invalid|Structure)/.test(name);
   liveEl.innerHTML = isStatus ? name : fmtFormula(name);
   liveEl.classList.toggle('status', isStatus);
   readout.classList.toggle('match', isCorrect);
-
   if (!won && isCorrect) showWin();
   updateFloatingNext(isCorrect);
 }
 
-/* ---------- Action wrappers (with undo history) ---------- */
 function actAddFirstAtom(el, pos) {
   const atom = createAtom(el, pos);
   history.push({ type: 'addAtom', atomId: atom.id, bondRef: null });
-  if (mode === 'build') {
-    camera.position.set(0, 0, 18);
-    camera.lookAt(0, 0, 0);
-    root.position.set(0, 0, 0);
-    root.rotation.set(0, 0, 0);
-  }
+  if (mode === 'build') { camera.position.set(0, 0, 18); camera.lookAt(0, 0, 0); root.position.set(0, 0, 0); root.rotation.set(0, 0, 0); }
   onStateChanged();
 }
 function actAddAtomBonded(el, parent) {
-  if (!canBond(parent)) {
-    toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`);
-    return;
-  }
+  if (!canBond(parent)) { toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`); return; }
   const pos = findPositionForNewAtom(parent);
   const atom = createAtom(el, pos);
   const bondRef = createBond(parent, atom);
@@ -1059,36 +900,27 @@ function actAddAtomBonded(el, parent) {
 }
 function actAddBond(a, b) {
   const bondRef = createBond(a, b);
-  if (bondRef) {
-    history.push({ type: 'addBond', bondRef });
-    onStateChanged();
-  }
+  if (bondRef) { history.push({ type: 'addBond', bondRef }); onStateChanged(); }
 }
 function undo() {
   const action = history.pop();
   if (!action) return;
   if (action.type === 'addAtom') removeAtom(action.atomId);
   else if (action.type === 'addBond') removeBondRef(action.bondRef);
-  selectedAtomId = null;
-  clearSelectionRing();
+  selectedAtomId = null; clearSelectionRing();
   onStateChanged();
 }
 function clearAll() {
   const ids = [...atoms.keys()];
   for (const id of ids) removeAtom(id);
   history.length = 0;
-  selectedAtomId = null;
-  clearSelectionRing();
-  won = false;
-  postWinView = false;
+  selectedAtomId = null; clearSelectionRing();
+  won = false; postWinView = false;
   document.getElementById('winOverlay').classList.remove('show');
   onStateChanged();
 }
 function advanceLevel() {
-  if (currentLevel >= LEVELS.length) {
-    showFinal();
-    return;
-  }
+  if (currentLevel >= LEVELS.length) { showFinal(); return; }
   currentLevel++;
   updateTargetLabel();
   if (mode === 'view') setMode('build');
@@ -1105,23 +937,18 @@ function resetGame() {
 /* ===========================================================
    NAMING ENGINE — old-style IUPAC  (preserved verbatim)
    =========================================================== */
-
 const PARENT_ROOTS = [null, 'meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct'];
 const BRANCH_NAMES = [null, 'methyl', 'ethyl', 'propyl'];
 const MULTI_PREFIX = [null, '', 'di', 'tri', 'tetra'];
 
 function generateName() {
-  if (atoms.size === 0) return 'Tap an atom to start';
-
-  // Single non-carbon atoms
+  if (atoms.size === 0) return 'Tap an atom to begin';
   if (atoms.size === 1) {
     const only = [...atoms.values()][0];
     if (only.element === 'C') return 'methane';
     if (only.element === 'O') return 'water';
     if (only.element === 'N') return 'ammonia';
   }
-
-  // Must only contain C, N, O
   for (const a of atoms.values())
     if (!['C','N','O'].includes(a.element)) return 'Invalid structure';
 
@@ -1131,21 +958,17 @@ function generateName() {
   if (carbons.length === 0) return 'Invalid structure';
   if (carbons.length > 20) return 'Structure too complex';
 
-  // Whole-molecule connectivity check
   {
     const vis = new Set();
     const firstId = [...atoms.values()][0].id;
     const q = [firstId]; vis.add(firstId);
     while (q.length) {
       const x = q.shift();
-      for (const nid of atoms.get(x).neighbors) {
-        if (!vis.has(nid)) { vis.add(nid); q.push(nid); }
-      }
+      for (const nid of atoms.get(x).neighbors) { if (!vis.has(nid)) { vis.add(nid); q.push(nid); } }
     }
     if (vis.size !== atoms.size) return 'Invalid structure';
   }
 
-  // Detect OH groups — each O must have exactly one C neighbor
   const ohCarbons = new Set();
   for (const o of oxygens) {
     if (o.neighbors.size === 0) return 'Building...';
@@ -1155,17 +978,13 @@ function generateName() {
     ohCarbons.add(nid);
   }
 
-  // Validate nitrogens — 1..3 neighbors, all carbons
   for (const nAtom of nitrogens) {
     if (nAtom.neighbors.size === 0) return 'Building...';
     if (nAtom.neighbors.size > 3) return 'Invalid structure';
-    for (const nid of nAtom.neighbors) {
-      if (atoms.get(nid).element !== 'C') return 'Invalid structure';
-    }
+    for (const nid of nAtom.neighbors) { if (atoms.get(nid).element !== 'C') return 'Invalid structure'; }
   }
   if (nitrogens.length > 1) return 'Structure too complex';
 
-  // Carbon subgraph (C-C edges only) — each connected component must be a tree
   const cIds = carbons.map(c => c.id);
   const cSet = new Set(cIds);
   {
@@ -1183,11 +1002,10 @@ function generateName() {
           if (!vis.has(nid)) { vis.add(nid); qc.push(nid); }
         }
       }
-      if (halfEdges / 2 !== nodes - 1) return 'Invalid structure'; // cycle
+      if (halfEdges / 2 !== nodes - 1) return 'Invalid structure';
     }
   }
 
-  // Unique path between two carbons restricted to C-C edges
   function pathBetween(s, e) {
     const parent = new Map();
     parent.set(s, null);
@@ -1197,8 +1015,7 @@ function generateName() {
       if (x === e) break;
       for (const nid of atoms.get(x).neighbors) {
         if (!cSet.has(nid) || parent.has(nid)) continue;
-        parent.set(nid, x);
-        qq.push(nid);
+        parent.set(nid, x); qq.push(nid);
       }
     }
     if (!parent.has(e)) return null;
@@ -1213,14 +1030,9 @@ function generateName() {
   const amineAsParent = hasN && !hasOH;
 
   let requiredCarbons = null;
-  if (hasOH) {
-    requiredCarbons = ohCarbons;
-  } else if (amineAsParent) {
-    requiredCarbons = new Set();
-    for (const nid of nitrogens[0].neighbors) requiredCarbons.add(nid);
-  }
+  if (hasOH) requiredCarbons = ohCarbons;
+  else if (amineAsParent) { requiredCarbons = new Set(); for (const nid of nitrogens[0].neighbors) requiredCarbons.add(nid); }
 
-  // Find longest path through the C subgraph satisfying requiredCarbons
   let bestChain = null;
   for (let i = 0; i < cIds.length; i++) {
     for (let j = i; j < cIds.length; j++) {
@@ -1238,8 +1050,7 @@ function generateName() {
 
   function measureAlkylChain(startId, excludeId) {
     const seen = new Set([excludeId]);
-    let cur = startId;
-    let len = 0;
+    let cur = startId, len = 0;
     while (true) {
       if (seen.has(cur)) return null;
       seen.add(cur);
@@ -1260,7 +1071,6 @@ function generateName() {
     }
     return len;
   }
-
   function buildNSubPrefix(lengths) {
     const names = lengths.map(l => BRANCH_NAMES[l]);
     const counts = {};
@@ -1275,29 +1085,24 @@ function generateName() {
     }
     return parts.join('-');
   }
-
   function analyze(chain) {
     const inChain = new Set(chain);
     const subs = [];
     let fgLocant = null;
     let nChainAttach = 0;
-
     for (let i = 0; i < chain.length; i++) {
       const locant = i + 1;
       const cid = chain[i];
       const c = atoms.get(cid);
-
       for (const nid of c.neighbors) {
         if (inChain.has(nid)) continue;
         const nb = atoms.get(nid);
-
         if (nb.element === 'O') {
           if (fgLocant !== null) return null;
           fgLocant = locant;
         } else if (nb.element === 'N') {
           nChainAttach++;
           if (nChainAttach > 1) return null;
-
           const otherCs = [...nb.neighbors].filter(x => x !== cid);
           const nSubLengths = [];
           for (const ocid of otherCs) {
@@ -1305,31 +1110,19 @@ function generateName() {
             if (!len) return null;
             nSubLengths.push(len);
           }
-
           if (amineAsParent) {
             if (fgLocant !== null) return null;
             fgLocant = locant;
-            for (const len of nSubLengths) {
-              subs.push({
-                name:    BRANCH_NAMES[len],
-                sortKey: BRANCH_NAMES[len],
-                locant:  'N',
-              });
-            }
+            for (const len of nSubLengths) subs.push({ name: BRANCH_NAMES[len], sortKey: BRANCH_NAMES[len], locant: 'N' });
           } else {
-            if (nSubLengths.length === 0) {
-              subs.push({ name: 'amino', sortKey: 'amino', locant });
-            } else {
+            if (nSubLengths.length === 0) subs.push({ name: 'amino', sortKey: 'amino', locant });
+            else {
               const nSubStr = buildNSubPrefix(nSubLengths);
               if (!nSubStr) return null;
               const fullName = '(' + nSubStr + 'amino)';
               let sortKey;
-              if (nSubLengths.length === 1) {
-                sortKey = BRANCH_NAMES[nSubLengths[0]] + 'amino';
-              } else {
-                const sortedNames = nSubLengths.map(l => BRANCH_NAMES[l]).sort();
-                sortKey = (sortedNames[0] === sortedNames[1] ? 'di' + sortedNames[0] : sortedNames.join('')) + 'amino';
-              }
+              if (nSubLengths.length === 1) sortKey = BRANCH_NAMES[nSubLengths[0]] + 'amino';
+              else { const sortedNames = nSubLengths.map(l => BRANCH_NAMES[l]).sort(); sortKey = (sortedNames[0] === sortedNames[1] ? 'di' + sortedNames[0] : sortedNames.join('')) + 'amino'; }
               subs.push({ name: fullName, sortKey, locant });
             }
           }
@@ -1360,10 +1153,8 @@ function generateName() {
         }
       }
     }
-
     if (amineAsParent && fgLocant === null) return null;
     if (hasOH && fgLocant === null) return null;
-
     return { subs, fgLocant };
   }
 
@@ -1375,14 +1166,11 @@ function generateName() {
     if (!a) return b;
     if (!b) return a;
     if (a.fgLocant !== null && b.fgLocant !== null) {
-      if (a.fgLocant !== b.fgLocant)
-        return a.fgLocant < b.fgLocant ? a : b;
+      if (a.fgLocant !== b.fgLocant) return a.fgLocant < b.fgLocant ? a : b;
     }
     const numLoc = s => s.subs.map(x => x.locant).filter(l => typeof l === 'number').sort((x,y)=>x-y);
     const la = numLoc(a), lb = numLoc(b);
-    for (let i = 0; i < Math.min(la.length, lb.length); i++) {
-      if (la[i] !== lb[i]) return la[i] < lb[i] ? a : b;
-    }
+    for (let i = 0; i < Math.min(la.length, lb.length); i++) { if (la[i] !== lb[i]) return la[i] < lb[i] ? a : b; }
     return a;
   }
   const chosen = pickBetter(fwd, rev);
@@ -1397,18 +1185,11 @@ function generateName() {
     if (!groups[key]) groups[key] = { sortKey: s.sortKey || s.name, locants: [] };
     groups[key].locants.push(s.locant);
   }
-  const sortedKeys = Object.keys(groups).sort((a, b) =>
-    groups[a].sortKey.localeCompare(groups[b].sortKey)
-  );
+  const sortedKeys = Object.keys(groups).sort((a, b) => groups[a].sortKey.localeCompare(groups[b].sortKey));
   const parts = [];
   for (const key of sortedKeys) {
     const { locants } = groups[key];
-    locants.sort((x, y) => {
-      if (x === 'N' && y === 'N') return 0;
-      if (x === 'N') return -1;
-      if (y === 'N') return 1;
-      return x - y;
-    });
+    locants.sort((x, y) => { if (x === 'N' && y === 'N') return 0; if (x === 'N') return -1; if (y === 'N') return 1; return x - y; });
     const count = locants.length;
     const prefix = count > 1 ? MULTI_PREFIX[count] : '';
     if (!prefix && count > 1) return 'Structure too complex';
@@ -1417,21 +1198,12 @@ function generateName() {
 
   let fgLocStr = '';
   let suffix;
-  if (hasOH) {
-    suffix = rootName + 'anol';
-    if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
-  } else if (amineAsParent) {
-    suffix = rootName + 'anamine';
-    if (n >= 3) fgLocStr = `${chosen.fgLocant}-`;
-  } else {
-    suffix = rootName + 'ane';
-  }
+  if (hasOH) { suffix = rootName + 'anol'; if (n >= 3) fgLocStr = `${chosen.fgLocant}-`; }
+  else if (amineAsParent) { suffix = rootName + 'anamine'; if (n >= 3) fgLocStr = `${chosen.fgLocant}-`; }
+  else suffix = rootName + 'ane';
 
   let name = '';
-  if (parts.length) {
-    name += parts.join('-');
-    if (fgLocStr) name += '-';
-  }
+  if (parts.length) { name += parts.join('-'); if (fgLocStr) name += '-'; }
   name += fgLocStr + suffix;
   return name;
 }
@@ -1439,16 +1211,12 @@ function generateName() {
 /* ===========================================================
    INTERACTION
    =========================================================== */
-
 document.querySelectorAll('.atomBtn').forEach(btn => {
   btn.addEventListener('click', () => {
     const el = btn.dataset.el;
     selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
-    document.querySelectorAll('.atomBtn').forEach(b =>
-      b.classList.toggle('selected', b.dataset.el === selectedPaletteEl)
-    );
-    selectedAtomId = null;
-    clearSelectionRing();
+    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('selected', b.dataset.el === selectedPaletteEl));
+    selectedAtomId = null; clearSelectionRing();
   });
 });
 
@@ -1465,52 +1233,40 @@ document.getElementById('nextChallengeBtn').addEventListener('click', () => {
   document.getElementById('winOverlay').classList.remove('show');
   advanceLevel();
 });
-document.getElementById('floatingNextBtn').addEventListener('click', () => {
-  advanceLevel();
-});
+document.getElementById('floatingNextBtn').addEventListener('click', advanceLevel);
 document.getElementById('playAgainBtn').addEventListener('click', resetGame);
 
-/* Mode toggle */
 const modeBtn = document.getElementById('modeToggle');
 const modeLabel = document.getElementById('modeLabel');
 function setMode(next) {
   mode = next;
-  modeLabel.textContent = mode === 'build' ? 'Build' : 'View';
+  modeLabel.textContent = mode === 'build' ? 'Inspect in 3D' : 'Back to build';
   modeBtn.classList.toggle('on', mode === 'view');
-  selectedAtomId = null;
-  clearSelectionRing();
+  selectedAtomId = null; clearSelectionRing();
   updateFloatingNext(currentName === currentTarget());
   if (mode === 'build') {
-    root.rotation.set(0, 0, 0);
-    root.position.set(0, 0, 0);
-    viewPan.set(0, 0, 0);
+    root.rotation.set(0, 0, 0); root.position.set(0, 0, 0); viewPan.set(0, 0, 0);
     autoFrame();
-  } else {
-    if (atoms.size > 0) {
-      computeViewCenter();
-      viewPan.set(0, 0, 0);
-      root.rotation.set(0, 0, 0);
-      applyViewTransform();
-      camera.position.set(0, 0, Math.max(14, camera.position.z));
-      camera.lookAt(0, 0, 0);
-    }
+  } else if (atoms.size > 0) {
+    computeViewCenter(); viewPan.set(0, 0, 0); root.rotation.set(0, 0, 0);
+    applyViewTransform();
+    camera.position.set(0, 0, Math.max(14, camera.position.z)); camera.lookAt(0, 0, 0);
   }
 }
 modeBtn.addEventListener('click', () => setMode(mode === 'build' ? 'view' : 'build'));
 
-/* Help + start screen */
 const helpOverlay = document.getElementById('helpOverlay');
 document.getElementById('helpBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
 document.getElementById('howBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
-document.getElementById('closeHelpBtn').addEventListener('click', () => helpOverlay.classList.remove('show'));
+document.getElementById('closeHelpBtn').addEventListener('click', () => { helpOverlay.classList.remove('show'); dismissStart(); });
 helpOverlay.addEventListener('click', (e) => { if (e.target === helpOverlay || e.target.classList.contains('scrim')) helpOverlay.classList.remove('show'); });
 
-document.getElementById('beginBtn').addEventListener('click', () => {
-  document.getElementById('startScreen').classList.add('hide');
-  setTimeout(resize, 60);
-});
+function dismissStart() {
+  const s = document.getElementById('startScreen');
+  if (!s.classList.contains('hide')) { s.classList.add('hide'); setTimeout(resize, 80); setTimeout(resize, 480); }
+}
+document.getElementById('beginBtn').addEventListener('click', dismissStart);
 
-/* Keyboard shortcuts (desktop) */
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
@@ -1520,99 +1276,54 @@ window.addEventListener('keydown', (e) => {
     selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
     document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('selected', b.dataset.el === selectedPaletteEl));
     selectedAtomId = null; clearSelectionRing();
-  } else if (k === 'u' || k === 'z') { undo(); }
-  else if (k === 'v') { setMode(mode === 'build' ? 'view' : 'build'); }
-  else if (k === 'escape') { helpOverlay.classList.remove('show'); }
+  } else if (k === 'u' || k === 'z') undo();
+  else if (k === 'v') setMode(mode === 'build' ? 'view' : 'build');
+  else if (k === 'escape') helpOverlay.classList.remove('show');
 });
 
-/* ---------- Canvas pointer / touch handling ---------- */
+/* ---------- Canvas pointer / touch ---------- */
 const canvas = renderer.domElement;
-const ts = {
-  active: false, moved: false, panning: false,
-  startX: 0, startY: 0, lastX: 0, lastY: 0,
-  pinchStart: 0, pinchCamStart: 0,
-  pinchMidX: 0, pinchMidY: 0,
-  twoFinger: false,
-};
+const ts = { active: false, moved: false, panning: false, startX: 0, startY: 0, lastX: 0, lastY: 0, pinchStart: 0, pinchCamStart: 0, pinchMidX: 0, pinchMidY: 0, twoFinger: false };
 
 function pxToWorld() {
   const h = renderer.domElement.clientHeight || 1;
   const worldH = 2 * Math.abs(camera.position.z) * Math.tan((camera.fov * Math.PI / 180) / 2);
   return worldH / h;
 }
-
-function pointerDown(x, y, shift) {
-  ts.active = true;
-  ts.moved  = false;
-  ts.panning = !!shift;
-  ts.startX = ts.lastX = x;
-  ts.startY = ts.lastY = y;
-  idleT = 0;
-}
+function pointerDown(x, y, shift) { ts.active = true; ts.moved = false; ts.panning = !!shift; ts.startX = ts.lastX = x; ts.startY = ts.lastY = y; idleT = 0; }
 function pointerMove(x, y) {
   if (!ts.active) return;
-  const dx = x - ts.startX;
-  const dy = y - ts.startY;
+  const dx = x - ts.startX, dy = y - ts.startY;
   if (!ts.moved && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) ts.moved = true;
   if (mode === 'view' && ts.moved) {
-    const ddx = x - ts.lastX;
-    const ddy = y - ts.lastY;
-    if (ts.panning) {
-      const k = pxToWorld();
-      viewPan.x += ddx * k;
-      viewPan.y -= ddy * k;
-    } else {
-      root.rotation.y += ddx * 0.01;
-      root.rotation.x += ddy * 0.01;
-    }
+    const ddx = x - ts.lastX, ddy = y - ts.lastY;
+    if (ts.panning) { const k = pxToWorld(); viewPan.x += ddx * k; viewPan.y -= ddy * k; }
+    else { root.rotation.y += ddx * 0.01; root.rotation.x += ddy * 0.01; }
     applyViewTransform();
   }
   ts.lastX = x; ts.lastY = y;
 }
-function pointerUp(x, y) {
-  if (!ts.active) return;
-  ts.active = false;
-  if (ts.moved) return;
-  handleTap(x, y);
-}
+function pointerUp(x, y) { if (!ts.active) return; ts.active = false; if (ts.moved) return; handleTap(x, y); }
 
 function handleTap(clientX, clientY) {
   if (mode !== 'build') return;
   const hit = pickAtom(clientX, clientY);
-
   if (hit) {
-    if (selectedPaletteEl) {
-      actAddAtomBonded(selectedPaletteEl, hit);
-    } else {
-      if (selectedAtomId === null) {
-        selectedAtomId = hit.id;
-        showSelectionRing(hit);
-      } else if (selectedAtomId === hit.id) {
-        selectedAtomId = null;
-        clearSelectionRing();
-      } else {
-        const a = atoms.get(selectedAtomId);
-        actAddBond(a, hit);
-        selectedAtomId = null;
-        clearSelectionRing();
-      }
+    if (selectedPaletteEl) actAddAtomBonded(selectedPaletteEl, hit);
+    else {
+      if (selectedAtomId === null) { selectedAtomId = hit.id; showSelectionRing(hit); }
+      else if (selectedAtomId === hit.id) { selectedAtomId = null; clearSelectionRing(); }
+      else { const a = atoms.get(selectedAtomId); actAddBond(a, hit); selectedAtomId = null; clearSelectionRing(); }
     }
     return;
   }
-
-  if (selectedPaletteEl && atoms.size === 0) {
-    actAddFirstAtom(selectedPaletteEl, new THREE.Vector3(0, 0, 0));
-  } else if (selectedAtomId !== null) {
-    selectedAtomId = null;
-    clearSelectionRing();
-  }
+  if (selectedPaletteEl && atoms.size === 0) actAddFirstAtom(selectedPaletteEl, new THREE.Vector3(0, 0, 0));
+  else if (selectedAtomId !== null) { selectedAtomId = null; clearSelectionRing(); }
 }
 
-canvas.addEventListener('mousedown', e => {
-  pointerDown(e.clientX, e.clientY, e.shiftKey || e.button === 2);
-});
-canvas.addEventListener('mousemove', e => { pointerMove(e.clientX, e.clientY); });
-canvas.addEventListener('mouseup',   e => { pointerUp(e.clientX, e.clientY); });
+canvas.addEventListener('mousedown', e => pointerDown(e.clientX, e.clientY, e.shiftKey || e.button === 2));
+canvas.addEventListener('mousemove', e => pointerMove(e.clientX, e.clientY));
+canvas.addEventListener('mouseup',   e => pointerUp(e.clientX, e.clientY));
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('wheel', e => {
   if (mode !== 'view') return;
@@ -1622,14 +1333,10 @@ canvas.addEventListener('wheel', e => {
 }, { passive: false });
 
 canvas.addEventListener('touchstart', e => {
-  if (e.touches.length === 1) {
-    ts.twoFinger = false;
-    pointerDown(e.touches[0].clientX, e.touches[0].clientY, false);
-  } else if (e.touches.length === 2) {
-    ts.active = false;
-    ts.twoFinger = true;
-    const dx = e.touches[0].clientX - e.touches[1].clientX;
-    const dy = e.touches[0].clientY - e.touches[1].clientY;
+  if (e.touches.length === 1) { ts.twoFinger = false; pointerDown(e.touches[0].clientX, e.touches[0].clientY, false); }
+  else if (e.touches.length === 2) {
+    ts.active = false; ts.twoFinger = true;
+    const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
     ts.pinchStart = Math.hypot(dx, dy);
     ts.pinchCamStart = camera.position.z;
     ts.pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -1637,41 +1344,26 @@ canvas.addEventListener('touchstart', e => {
   }
   e.preventDefault();
 }, { passive: false });
-
 canvas.addEventListener('touchmove', e => {
-  if (e.touches.length === 1 && !ts.twoFinger) {
-    pointerMove(e.touches[0].clientX, e.touches[0].clientY);
-  } else if (e.touches.length === 2 && mode === 'view') {
-    const dx = e.touches[0].clientX - e.touches[1].clientX;
-    const dy = e.touches[0].clientY - e.touches[1].clientY;
+  if (e.touches.length === 1 && !ts.twoFinger) pointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  else if (e.touches.length === 2 && mode === 'view') {
+    const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
     const dist = Math.hypot(dx, dy);
-    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (dist > 0 && ts.pinchStart > 0) {
-      const ratio = ts.pinchStart / dist;
-      camera.position.z = Math.max(5, Math.min(120, ts.pinchCamStart * ratio));
-    }
+    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2, midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    if (dist > 0 && ts.pinchStart > 0) { const ratio = ts.pinchStart / dist; camera.position.z = Math.max(5, Math.min(120, ts.pinchCamStart * ratio)); }
     const k = pxToWorld();
-    viewPan.x += (midX - ts.pinchMidX) * k;
-    viewPan.y -= (midY - ts.pinchMidY) * k;
-    ts.pinchMidX = midX;
-    ts.pinchMidY = midY;
+    viewPan.x += (midX - ts.pinchMidX) * k; viewPan.y -= (midY - ts.pinchMidY) * k;
+    ts.pinchMidX = midX; ts.pinchMidY = midY;
     applyViewTransform();
   }
   e.preventDefault();
 }, { passive: false });
-
 canvas.addEventListener('touchend', e => {
-  if (e.touches.length === 0 && !ts.twoFinger && e.changedTouches.length > 0) {
-    pointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-  }
+  if (e.touches.length === 0 && !ts.twoFinger && e.changedTouches.length > 0) pointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
   if (e.touches.length === 0) ts.twoFinger = false;
   e.preventDefault();
 }, { passive: false });
-
-document.addEventListener('touchmove', e => {
-  if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
 /* ---------- Win / celebration ---------- */
 function showWin() {
@@ -1680,13 +1372,8 @@ function showWin() {
   document.getElementById('winOverlay').classList.add('show');
   burstConfetti();
 }
-function showFinal() {
-  const overlay = document.getElementById('finalOverlay');
-  if (overlay) overlay.classList.add('show');
-  burstConfetti(true);
-}
+function showFinal() { document.getElementById('finalOverlay').classList.add('show'); burstConfetti(true); }
 
-/* ---------- Confetti ---------- */
 const fx = document.getElementById('fx');
 const fxCtx = fx.getContext('2d');
 let confetti = [];
@@ -1694,19 +1381,13 @@ function sizeFx() { fx.width = innerWidth * devicePixelRatio; fx.height = innerH
 window.addEventListener('resize', sizeFx);
 function burstConfetti(big) {
   sizeFx();
-  const colors = ['#c8f135', '#ffc24b', '#35d6e0', '#eef3f8', '#3a5fe0', '#e0392f'];
-  const n = big ? 220 : 140;
-  const cx = innerWidth / 2, cy = innerHeight * 0.42;
+  const colors = ['#2b3fa6', '#b07a2b', '#2f7d5b', '#d2402f', '#2f4cc4', '#e3b34f'];
+  const n = big ? 200 : 130;
+  const cx = innerWidth / 2, cy = innerHeight * 0.4;
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2;
-    const sp = 5 + Math.random() * (big ? 15 : 11);
-    confetti.push({
-      x: cx + (Math.random()-0.5)*60, y: cy + (Math.random()-0.5)*40,
-      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4,
-      g: 0.22 + Math.random()*0.12, rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.4,
-      w: 6 + Math.random()*7, h: 4 + Math.random()*5,
-      color: colors[(Math.random()*colors.length)|0], life: 0, max: 90 + Math.random()*50,
-    });
+    const sp = 5 + Math.random() * (big ? 14 : 10);
+    confetti.push({ x: cx + (Math.random()-0.5)*60, y: cy + (Math.random()-0.5)*40, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4, g: 0.22 + Math.random()*0.12, rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.4, w: 6 + Math.random()*6, h: 4 + Math.random()*5, color: colors[(Math.random()*colors.length)|0], life: 0, max: 90 + Math.random()*50 });
   }
 }
 function updateConfetti() {
@@ -1716,13 +1397,57 @@ function updateConfetti() {
     const p = confetti[i];
     p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.rot += p.vr; p.life++;
     const alpha = Math.max(0, 1 - p.life / p.max);
-    fxCtx.save();
-    fxCtx.translate(p.x, p.y); fxCtx.rotate(p.rot);
-    fxCtx.globalAlpha = alpha; fxCtx.fillStyle = p.color;
-    fxCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    fxCtx.restore();
+    fxCtx.save(); fxCtx.translate(p.x, p.y); fxCtx.rotate(p.rot); fxCtx.globalAlpha = alpha; fxCtx.fillStyle = p.color;
+    fxCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h); fxCtx.restore();
     if (p.life >= p.max || p.y > innerHeight + 40) confetti.splice(i, 1);
   }
+}
+
+/* ---------- Hero scene (start screen decoration) ---------- */
+let heroRenderer = null, heroScene = null, heroCamera = null, heroRoot = null;
+function initHero() {
+  const hv = document.getElementById('heroViewport');
+  if (!hv || typeof THREE === 'undefined') return;
+  heroRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  heroRenderer.setClearColor(0x000000, 0);
+  heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  if ('outputEncoding' in heroRenderer) heroRenderer.outputEncoding = THREE.sRGBEncoding;
+  if ('toneMapping' in heroRenderer) { heroRenderer.toneMapping = THREE.ACESFilmicToneMapping; heroRenderer.toneMappingExposure = 1.15; }
+  hv.appendChild(heroRenderer.domElement);
+  heroScene = new THREE.Scene();
+  heroScene.environment = sharedEnv;
+  heroCamera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  heroCamera.position.set(0, 0, 12);
+  heroScene.add(new THREE.AmbientLight(0xffffff, 0.42));
+  heroScene.add(new THREE.HemisphereLight(0xdfe7ff, 0x0b0d12, 0.5));
+  const dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(-6, 10, 12); heroScene.add(dl);
+  const fl = new THREE.DirectionalLight(0xffe8cf, 0.35); fl.position.set(8, -5, -6); heroScene.add(fl);
+  heroRoot = new THREE.Group(); heroScene.add(heroRoot);
+
+  // isopropanol-ish showcase: C-C(-C)-O with hydrogens
+  const P = (x,y,z)=>new THREE.Vector3(x,y,z);
+  const nodes = [
+    { el:'C', p:P(-2.1, 0.2, 0) },
+    { el:'C', p:P(0, -0.4, 0.3) },
+    { el:'C', p:P(2.1, 0.3, -0.2) },
+    { el:'O', p:P(0, 1.7, -0.4) },
+  ];
+  const edges = [[0,1],[1,2],[1,3]];
+  const meshes = nodes.map(nd => { const m = new THREE.Mesh(getSphereGeo(nd.el), atomMats[nd.el]); m.position.copy(nd.p); heroRoot.add(m); return m; });
+  edges.forEach(([a,b]) => heroRoot.add(makeBondMesh(nodes[a].p, nodes[b].p)));
+  // a few hydrogens for fullness
+  const hAngles = [ [0,[-2.1,0.2,0],[[-1,0.9],[-1,-1]]] ];
+  [[-3.4,0.6,0.5],[-2.6,-1.1,-0.4],[1.0,-1.4,0.8],[2.9,-0.6,0.4],[3.1,1.2,-0.9],[0.9,2.4,-0.2]].forEach(pt => {
+    const h = new THREE.Mesh(getSphereGeo('H'), atomMats.H); h.position.set(pt[0],pt[1],pt[2]); heroRoot.add(h);
+  });
+
+  function hres() {
+    const w = hv.clientWidth, h = hv.clientHeight;
+    if (!w || !h) return;
+    heroRenderer.setSize(w, h); heroCamera.aspect = w / h; heroCamera.updateProjectionMatrix();
+  }
+  hres(); setTimeout(hres, 60);
+  window.addEventListener('resize', hres);
 }
 
 /* ---------- Animation loop ---------- */
@@ -1732,35 +1457,30 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
-  // Atom spawn pop-in
   for (const a of atoms.values()) {
     if (a.mesh.userData.spawn < 1) {
       a.mesh.userData.spawn = Math.min(1, a.mesh.userData.spawn + dt * 6);
       const t = a.mesh.userData.spawn;
-      const s = 1 + 0.14 * Math.sin(t * Math.PI); // slight overshoot
-      a.mesh.scale.setScalar(Math.max(0.01, t * s));
+      a.mesh.scale.setScalar(Math.max(0.01, t * (1 + 0.12 * Math.sin(t * Math.PI))));
     }
   }
-
-  // Selection ring pulse
   if (selectionRing) {
     const t = clock.elapsedTime;
-    const s = 1 + Math.sin(t * 4) * 0.08;
-    selectionRing.scale.setScalar(s);
-    selectionRing.material.opacity = 0.55 + Math.abs(Math.sin(t * 4)) * 0.4;
+    selectionRing.scale.setScalar(1 + Math.sin(t * 4) * 0.07);
+    selectionRing.material.opacity = 0.6 + Math.abs(Math.sin(t * 4)) * 0.35;
   }
-
-  // Gentle idle auto-rotation in view mode
   if (mode === 'view' && atoms.size > 0 && !ts.active && !ts.twoFinger) {
     idleT += dt;
-    if (idleT > 0.6) {
-      root.rotation.y += dt * 0.28;
-      applyViewTransform();
-    }
+    if (idleT > 0.5) { root.rotation.y += dt * 0.26; applyViewTransform(); }
   }
-
   updateConfetti();
   renderer.render(scene, camera);
+
+  if (heroRenderer && !document.getElementById('startScreen').classList.contains('hide')) {
+    heroRoot.rotation.y += dt * 0.35;
+    heroRoot.rotation.x = Math.sin(clock.elapsedTime * 0.3) * 0.12;
+    heroRenderer.render(heroScene, heroCamera);
+  }
 }
 
 /* ---------- Init ---------- */
@@ -1768,6 +1488,7 @@ sizeFx();
 resize();
 setTimeout(resize, 50);
 updateTargetLabel();
+initHero();
 animate();
 onStateChanged();
 </script>
