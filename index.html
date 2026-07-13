@@ -3,57 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Molecule Builder</title>
+<meta name="theme-color" content="#06080b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Molecule Builder — build organic molecules in 3D and learn IUPAC nomenclature. A chemistry lab in your browser.">
+<title>Molecule Builder — 3D Organic Chemistry Lab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='9' r='4' fill='%23c8f135'/%3E%3Ccircle cx='8' cy='22' r='4' fill='%232f54d6'/%3E%3Ccircle cx='24' cy='22' r='4' fill='%23e0392f'/%3E%3Cg stroke='%238a97a6' stroke-width='2'%3E%3Cline x1='16' y1='9' x2='8' y2='22'/%3E%3Cline x1='16' y1='9' x2='24' y2='22'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --ink:        #06080b;
+    --surface:    #0f141c;
+    --surface-2:  #161c26;
+    --line:       rgba(255,255,255,0.09);
+    --line-soft:  rgba(255,255,255,0.05);
+    --text:       #eef3f8;
+    --muted:      #8b98a8;
+    --muted-2:    #5d6875;
+    --lime:       #c8f135;
+    --lime-deep:  #a6cf1e;
+    --lime-glow:  rgba(200,241,53,0.55);
+    --amber:      #ffc24b;
+    --amber-glow: rgba(255,194,75,0.5);
+    --cyan:       #35d6e0;
+    --c-carbon:   #5b6470;
+    --c-nitro:    #3a5fe0;
+    --c-oxy:      #e0392f;
+    --shadow:     0 18px 50px rgba(0,0,0,0.55);
+    --panel-bg:   linear-gradient(180deg, rgba(24,30,40,0.74), rgba(13,17,24,0.66));
+    --font-disp:  "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+
   html, body {
     height: 100%;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #0d0d2b;
-    color: #ffffff;
+    font-family: var(--font-disp);
+    background: var(--ink);
+    color: var(--text);
     overscroll-behavior: none;
     touch-action: none;
+    -webkit-font-smoothing: antialiased;
   }
   body {
-    display: flex;
-    flex-direction: column;
     height: 100vh;
     height: 100dvh;
-  }
-
-  /* Header */
-  #header {
-    background: #1a1a4e;
-    padding: 10px 14px;
-    flex-shrink: 0;
-    border-bottom: 1px solid #2a2a6e;
-  }
-  #header .titleRow {
     position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
-  #header .titleRow h1 { font-size: 16px; font-weight: 600; color: #ffffff; margin: 0; }
-  #header .titleRow .center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-  }
-  #header .titleRow .right { font-size: 16px; font-weight: 600; color: #ffffff; }
-  #header .target { font-size: 12px; color: #4fc3f7; margin-top: 3px; }
-  #header .target .levelLabel { color: #ffd84d; font-weight: 700; margin-right: 4px; }
 
-  /* Viewport */
+  /* ---------------- Ambient backdrop ---------------- */
+  #bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(130% 90% at 50% -15%, rgba(200,241,53,0.10), transparent 52%),
+      radial-gradient(100% 75% at 88% 112%, rgba(53,214,224,0.09), transparent 60%),
+      radial-gradient(90% 60% at 8% 105%, rgba(58,95,224,0.08), transparent 60%),
+      var(--ink);
+  }
+  #bg::before {
+    /* dot grid, faded toward center so it never fights the molecule */
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1.4px);
+    background-size: 30px 30px;
+    opacity: 0.35;
+    -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, transparent 34%, #000 82%);
+            mask-image: radial-gradient(120% 120% at 50% 50%, transparent 34%, #000 82%);
+    animation: drift 34s linear infinite;
+  }
+  #bg::after {
+    /* film grain */
+    content: ""; position: absolute; inset: -50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.035; mix-blend-mode: overlay; pointer-events: none;
+  }
+  @keyframes drift { to { background-position: 30px 60px; } }
+
+  /* ---------------- 3D stage ---------------- */
   #viewport {
-    flex: 1 1 auto;
-    position: relative;
-    background: #0d0d2b;
-    min-height: 0;
+    position: fixed; inset: 0; z-index: 1;
     overflow: hidden;
   }
   #viewport canvas {
@@ -63,301 +94,494 @@
     touch-action: none;
   }
 
-  /* Name bar */
-  #nameBar {
-    background: #161638;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    border-top: 1px solid #2a2a6e;
+  /* ---------------- Glass panel base ---------------- */
+  .panel {
+    background: var(--panel-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+            backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
   }
-  #modeToggle {
-    background: #2a2a6e;
-    color: white;
-    border: none;
-    padding: 9px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
+
+  /* ---------------- Top bar ---------------- */
+  #topbar {
+    position: fixed; z-index: 10;
+    top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px;
+    border-radius: 18px;
+    padding: 12px 16px 14px;
+    display: flex; flex-direction: column; gap: 11px;
   }
-  #modeToggle:active { background: #3a3a8e; }
+  .brandRow { display: flex; align-items: center; gap: 12px; }
+  .mark {
+    width: 30px; height: 30px; flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(200,241,53,0.4));
+  }
+  .brandText { display: flex; flex-direction: column; line-height: 1.05; }
+  .brandText b {
+    font-family: var(--font-disp); font-weight: 700; font-size: 15px;
+    letter-spacing: -0.01em; color: var(--text);
+  }
+  .brandText span {
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted-2); margin-top: 2px;
+  }
+  .credits { margin-left: auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
+  .credits .cls {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--text);
+    letter-spacing: 0.04em; font-weight: 500;
+  }
+  .credits .by { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); }
+  .credits .by b { color: var(--lime); font-weight: 600; }
+
+  /* progress + target */
+  .targetWrap {
+    display: flex; align-items: center; gap: 14px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 11px;
+  }
+  .levelBadge {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 46px; height: 46px; border-radius: 13px;
+    background: radial-gradient(circle at 50% 30%, rgba(200,241,53,0.18), rgba(200,241,53,0.04));
+    border: 1px solid rgba(200,241,53,0.3);
+  }
+  .levelBadge .lvlLabel { font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.16em; color: var(--lime); text-transform: uppercase; }
+  .levelBadge .lvlNum { font-family: var(--font-disp); font-weight: 800; font-size: 22px; line-height: 1; color: var(--text); margin-top: 1px; }
+  .targetCol { min-width: 0; flex: 1; }
+  .targetCol .lbl {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+  }
+  .tag {
+    font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.08em;
+    padding: 2px 7px; border-radius: 20px; text-transform: uppercase;
+    background: rgba(53,214,224,0.12); color: var(--cyan); border: 1px solid rgba(53,214,224,0.28);
+  }
+  #targetName {
+    font-family: var(--font-mono); font-weight: 500; font-size: clamp(13px, 3.6vw, 16px);
+    color: var(--text); word-break: break-word; line-height: 1.28; letter-spacing: -0.01em;
+  }
+  .loc { color: var(--lime); font-weight: 600; }
+  .dots { display: flex; gap: 6px; flex-shrink: 0; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.14); transition: all 0.3s ease;
+  }
+  .dot.done { background: var(--lime); box-shadow: 0 0 8px var(--lime-glow); }
+  .dot.active { background: var(--amber); box-shadow: 0 0 10px var(--amber-glow); transform: scale(1.35); }
+
+  /* ---------------- Live readout ---------------- */
+  #readout {
+    position: fixed; z-index: 10;
+    left: 50%; transform: translateX(-50%);
+    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 14px);
+    max-width: min(560px, calc(100vw - 28px));
+    border-radius: 14px; padding: 9px 16px;
+    display: flex; align-items: center; gap: 11px;
+    transition: box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  #readout .rLbl {
+    font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted-2); flex-shrink: 0;
+  }
   #liveName {
-    font-size: 13px;
-    color: #4fc3f7;
-    flex: 1;
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 500;
+    font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em;
   }
+  #liveName.status { color: var(--muted); font-style: italic; }
+  #matchDot {
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--muted-2); position: relative; transition: all 0.3s ease;
+  }
+  #readout.match {
+    border-color: rgba(200,241,53,0.55);
+    box-shadow: var(--shadow), 0 0 22px rgba(200,241,53,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  #readout.match #matchDot { border-color: var(--lime); background: var(--lime); box-shadow: 0 0 12px var(--lime-glow); }
+  #readout.match #matchDot::after {
+    content: ""; position: absolute; left: 5px; top: 2px; width: 5px; height: 9px;
+    border: solid var(--ink); border-width: 0 2px 2px 0; transform: rotate(42deg);
+  }
+  #readout.match #liveName { color: var(--lime); }
 
-  /* Palette */
-  #palette {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    padding: 12px;
-    background: #11112e;
-    flex-shrink: 0;
+  /* ---------------- Bottom dock ---------------- */
+  #dock {
+    position: fixed; z-index: 10;
+    left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
+    border-radius: 20px; padding: 12px 14px 13px;
+    display: flex; flex-direction: column; gap: 11px;
   }
+  #palette { display: flex; justify-content: center; gap: clamp(14px, 5vw, 26px); }
   .atomBtn {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    color: white;
-    font-size: 22px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
-    cursor: pointer;
+    position: relative; width: 60px; height: 60px; border-radius: 50%;
+    border: none; cursor: pointer; flex-shrink: 0;
+    color: #fff; font-family: var(--font-disp); font-size: 24px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.45), inset 0 -4px 10px rgba(0,0,0,0.35), inset 0 3px 8px rgba(255,255,255,0.25);
+    transition: transform 0.12s ease, box-shadow 0.2s ease;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
-  .atomBtn[data-el="C"] { background: #505050; }
-  .atomBtn[data-el="N"] { background: #3050D0; }
-  .atomBtn[data-el="O"] { background: #D03030; }
-  .atomBtn.selected {
-    border-color: #4fc3f7;
-    box-shadow: 0 0 14px rgba(79, 195, 247, 0.8);
+  .atomBtn::after {
+    content: attr(data-val); position: absolute; bottom: -17px; left: 50%;
+    transform: translateX(-50%); font-family: var(--font-mono); font-size: 8px;
+    letter-spacing: 0.1em; color: var(--muted-2); white-space: nowrap; text-shadow: none;
   }
-  .atomBtn:active { transform: scale(0.94); }
+  .atomBtn[data-el="C"] { background: radial-gradient(circle at 34% 28%, #9aa2ad, #4c545f 58%, #2a2f37); }
+  .atomBtn[data-el="N"] { background: radial-gradient(circle at 34% 28%, #8fb0ff, #2f54d6 56%, #1a3099); }
+  .atomBtn[data-el="O"] { background: radial-gradient(circle at 34% 28%, #ff9c8e, #e0392f 55%, #911d18); }
+  .atomBtn:hover { transform: translateY(-3px); }
+  .atomBtn:active { transform: scale(0.93); }
+  .atomBtn .glow {
+    position: absolute; inset: -6px; border-radius: 50%;
+    border: 2.5px solid var(--lime); opacity: 0; transition: opacity 0.18s ease;
+    box-shadow: 0 0 18px var(--lime-glow); pointer-events: none;
+  }
+  .atomBtn.selected .glow { opacity: 1; }
+  .atomBtn.selected { transform: translateY(-3px) scale(1.04); }
 
-  /* Controls */
-  #controls {
-    display: flex;
-    gap: 10px;
-    padding: 10px 12px 14px;
-    background: #11112e;
-    flex-shrink: 0;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  .dockRow { display: flex; gap: 9px; align-items: stretch; }
+  .btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: rgba(255,255,255,0.055); color: var(--text);
+    border: 1px solid var(--line); cursor: pointer;
+    padding: 12px 10px; border-radius: 12px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.02em;
+    transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
   }
-  #controls button {
-    flex: 1;
-    background: #2a2a6e;
-    color: white;
-    border: none;
-    padding: 13px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
+  .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
+  .btn:active { transform: scale(0.96); }
+  .btn.icon { flex: 0 0 46px; }
+  .btn.primary {
+    background: linear-gradient(180deg, var(--lime), var(--lime-deep));
+    color: #10160a; border: none; font-weight: 600;
+    box-shadow: 0 8px 20px rgba(200,241,53,0.25);
   }
-  #controls button:active { background: #3a3a8e; }
+  .btn.primary:hover { background: linear-gradient(180deg, #d6ff54, var(--lime)); }
+  #modeToggle.on {
+    background: linear-gradient(180deg, rgba(53,214,224,0.22), rgba(53,214,224,0.1));
+    border-color: rgba(53,214,224,0.45); color: var(--cyan);
+  }
 
-  /* Toast */
+  /* ---------------- Toast ---------------- */
   #toast {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(10px);
-    background: rgba(20, 20, 40, 0.96);
-    border: 1px solid #3a3a8e;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    opacity: 0;
-    transition: opacity 0.25s, transform 0.25s;
-    pointer-events: none;
-    max-width: 85%;
-    text-align: center;
-    z-index: 100;
-    white-space: nowrap;
+    position: fixed; z-index: 90;
+    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 60px);
+    left: 50%; transform: translateX(-50%) translateY(10px);
+    background: rgba(14,18,26,0.94); border: 1px solid var(--line);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    color: var(--text); padding: 10px 18px; border-radius: 12px;
+    font-family: var(--font-mono); font-size: 12px;
+    opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+    max-width: 88%; text-align: center; white-space: nowrap; box-shadow: var(--shadow);
   }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* Floating Next button (shown in view mode after a correct build) */
+  /* ---------------- Floating Next (view mode) ---------------- */
   #floatingNextBtn {
-    position: absolute;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #4fc3f7;
-    color: #0d0d2b;
-    border: none;
-    padding: 14px 36px;
-    border-radius: 28px;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 14px rgba(79, 195, 247, 0.55);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s, transform 0.25s;
-    z-index: 150;
+    position: fixed; z-index: 90;
+    bottom: calc(var(--dock-h, 148px) + env(safe-area-inset-bottom) + 24px);
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(180deg, var(--lime), var(--lime-deep));
+    color: #10160a; border: none; padding: 14px 40px; border-radius: 30px;
+    font-family: var(--font-disp); font-size: 16px; font-weight: 800; letter-spacing: 0.02em;
+    cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 22px var(--lime-glow);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
   }
-  #floatingNextBtn.show {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-  }
-  #floatingNextBtn:active { background: #3bb4ea; }
+  #floatingNextBtn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  #floatingNextBtn:active { transform: translateX(-50%) scale(0.96); }
 
-  /* Win overlay */
-  #winOverlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 170, 0, 0.92);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    color: white;
-    text-align: center;
-    padding: 20px;
+  /* ---------------- Overlays ---------------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
   }
-  #winOverlay.show { display: flex; }
-  #winOverlay h2 {
-    font-size: 48px;
-    margin-bottom: 14px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
+  .overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .overlay .scrim {
+    position: absolute; inset: 0;
+    background: radial-gradient(120% 90% at 50% 0%, rgba(6,8,11,0.6), rgba(6,8,11,0.9));
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
-  #winOverlay p {
-    font-size: 15px;
-    margin-bottom: 28px;
-    opacity: 0.95;
-    max-width: 320px;
+  .card {
+    position: relative; z-index: 1; width: 100%; max-width: 380px;
+    border-radius: 24px; padding: 34px 26px 28px;
+    background: var(--panel-bg);
+    -webkit-backdrop-filter: blur(24px) saturate(150%); backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--line); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.07);
+    animation: pop 0.42s cubic-bezier(0.16,1,0.3,1);
   }
-  #winOverlay .winButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-    width: 100%;
-    max-width: 280px;
+  @keyframes pop { from { opacity: 0; transform: translateY(18px) scale(0.94); } to { opacity: 1; transform: none; } }
+  .card .kicker {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--lime); margin-bottom: 10px;
   }
-  #winOverlay button {
-    background: white;
-    color: #00AA00;
-    border: none;
-    padding: 13px 28px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
+  .card h2 {
+    font-family: var(--font-disp); font-weight: 800; letter-spacing: -0.02em;
+    font-size: 40px; line-height: 1; margin-bottom: 16px;
   }
-  #winOverlay button:active { background: #e0e0e0; }
-  #winOverlay button.secondary {
-    background: transparent;
-    color: #ffffff;
-    border: 2px solid #ffffff;
+  .card .molName {
+    font-family: var(--font-mono); font-size: 14px; color: var(--text);
+    background: rgba(0,0,0,0.28); border: 1px solid var(--line-soft);
+    padding: 12px 14px; border-radius: 12px; margin-bottom: 22px; word-break: break-word; line-height: 1.35;
   }
-  #winOverlay button.secondary:active { background: rgba(255,255,255,0.15); }
+  .card .btnCol { display: flex; flex-direction: column; gap: 10px; }
+  .card .cbtn {
+    padding: 14px; border-radius: 13px; border: none; cursor: pointer;
+    font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+  .card .cbtn:active { transform: scale(0.97); }
+  .card .cbtn.solid { background: linear-gradient(180deg, var(--lime), var(--lime-deep)); color: #10160a; box-shadow: 0 8px 20px rgba(200,241,53,0.22); }
+  .card .cbtn.ghost { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--line); }
+  .card .cbtn.ghost:hover { background: rgba(255,255,255,0.11); }
 
-  /* Final completion overlay */
-  #finalOverlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, #1e3a8a 0%, #0d0d2b 80%);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 220;
-    color: white;
+  /* Win card accent */
+  #winOverlay .card { border-top: 2px solid var(--lime); }
+  #winOverlay .card h2 { color: var(--lime); text-shadow: 0 0 26px var(--lime-glow); }
+
+  /* Final overlay */
+  #finalOverlay .scrim { background: radial-gradient(120% 90% at 50% 10%, rgba(255,194,75,0.14), rgba(6,8,11,0.92)); }
+  #finalOverlay .card { border-top: 2px solid var(--amber); }
+  #finalOverlay .kicker { color: var(--amber); }
+  #finalOverlay .card h2 { color: var(--amber); text-shadow: 0 0 30px var(--amber-glow); font-size: 38px; }
+  #finalOverlay .trophy { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 6px 18px var(--amber-glow)); }
+  #finalOverlay .cbtn.solid { background: linear-gradient(180deg, var(--amber), #e5a52f); color: #201400; box-shadow: 0 8px 20px var(--amber-glow); }
+
+  /* ---------------- Start screen ---------------- */
+  #startScreen {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 26px calc(32px + env(safe-area-inset-bottom));
     text-align: center;
-    padding: 20px;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(200,241,53,0.14), transparent 55%),
+      radial-gradient(90% 70% at 80% 110%, rgba(53,214,224,0.1), transparent 60%),
+      rgba(6,8,11,0.86);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    transition: opacity 0.5s ease, visibility 0.5s ease;
   }
-  #finalOverlay.show { display: flex; }
-  #finalOverlay h2 {
-    font-size: 54px;
-    margin-bottom: 16px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    color: #ffd84d;
-    text-shadow: 0 0 20px rgba(255, 216, 77, 0.5);
+  #startScreen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  .startMark { width: 76px; height: 76px; margin-bottom: 22px; filter: drop-shadow(0 0 22px rgba(200,241,53,0.4)); animation: floaty 5s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-9px) rotate(4deg); } }
+  #startScreen .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase;
+    color: var(--lime); margin-bottom: 14px;
   }
-  #finalOverlay p {
-    font-size: 18px;
-    margin-bottom: 34px;
-    opacity: 0.95;
-    max-width: 340px;
-    color: #ffffff;
+  #startScreen h1 {
+    font-family: var(--font-disp); font-weight: 800; letter-spacing: -0.03em;
+    font-size: clamp(40px, 13vw, 66px); line-height: 0.94; margin-bottom: 16px;
   }
-  #finalOverlay button {
-    background: #ffd84d;
-    color: #0d0d2b;
-    border: none;
-    padding: 15px 40px;
-    border-radius: 10px;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(255, 216, 77, 0.4);
+  #startScreen h1 em { font-style: normal; color: var(--lime); }
+  #startScreen .sub {
+    font-family: var(--font-disp); font-weight: 400; font-size: 15px; color: var(--muted);
+    max-width: 340px; line-height: 1.5; margin-bottom: 30px;
   }
-  #finalOverlay button:active { background: #e5c23e; }
+  #startScreen .meta {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em;
+    margin-bottom: 34px; line-height: 1.7;
+  }
+  #startScreen .meta b { color: var(--text); font-weight: 600; }
+  #startScreen .startBtns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+  #beginBtn {
+    padding: 17px; border-radius: 15px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, var(--lime), var(--lime-deep)); color: #10160a;
+    font-family: var(--font-disp); font-size: 18px; font-weight: 800; letter-spacing: 0.01em;
+    box-shadow: 0 12px 34px rgba(200,241,53,0.3); transition: transform 0.12s ease;
+  }
+  #beginBtn:hover { transform: translateY(-2px); }
+  #beginBtn:active { transform: scale(0.97); }
+  #howBtn {
+    padding: 14px; border-radius: 15px; cursor: pointer;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--text);
+    font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  }
+  #howBtn:hover { background: rgba(255,255,255,0.1); }
+
+  /* ---------------- Help overlay ---------------- */
+  #helpOverlay { z-index: 320; }
+  #helpOverlay .card { max-width: 400px; text-align: left; padding: 28px 24px 24px; }
+  #helpOverlay h2 { font-size: 26px; margin-bottom: 4px; color: var(--text); }
+  #helpOverlay .hsub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+  .step .n {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px;
+    background: rgba(200,241,53,0.12); border: 1px solid rgba(200,241,53,0.3); color: var(--lime);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+  }
+  .step .t { font-size: 14px; line-height: 1.45; color: var(--muted); }
+  .step .t b { color: var(--text); font-weight: 600; }
+  #closeHelpBtn { margin-top: 6px; }
+
+  /* ---------------- FX (confetti) ---------------- */
+  #fx { position: fixed; inset: 0; z-index: 500; pointer-events: none; }
+
+  /* ---------------- Desktop refinements ---------------- */
+  @media (min-width: 720px) {
+    #topbar { left: 50%; transform: translateX(-50%); max-width: 720px; }
+    #dock { left: 50%; transform: translateX(-50%); max-width: 560px; }
+    .atomBtn { width: 64px; height: 64px; }
+  }
+  @media (min-width: 720px) and (min-height: 640px) {
+    #readout { max-width: 620px; }
+  }
 </style>
 </head>
 <body>
 
-<div id="header">
-  <div class="titleRow">
-    <h1>Molecule Builder</h1>
-    <div class="center">Mr. Lalama's Class</div>
-    <div class="right">By: Yazan Ali</div>
-  </div>
-  <div class="target" id="targetLabel"><span class="levelLabel">Level 1</span> — Target: 4-amino-6-ethyl-3-methyl-2-octanol</div>
-</div>
+<div id="bg"></div>
 
-<div id="viewport">
-  <div id="toast"></div>
-  <button id="floatingNextBtn">Next ▶</button>
-  <div id="winOverlay">
-    <h2>Correct!</h2>
-    <p id="winName">4-amino-6-ethyl-3-methyl-2-octanol</p>
-    <div class="winButtons">
-      <button id="viewMoleculeBtn">View Molecule</button>
-      <button id="nextChallengeBtn" class="secondary">Next Challenge</button>
+<div id="viewport"></div>
+
+<!-- Top bar -->
+<header id="topbar" class="panel">
+  <div class="brandRow">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <line x1="16" y1="9" x2="8" y2="22" stroke="#8a97a6" stroke-width="2"/>
+      <line x1="16" y1="9" x2="24" y2="22" stroke="#8a97a6" stroke-width="2"/>
+      <circle cx="16" cy="9" r="4.5" fill="#c8f135"/>
+      <circle cx="8" cy="22" r="4.5" fill="#3a5fe0"/>
+      <circle cx="24" cy="22" r="4.5" fill="#e0392f"/>
+    </svg>
+    <div class="brandText">
+      <b>Molecule Builder</b>
+      <span>Organic Chemistry Lab</span>
+    </div>
+    <div class="credits">
+      <div class="cls">Mr. Lalama&rsquo;s Class</div>
+      <div class="by">By <b>Yazan Ali</b></div>
     </div>
   </div>
-  <div id="finalOverlay">
-    <h2>Congratulations!</h2>
-    <p>You completed all 5 challenges!</p>
-    <button id="playAgainBtn">Play Again</button>
+  <div class="targetWrap">
+    <div class="levelBadge">
+      <div class="lvlLabel">Level</div>
+      <div class="lvlNum" id="levelNum">1</div>
+    </div>
+    <div class="targetCol">
+      <div class="lbl">Target <span class="tag" id="targetTag">Alcohol</span></div>
+      <div id="targetName">&mdash;</div>
+    </div>
+    <div class="dots" id="dots"></div>
+  </div>
+</header>
+
+<!-- Live readout -->
+<div id="readout" class="panel">
+  <span class="rLbl">Now building</span>
+  <span id="liveName" class="status">Tap an atom to start</span>
+  <span id="matchDot"></span>
+</div>
+
+<!-- Bottom dock -->
+<div id="dock" class="panel">
+  <div id="palette">
+    <button class="atomBtn" data-el="C" data-val="Carbon" title="Carbon — forms 4 bonds"><span class="glow"></span>C</button>
+    <button class="atomBtn" data-el="N" data-val="Nitrogen" title="Nitrogen — forms 3 bonds"><span class="glow"></span>N</button>
+    <button class="atomBtn" data-el="O" data-val="Oxygen" title="Oxygen — forms 2 bonds"><span class="glow"></span>O</button>
+  </div>
+  <div class="dockRow">
+    <button class="btn icon" id="undoBtn" title="Undo" aria-label="Undo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+    </button>
+    <button class="btn" id="clearBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      Clear
+    </button>
+    <button class="btn" id="modeToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>
+      <span id="modeLabel">Build</span>
+    </button>
+    <button class="btn icon" id="helpBtn" title="How to play" aria-label="How to play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.5.8c0 1.9-2.8 2.5-2.8 2.5"/><path d="M12 17h.01"/></svg>
+    </button>
   </div>
 </div>
 
-<div id="nameBar">
-  <button id="modeToggle">Build Mode</button>
-  <div id="liveName">Tap an atom to start</div>
+<!-- Toast + floating next -->
+<div id="toast"></div>
+<button id="floatingNextBtn">Next Challenge &rarr;</button>
+
+<!-- Win overlay -->
+<div id="winOverlay" class="overlay">
+  <div class="scrim"></div>
+  <div class="card">
+    <div class="kicker">Structure Confirmed</div>
+    <h2>Correct!</h2>
+    <div class="molName" id="winName">&mdash;</div>
+    <div class="btnCol">
+      <button class="cbtn ghost" id="viewMoleculeBtn">Inspect in 3D</button>
+      <button class="cbtn solid" id="nextChallengeBtn">Next Challenge &rarr;</button>
+    </div>
+  </div>
 </div>
 
-<div id="palette">
-  <button class="atomBtn" data-el="C">C</button>
-  <button class="atomBtn" data-el="N">N</button>
-  <button class="atomBtn" data-el="O">O</button>
+<!-- Final overlay -->
+<div id="finalOverlay" class="overlay">
+  <div class="scrim"></div>
+  <div class="card">
+    <div class="trophy">🏆</div>
+    <div class="kicker">All Levels Complete</div>
+    <h2>Master Chemist</h2>
+    <p class="molName" id="finalMsg">You built all 5 molecules and named every one correctly.</p>
+    <div class="btnCol">
+      <button class="cbtn solid" id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
 </div>
 
-<div id="controls">
-  <button id="undoBtn">Undo</button>
-  <button id="clearBtn">Clear All</button>
+<!-- Help overlay -->
+<div id="helpOverlay" class="overlay">
+  <div class="scrim"></div>
+  <div class="card">
+    <h2>How to play</h2>
+    <div class="hsub">Build the target molecule</div>
+    <div class="step"><div class="n">1</div><div class="t"><b>Pick an atom</b> — tap Carbon, Nitrogen, or Oxygen in the dock. Hydrogens fill in automatically.</div></div>
+    <div class="step"><div class="n">2</div><div class="t"><b>Place it</b> — tap empty space for your first atom, then tap an existing atom to grow the chain.</div></div>
+    <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> — with no atom selected in the dock, tap one atom then another to link them.</div></div>
+    <div class="step"><div class="n">4</div><div class="t"><b>Match the name</b> — the readout names your molecule live. Match the <b>target</b> to win.</div></div>
+    <div class="step"><div class="n">5</div><div class="t"><b>Inspect in 3D</b> — switch to <b>View</b> to orbit, pinch, and pan your creation.</div></div>
+    <button class="cbtn solid" id="closeHelpBtn">Got it</button>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Start screen -->
+<div id="startScreen">
+  <svg class="startMark" viewBox="0 0 64 64" aria-hidden="true">
+    <g stroke="#8a97a6" stroke-width="3">
+      <line x1="32" y1="16" x2="16" y2="42"/>
+      <line x1="32" y1="16" x2="48" y2="42"/>
+      <line x1="16" y1="42" x2="48" y2="42"/>
+    </g>
+    <circle cx="32" cy="16" r="8.5" fill="#c8f135"/>
+    <circle cx="16" cy="42" r="8.5" fill="#3a5fe0"/>
+    <circle cx="48" cy="42" r="8.5" fill="#e0392f"/>
+  </svg>
+  <div class="eyebrow">Organic Chemistry Lab</div>
+  <h1>Molecule<br><em>Builder</em></h1>
+  <p class="sub">Assemble atoms into real organic molecules and watch them get named by IUPAC rules — live, in 3D.</p>
+  <div class="meta">
+    <b>Mr. Lalama&rsquo;s Class</b><br>
+    Built by <b>Yazan Ali</b>
+  </div>
+  <div class="startBtns">
+    <button id="beginBtn">Start Building &rarr;</button>
+    <button id="howBtn">How to play</button>
+  </div>
+</div>
+
+<canvas id="fx"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+        integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 /* =========================================================================
    MOLECULE BUILDER  —  single-file build
-   Phase 1: scaffold (HTML/CSS above)
-   Phase 2: Three.js scene
-   Phase 3: Atom placement & auto-hydrogens
-   Phase 4: Bond validation
-   Phase 5: Bond between existing atoms
-   Phase 6: Undo / Clear All
-   Phase 7: IUPAC naming engine (old-style)
-   Phase 8: Win condition
-   Phase 9: View Mode (rotate / pinch)
-   Phase 10: Polish
+   Design overhaul: immersive lab-instrument UI + upgraded Three.js rendering.
+   Naming engine & interaction logic preserved from the original build.
    ========================================================================= */
 
 const LEVELS = [
@@ -368,30 +592,61 @@ const LEVELS = [
   { level: 5, target: '5-ethyl-4-(N-methylamino)-2-heptanol' },
 ];
 let currentLevel = 1;
+let currentName = '';
 function currentTarget() { return LEVELS[currentLevel - 1].target; }
+
+/* Highlight locants (digits + N-locants) inside a molecule name */
+function fmtFormula(str) {
+  return str
+    .replace(/\d+/g, m => `<span class="loc">${m}</span>`)
+    .replace(/N(?=[-,])/g, `<span class="loc">N</span>`);
+}
+function molTag(name) {
+  if (/ol$/.test(name)) return 'Alcohol';
+  if (/amine$/.test(name) || /amino/.test(name)) return 'Amine';
+  return 'Alkane';
+}
 function updateTargetLabel() {
-  const el = document.getElementById('targetLabel');
-  if (!el) return;
-  el.innerHTML = `<span class="levelLabel">Level ${currentLevel}</span> — Target: ${currentTarget()}`;
+  const t = currentTarget();
+  document.getElementById('levelNum').textContent = currentLevel;
+  document.getElementById('targetName').innerHTML = fmtFormula(t);
+  document.getElementById('targetTag').textContent = molTag(t);
+  renderProgress();
+}
+function renderProgress() {
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  for (let i = 1; i <= LEVELS.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
+    dots.appendChild(d);
+  }
 }
 
 const MAX_BONDS   = { C: 4, N: 3, O: 2, H: 1 };
-const ATOM_COLOR  = { C: 0x505050, N: 0x3050D0, O: 0xD03030, H: 0xE0E0E0 };
+const ATOM_COLOR  = { C: 0x5b6470, N: 0x3a5fe0, O: 0xe0392f, H: 0xeef2f6 };
+const ATOM_EMISS  = { C: 0x11141a, N: 0x0b1030, O: 0x2a0806, H: 0x0a0d12 };
 const ATOM_RADIUS = { C: 0.50,     N: 0.48,     O: 0.45,     H: 0.30 };
 
-/* ---------- Three.js setup (Phase 2) ---------- */
+/* ---------- Three.js setup ---------- */
 const viewport = document.getElementById('viewport');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0d0d2b);
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
 camera.position.set(0, 0, 18);
 camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+if ('toneMapping' in renderer) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12; }
 viewport.appendChild(renderer.domElement);
 
+function syncDockHeight() {
+  const dock = document.getElementById('dock');
+  if (dock) document.documentElement.style.setProperty('--dock-h', dock.offsetHeight + 'px');
+}
 function resize() {
   const w = viewport.clientWidth;
   const h = viewport.clientHeight;
@@ -399,18 +654,44 @@ function resize() {
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  syncDockHeight();
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 100));
 
+/* Environment map (procedural gradient) for glossy reflections */
+function makeEnvMap() {
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 128);
+  grad.addColorStop(0.00, '#2b3648');
+  grad.addColorStop(0.42, '#141a24');
+  grad.addColorStop(0.55, '#0c1017');
+  grad.addColorStop(1.00, '#04060a');
+  g.fillStyle = grad; g.fillRect(0, 0, 16, 128);
+  // a soft warm-lime kick near the top for a hot highlight
+  g.fillStyle = 'rgba(200,241,53,0.20)'; g.fillRect(0, 0, 16, 20);
+  const tex = new THREE.CanvasTexture(c);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+const envMap = makeEnvMap();
+scene.environment = envMap;
+
 /* Lighting */
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+scene.add(new THREE.HemisphereLight(0xdfeaff, 0x0a0d14, 0.55));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.15);
 dirLight.position.set(-6, 10, 12);
 scene.add(dirLight);
-const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.25);
-dirLight2.position.set(6, -4, 8);
-scene.add(dirLight2);
+const rimLight = new THREE.DirectionalLight(0xc8f135, 0.5);
+rimLight.position.set(8, -6, -10);
+scene.add(rimLight);
+const keyPoint = new THREE.PointLight(0xffffff, 0.6, 100);
+keyPoint.position.set(4, 6, 14);
+scene.add(keyPoint);
 
 /* Root group — rotated in View Mode */
 const root = new THREE.Group();
@@ -422,17 +703,24 @@ root.add(hGroup);
 const sphereGeoCache = {};
 function getSphereGeo(el) {
   if (!sphereGeoCache[el])
-    sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 28, 20);
+    sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 40, 28);
   return sphereGeoCache[el];
 }
-const bondGeo = new THREE.CylinderGeometry(0.08, 0.08, 1, 14);
-const bondMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, shininess: 30 });
+const bondGeo = new THREE.CylinderGeometry(0.085, 0.085, 1, 20);
+const bondMat = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.55, roughness: 0.45, envMapIntensity: 0.7 });
 const atomMats = {};
 for (const el of ['C','N','O','H']) {
-  atomMats[el] = new THREE.MeshPhongMaterial({ color: ATOM_COLOR[el], shininess: 70 });
+  atomMats[el] = new THREE.MeshStandardMaterial({
+    color: ATOM_COLOR[el],
+    emissive: ATOM_EMISS[el],
+    metalness: el === 'H' ? 0.0 : 0.25,
+    roughness: el === 'H' ? 0.5 : 0.28,
+    envMapIntensity: el === 'H' ? 0.4 : 0.85,
+  });
 }
 const ringMat = new THREE.MeshBasicMaterial({
-  color: 0x4fc3f7, side: THREE.DoubleSide, transparent: true, opacity: 0.9,
+  color: 0xc8f135, side: THREE.DoubleSide, transparent: true, opacity: 0.9,
+  blending: THREE.AdditiveBlending, depthWrite: false,
 });
 
 /* ---------- State ---------- */
@@ -464,8 +752,6 @@ function computeViewCenter() {
   viewCenter.divideScalar(atoms.size);
 }
 function applyViewTransform() {
-  // Position root so that rotation orbits around viewCenter (centroid),
-  // keeping the centroid at world origin where the camera looks.
   _viewTmp.copy(viewCenter).applyEuler(root.rotation).negate().add(viewPan);
   root.position.copy(_viewTmp);
 }
@@ -473,11 +759,8 @@ function applyViewTransform() {
 function updateFloatingNext(isCorrect) {
   const btn = document.getElementById('floatingNextBtn');
   if (!btn) return;
-  if (postWinView && isCorrect) {
-    btn.classList.add('show');
-  } else {
-    btn.classList.remove('show');
-  }
+  if (postWinView && isCorrect) btn.classList.add('show');
+  else btn.classList.remove('show');
 }
 
 /* ---------- Small helpers ---------- */
@@ -510,7 +793,7 @@ function orientBond(mesh, pa, pb) {
   );
 }
 
-/* ---------- Auto-position new atom (Phase 3) ---------- */
+/* ---------- Auto-position new atom ---------- */
 function findPositionForNewAtom(parent) {
   const neighborAngles = [];
   for (const nid of parent.neighbors) {
@@ -556,6 +839,8 @@ function createAtom(el, pos) {
   const mesh = new THREE.Mesh(getSphereGeo(el), atomMats[el]);
   mesh.position.copy(pos);
   mesh.userData.atomId = atom.id;
+  mesh.scale.setScalar(0.01);          // spawn animation
+  mesh.userData.spawn = 0;
   atom.mesh = mesh;
   root.add(mesh);
   atoms.set(atom.id, atom);
@@ -613,7 +898,6 @@ function renderHydrogens() {
     const hCount = MAX_BONDS[atom.element] - atom.neighbors.size;
     if (hCount <= 0) continue;
 
-    // angles taken by heavy-atom neighbours (XY plane)
     const taken = [];
     for (const nid of atom.neighbors) {
       const n = atoms.get(nid);
@@ -624,7 +908,6 @@ function renderHydrogens() {
       for (let i = 0; i < hCount; i++)
         picks.push((Math.PI * 2 * i) / hCount);
     } else {
-      // build gaps on a circle
       taken.sort((a,b) => a - b);
       let gaps = [];
       for (let i = 0; i < taken.length; i++) {
@@ -666,11 +949,12 @@ function clearSelectionRing() {
 function showSelectionRing(atom) {
   clearSelectionRing();
   const r0 = ATOM_RADIUS[atom.element] * 1.35;
-  const r1 = ATOM_RADIUS[atom.element] * 1.65;
-  const geo = new THREE.RingGeometry(r0, r1, 32);
-  const ring = new THREE.Mesh(geo, ringMat);
+  const r1 = ATOM_RADIUS[atom.element] * 1.62;
+  const geo = new THREE.RingGeometry(r0, r1, 40);
+  const ring = new THREE.Mesh(geo, ringMat.clone());
   ring.position.copy(atom.pos);
   ring.position.z += 0.05;
+  ring.userData.base = (r0 + r1) / 2;
   selectionRing = ring;
   root.add(ring);
 }
@@ -716,7 +1000,6 @@ function autoFrame() {
     if (a.pos.y < minY) minY = a.pos.y;
     if (a.pos.y > maxY) maxY = a.pos.y;
   }
-  // include hydrogens radius ~1.5
   minX -= 2; maxX += 2; minY -= 2; maxY += 2;
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
@@ -736,9 +1019,17 @@ function onStateChanged() {
   renderHydrogens();
   if (mode === 'build') autoFrame();
   const name = generateName();
-  document.getElementById('liveName').textContent = name;
+  currentName = name;
   const target = currentTarget();
   const isCorrect = (name === target);
+
+  const liveEl = document.getElementById('liveName');
+  const readout = document.getElementById('readout');
+  const isStatus = /^(Tap an atom|Building|Invalid|Structure)/.test(name);
+  liveEl.innerHTML = isStatus ? name : fmtFormula(name);
+  liveEl.classList.toggle('status', isStatus);
+  readout.classList.toggle('match', isCorrect);
+
   if (!won && isCorrect) showWin();
   updateFloatingNext(isCorrect);
 }
@@ -800,31 +1091,19 @@ function advanceLevel() {
   }
   currentLevel++;
   updateTargetLabel();
-  if (mode === 'view') {
-    mode = 'build';
-    modeBtn.textContent = 'Build Mode';
-    root.rotation.set(0, 0, 0);
-    root.position.set(0, 0, 0);
-    viewPan.set(0, 0, 0);
-  }
+  if (mode === 'view') setMode('build');
   clearAll();
 }
 function resetGame() {
   currentLevel = 1;
   updateTargetLabel();
-  if (mode === 'view') {
-    mode = 'build';
-    modeBtn.textContent = 'Build Mode';
-    root.rotation.set(0, 0, 0);
-    root.position.set(0, 0, 0);
-    viewPan.set(0, 0, 0);
-  }
+  if (mode === 'view') setMode('build');
   document.getElementById('finalOverlay').classList.remove('show');
   clearAll();
 }
 
 /* ===========================================================
-   NAMING ENGINE (Phase 7) — old-style IUPAC
+   NAMING ENGINE — old-style IUPAC  (preserved verbatim)
    =========================================================== */
 
 const PARENT_ROOTS = [null, 'meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct'];
@@ -852,7 +1131,7 @@ function generateName() {
   if (carbons.length === 0) return 'Invalid structure';
   if (carbons.length > 20) return 'Structure too complex';
 
-  // Whole-molecule connectivity check — every atom must belong to a single component
+  // Whole-molecule connectivity check
   {
     const vis = new Set();
     const firstId = [...atoms.values()][0].id;
@@ -933,7 +1212,6 @@ function generateName() {
   const hasN   = nitrogens.length > 0;
   const amineAsParent = hasN && !hasOH;
 
-  // Parent chain must contain: an OH carbon (if hasOH), otherwise a C bonded to the N (if amineAsParent)
   let requiredCarbons = null;
   if (hasOH) {
     requiredCarbons = ohCarbons;
@@ -958,8 +1236,6 @@ function generateName() {
   }
   if (!bestChain) return 'Building...';
 
-  // Measure a linear alkyl chain starting at startId, treating excludeId as already visited.
-  // Returns chain length (1..3) or null if branched / too long / invalid element.
   function measureAlkylChain(startId, excludeId) {
     const seen = new Set([excludeId]);
     let cur = startId;
@@ -985,7 +1261,6 @@ function generateName() {
     return len;
   }
 
-  // Build the "N-methyl" / "N,N-dimethyl" prefix portion (used inside parenthetical branches too)
   function buildNSubPrefix(lengths) {
     const names = lengths.map(l => BRANCH_NAMES[l]);
     const counts = {};
@@ -1017,7 +1292,6 @@ function generateName() {
         const nb = atoms.get(nid);
 
         if (nb.element === 'O') {
-          // OH functional group
           if (fgLocant !== null) return null;
           fgLocant = locant;
         } else if (nb.element === 'N') {
@@ -1043,7 +1317,6 @@ function generateName() {
               });
             }
           } else {
-            // Amine as branch (OH is parent)
             if (nSubLengths.length === 0) {
               subs.push({ name: 'amino', sortKey: 'amino', locant });
             } else {
@@ -1061,7 +1334,6 @@ function generateName() {
             }
           }
         } else if (nb.element === 'C') {
-          // Linear alkyl branch (methyl/ethyl/propyl)
           const seen = new Set([cid]);
           const branch = [];
           let cur = nid;
@@ -1119,7 +1391,6 @@ function generateName() {
   const rootName = PARENT_ROOTS[n];
   if (!rootName) return 'Structure too complex';
 
-  // Group substituents by full name for di/tri prefixes (but order by sortKey)
   const groups = {};
   for (const s of chosen.subs) {
     const key = s.name;
@@ -1144,7 +1415,6 @@ function generateName() {
     parts.push(`${locants.join(',')}-${prefix}${key}`);
   }
 
-  // Suffix with / without functional-group locant
   let fgLocStr = '';
   let suffix;
   if (hasOH) {
@@ -1167,7 +1437,7 @@ function generateName() {
 }
 
 /* ===========================================================
-   INTERACTION (Phase 3–5, 9)
+   INTERACTION
    =========================================================== */
 
 document.querySelectorAll('.atomBtn').forEach(btn => {
@@ -1188,7 +1458,7 @@ document.getElementById('clearBtn').addEventListener('click', clearAll);
 document.getElementById('viewMoleculeBtn').addEventListener('click', () => {
   document.getElementById('winOverlay').classList.remove('show');
   postWinView = true;
-  if (mode !== 'view') modeBtn.click();
+  if (mode !== 'view') setMode('view');
   updateFloatingNext(true);
 });
 document.getElementById('nextChallengeBtn').addEventListener('click', () => {
@@ -1200,22 +1470,22 @@ document.getElementById('floatingNextBtn').addEventListener('click', () => {
 });
 document.getElementById('playAgainBtn').addEventListener('click', resetGame);
 
+/* Mode toggle */
 const modeBtn = document.getElementById('modeToggle');
-modeBtn.addEventListener('click', () => {
-  mode = (mode === 'build') ? 'view' : 'build';
-  modeBtn.textContent = mode === 'build' ? 'Build Mode' : 'View Mode';
+const modeLabel = document.getElementById('modeLabel');
+function setMode(next) {
+  mode = next;
+  modeLabel.textContent = mode === 'build' ? 'Build' : 'View';
+  modeBtn.classList.toggle('on', mode === 'view');
   selectedAtomId = null;
   clearSelectionRing();
-  // Update floating Next visibility based on current correctness
-  const curName = document.getElementById('liveName').textContent;
-  updateFloatingNext(curName === currentTarget());
+  updateFloatingNext(currentName === currentTarget());
   if (mode === 'build') {
     root.rotation.set(0, 0, 0);
     root.position.set(0, 0, 0);
     viewPan.set(0, 0, 0);
     autoFrame();
   } else {
-    // Recompute orbit pivot from centroid of all non-H atoms (live state)
     if (atoms.size > 0) {
       computeViewCenter();
       viewPan.set(0, 0, 0);
@@ -1225,6 +1495,34 @@ modeBtn.addEventListener('click', () => {
       camera.lookAt(0, 0, 0);
     }
   }
+}
+modeBtn.addEventListener('click', () => setMode(mode === 'build' ? 'view' : 'build'));
+
+/* Help + start screen */
+const helpOverlay = document.getElementById('helpOverlay');
+document.getElementById('helpBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
+document.getElementById('howBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
+document.getElementById('closeHelpBtn').addEventListener('click', () => helpOverlay.classList.remove('show'));
+helpOverlay.addEventListener('click', (e) => { if (e.target === helpOverlay || e.target.classList.contains('scrim')) helpOverlay.classList.remove('show'); });
+
+document.getElementById('beginBtn').addEventListener('click', () => {
+  document.getElementById('startScreen').classList.add('hide');
+  setTimeout(resize, 60);
+});
+
+/* Keyboard shortcuts (desktop) */
+window.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  const map = { c: 'C', n: 'N', o: 'O' };
+  if (map[k]) {
+    const el = map[k];
+    selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
+    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('selected', b.dataset.el === selectedPaletteEl));
+    selectedAtomId = null; clearSelectionRing();
+  } else if (k === 'u' || k === 'z') { undo(); }
+  else if (k === 'v') { setMode(mode === 'build' ? 'view' : 'build'); }
+  else if (k === 'escape') { helpOverlay.classList.remove('show'); }
 });
 
 /* ---------- Canvas pointer / touch handling ---------- */
@@ -1237,7 +1535,6 @@ const ts = {
   twoFinger: false,
 };
 
-/* Screen-pixel → world-unit factor at current camera distance */
 function pxToWorld() {
   const h = renderer.domElement.clientHeight || 1;
   const worldH = 2 * Math.abs(camera.position.z) * Math.tan((camera.fov * Math.PI / 180) / 2);
@@ -1250,6 +1547,7 @@ function pointerDown(x, y, shift) {
   ts.panning = !!shift;
   ts.startX = ts.lastX = x;
   ts.startY = ts.lastY = y;
+  idleT = 0;
 }
 function pointerMove(x, y) {
   if (!ts.active) return;
@@ -1302,7 +1600,6 @@ function handleTap(clientX, clientY) {
     return;
   }
 
-  // Empty space tap
   if (selectedPaletteEl && atoms.size === 0) {
     actAddFirstAtom(selectedPaletteEl, new THREE.Vector3(0, 0, 0));
   } else if (selectedAtomId !== null) {
@@ -1350,12 +1647,10 @@ canvas.addEventListener('touchmove', e => {
     const dist = Math.hypot(dx, dy);
     const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
     const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    // Pinch zoom
     if (dist > 0 && ts.pinchStart > 0) {
       const ratio = ts.pinchStart / dist;
       camera.position.z = Math.max(5, Math.min(120, ts.pinchCamStart * ratio));
     }
-    // Two-finger pan: midpoint delta
     const k = pxToWorld();
     viewPan.x += (midX - ts.pinchMidX) * k;
     viewPan.y -= (midY - ts.pinchMidY) * k;
@@ -1374,29 +1669,102 @@ canvas.addEventListener('touchend', e => {
   e.preventDefault();
 }, { passive: false });
 
-/* Prevent page scroll/zoom on non-canvas touch too */
 document.addEventListener('touchmove', e => {
   if (e.touches.length > 1) e.preventDefault();
 }, { passive: false });
 
-/* ---------- Win ---------- */
+/* ---------- Win / celebration ---------- */
 function showWin() {
   won = true;
-  document.getElementById('winName').textContent = currentTarget();
+  document.getElementById('winName').innerHTML = fmtFormula(currentTarget());
   document.getElementById('winOverlay').classList.add('show');
+  burstConfetti();
 }
 function showFinal() {
   const overlay = document.getElementById('finalOverlay');
   if (overlay) overlay.classList.add('show');
+  burstConfetti(true);
+}
+
+/* ---------- Confetti ---------- */
+const fx = document.getElementById('fx');
+const fxCtx = fx.getContext('2d');
+let confetti = [];
+function sizeFx() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; fxCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+window.addEventListener('resize', sizeFx);
+function burstConfetti(big) {
+  sizeFx();
+  const colors = ['#c8f135', '#ffc24b', '#35d6e0', '#eef3f8', '#3a5fe0', '#e0392f'];
+  const n = big ? 220 : 140;
+  const cx = innerWidth / 2, cy = innerHeight * 0.42;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = 5 + Math.random() * (big ? 15 : 11);
+    confetti.push({
+      x: cx + (Math.random()-0.5)*60, y: cy + (Math.random()-0.5)*40,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4,
+      g: 0.22 + Math.random()*0.12, rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.4,
+      w: 6 + Math.random()*7, h: 4 + Math.random()*5,
+      color: colors[(Math.random()*colors.length)|0], life: 0, max: 90 + Math.random()*50,
+    });
+  }
+}
+function updateConfetti() {
+  if (!confetti.length) { if (fx.width) fxCtx.clearRect(0,0,fx.width,fx.height); return; }
+  fxCtx.clearRect(0, 0, innerWidth, innerHeight);
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const p = confetti[i];
+    p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.rot += p.vr; p.life++;
+    const alpha = Math.max(0, 1 - p.life / p.max);
+    fxCtx.save();
+    fxCtx.translate(p.x, p.y); fxCtx.rotate(p.rot);
+    fxCtx.globalAlpha = alpha; fxCtx.fillStyle = p.color;
+    fxCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    fxCtx.restore();
+    if (p.life >= p.max || p.y > innerHeight + 40) confetti.splice(i, 1);
+  }
 }
 
 /* ---------- Animation loop ---------- */
+let idleT = 0;
+const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  // Atom spawn pop-in
+  for (const a of atoms.values()) {
+    if (a.mesh.userData.spawn < 1) {
+      a.mesh.userData.spawn = Math.min(1, a.mesh.userData.spawn + dt * 6);
+      const t = a.mesh.userData.spawn;
+      const s = 1 + 0.14 * Math.sin(t * Math.PI); // slight overshoot
+      a.mesh.scale.setScalar(Math.max(0.01, t * s));
+    }
+  }
+
+  // Selection ring pulse
+  if (selectionRing) {
+    const t = clock.elapsedTime;
+    const s = 1 + Math.sin(t * 4) * 0.08;
+    selectionRing.scale.setScalar(s);
+    selectionRing.material.opacity = 0.55 + Math.abs(Math.sin(t * 4)) * 0.4;
+  }
+
+  // Gentle idle auto-rotation in view mode
+  if (mode === 'view' && atoms.size > 0 && !ts.active && !ts.twoFinger) {
+    idleT += dt;
+    if (idleT > 0.6) {
+      root.rotation.y += dt * 0.28;
+      applyViewTransform();
+    }
+  }
+
+  updateConfetti();
   renderer.render(scene, camera);
 }
 
 /* ---------- Init ---------- */
+sizeFx();
 resize();
 setTimeout(resize, 50);
 updateTargetLabel();
