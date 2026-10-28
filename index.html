@@ -3,518 +3,436 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#f4f0e8">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="Molecule Builder — assemble organic molecules in 3D and learn IUPAC nomenclature live. An interactive chemistry teaching tool.">
+<meta name="description" content="Molecule Builder — assemble organic molecules in real 3D and learn IUPAC nomenclature live. An interactive chemistry teaching tool.">
 <title>Molecule Builder — Interactive Organic Chemistry</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b3fa6'/%3E%3Cg stroke='white' stroke-width='2'%3E%3Cline x1='16' y1='10' x2='10' y2='22'/%3E%3Cline x1='16' y1='10' x2='22' y2='22'/%3E%3C/g%3E%3Ccircle cx='16' cy='10' r='3.4' fill='white'/%3E%3Ccircle cx='10' cy='22' r='3.4' fill='%23e3b34f'/%3E%3Ccircle cx='22' cy='22' r='3.4' fill='%23d2402f'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230071e3'/%3E%3Cg stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Cline x1='16' y1='11' x2='10.5' y2='21'/%3E%3Cline x1='16' y1='11' x2='21.5' y2='21'/%3E%3C/g%3E%3Ccircle cx='16' cy='11' r='3.2' fill='white'/%3E%3Ccircle cx='10.5' cy='21' r='3.2' fill='white'/%3E%3Ccircle cx='21.5' cy='21' r='3.2' fill='white'/%3E%3C/svg%3E">
 <style>
   :root {
-    /* Warm-paper neutral ramp */
-    --paper:      #f4f0e8;
-    --paper-2:    #efe9dd;
-    --surface:    #ffffff;
-    --surface-2:  #faf7f1;
-    --line:       #e6dfd0;
-    --line-2:     #d9d0bd;
-    --ink:        #201d18;
-    --ink-2:      #6a6456;
-    --ink-3:      #9a9384;
-    /* Dark 3D stage */
-    --stage-1:    #1a1e26;
-    --stage-2:    #0d0f14;
-    --stage-line: rgba(255,255,255,0.07);
-    /* Accents */
-    --accent:      #2b3fa6;
-    --accent-2:    #223391;
-    --accent-weak: #e9ebf6;
-    --brass:       #b07a2b;
-    --brass-2:     #8f6220;
-    --brass-weak:  #f5ecda;
-    --success:     #2f7d5b;
-    --success-weak:#e4f0e9;
-    /* CPK-ish palette (buttons) */
-    --c-carbon:   #3b4048;
-    --c-nitro:    #2f4cc4;
-    --c-oxy:      #d2402f;
-    /* radii */
-    --r-card: 16px;
-    --r-btn:  11px;
-    --r-pill: 999px;
-    /* elevation (max 2) */
-    --sh-1: 0 1px 2px rgba(40,34,20,0.05), 0 1px 3px rgba(40,34,20,0.04);
-    --sh-2: 0 10px 34px rgba(40,34,20,0.11), 0 3px 10px rgba(40,34,20,0.06);
-    /* type */
-    --f-display: "Fraunces", Georgia, serif;
-    --f-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --bg:        #ffffff;
+    --bg-2:      #f5f5f7;
+    --stage-a:   #ffffff;
+    --stage-b:   #ebebed;
+    --stage-c:   #e2e2e5;
+    --glass:     rgba(255,255,255,0.72);
+    --glass-2:   rgba(255,255,255,0.86);
+    --hair:      rgba(0,0,0,0.09);
+    --hair-2:    rgba(0,0,0,0.14);
+    --ink:       #1d1d1f;
+    --ink-2:     #6e6e73;
+    --ink-3:     #a1a1a6;
+    --accent:    #0071e3;
+    --accent-2:  #0062c4;
+    --accent-bg: rgba(0,113,227,0.10);
+    --good:      #1d9a5f;
+    --good-bg:   rgba(29,154,95,0.12);
+    --r-lg: 20px;
+    --r-md: 14px;
+    --r-sm: 10px;
+    --sh-1: 0 1px 2px rgba(0,0,0,0.05);
+    --sh-2: 0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --sh-3: 0 24px 60px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #000000;
+      --bg-2:      #1c1c1e;
+      --stage-a:   #1c1c1e;
+      --stage-b:   #0e0e10;
+      --stage-c:   #000000;
+      --glass:     rgba(28,28,30,0.72);
+      --glass-2:   rgba(28,28,30,0.88);
+      --hair:      rgba(255,255,255,0.12);
+      --hair-2:    rgba(255,255,255,0.18);
+      --ink:       #f5f5f7;
+      --ink-2:     #98989d;
+      --ink-3:     #6e6e73;
+      --accent:    #0a84ff;
+      --accent-2:  #409cff;
+      --accent-bg: rgba(10,132,255,0.18);
+      --good:      #30d158;
+      --good-bg:   rgba(48,209,88,0.18);
+      --sh-2: 0 4px 16px rgba(0,0,0,0.5);
+      --sh-3: 0 24px 60px rgba(0,0,0,0.7);
+    }
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
     height: 100%; overflow: hidden;
-    font-family: var(--f-body);
-    background: var(--paper);
+    font-family: var(--font);
+    font-size: 16px;
+    background: var(--bg);
     color: var(--ink);
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
     overscroll-behavior: none; touch-action: none;
   }
-  body {
-    height: 100vh; height: 100dvh;
-    display: flex; flex-direction: column;
-    -webkit-user-select: none; user-select: none;
-  }
-  button { font-family: inherit; cursor: pointer; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
+  button { font-family: inherit; font-size: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
-
   .loc { color: var(--accent); }
 
-  /* ---------------- App bar ---------------- */
-  #appbar {
-    flex-shrink: 0;
-    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-    gap: 16px; padding: 12px clamp(16px, 3vw, 28px);
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
-    z-index: 20;
+  /* ---------------- Top bar ---------------- */
+  #bar {
+    flex-shrink: 0; height: 52px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+    padding: 0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right));
+    border-bottom: 1px solid var(--hair);
+    background: var(--bg);
+    position: relative; z-index: 20;
   }
-  .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-  .brand .mk { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; box-shadow: var(--sh-1); }
-  .brand .wm { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
-  .brand .wm b { font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: -0.01em; color: var(--ink); }
-  .brand .wm span { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin-top: 1px; }
-  #appbar .cls {
-    font-family: var(--f-display); font-style: italic; font-weight: 500;
-    font-size: 15px; color: var(--ink-2); white-space: nowrap; text-align: center;
+  .brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .brand svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .brand .bmk { fill: var(--accent); }
+  .brand b { font-size: 15px; font-weight: 600; letter-spacing: -0.016em; white-space: nowrap; }
+  #cls { font-size: 13px; color: var(--ink-2); white-space: nowrap; text-align: center; }
+  .barR { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  #barLvl { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ghostBtn {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; color: var(--ink-2);
+    transition: background .18s, color .18s;
   }
-  .barRight { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
-  .lvlPill {
-    font-size: 12px; font-weight: 500; color: var(--ink-2);
-    letter-spacing: 0.01em; white-space: nowrap;
-  }
-  .lvlPill b { color: var(--ink); font-weight: 600; }
-  .iconBtn {
-    width: 34px; height: 34px; border-radius: var(--r-pill);
-    border: 1px solid var(--line-2); background: var(--surface);
-    color: var(--ink-2); display: flex; align-items: center; justify-content: center;
-    transition: background .15s, color .15s, border-color .15s;
-  }
-  .iconBtn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--ink-3); }
-  .iconBtn svg { width: 17px; height: 17px; }
+  .ghostBtn:hover { background: var(--bg-2); color: var(--ink); }
+  .ghostBtn svg { width: 19px; height: 19px; }
 
-  /* ---------------- Main layout ---------------- */
-  #main {
-    flex: 1; min-height: 0;
-    display: grid;
-    grid-template-columns: 1fr 384px;
-    gap: 18px;
-    padding: 18px;
-  }
+  /* stage chrome stays out of the way until the intro is dismissed */
+  #task, #readout, #dock { transition: opacity .5s ease .1s; }
+  body.pre #task, body.pre #readout, body.pre #dock { opacity: 0; pointer-events: none; }
+  #bar { transition: opacity .5s ease .15s; }
+  body.pre #bar { opacity: 0; }
 
-  /* ---------------- Bench (3D stage) ---------------- */
-  #bench {
-    position: relative; min-width: 0; min-height: 0;
-    border-radius: var(--r-card);
-    background: radial-gradient(120% 120% at 50% 8%, var(--stage-1), var(--stage-2) 78%);
-    box-shadow: var(--sh-2), inset 0 1px 0 rgba(255,255,255,0.05);
-    border: 1px solid rgba(0,0,0,0.35);
+  /* ---------------- Stage ---------------- */
+  #stage {
+    position: relative; flex: 1; min-height: 0;
+    background: radial-gradient(120% 110% at 50% -10%, var(--stage-a), var(--stage-b) 62%, var(--stage-c));
     overflow: hidden;
-  }
-  #bench::before {
-    /* faint bench grid — earned: gives the 3D depth cues, very subtle */
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background-image:
-      linear-gradient(var(--stage-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--stage-line) 1px, transparent 1px);
-    background-size: 46px 46px;
-    -webkit-mask-image: radial-gradient(90% 90% at 50% 45%, transparent 40%, #000 92%);
-            mask-image: radial-gradient(90% 90% at 50% 45%, transparent 40%, #000 92%);
-    opacity: 0.6;
   }
   #viewport { position: absolute; inset: 0; }
   #viewport canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
 
-  /* corner label */
-  .benchTag {
-    position: absolute; top: 14px; left: 16px; z-index: 3;
-    display: flex; align-items: center; gap: 7px;
-    font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(255,255,255,0.42);
+  /* task card */
+  #task {
+    position: absolute; z-index: 4;
+    top: max(16px, env(safe-area-inset-top)); left: 16px;
+    width: min(320px, calc(100% - 32px));
+    padding: 15px 17px 16px;
+    border-radius: var(--r-lg);
+    background: var(--glass); border: 1px solid var(--hair);
+    -webkit-backdrop-filter: saturate(180%) blur(22px); backdrop-filter: saturate(180%) blur(22px);
+    box-shadow: var(--sh-2);
   }
-  .benchTag .d { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 8px rgba(176,122,43,0.7); }
+  .tHead { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .tHead .lv { font-size: 11px; font-weight: 600; letter-spacing: 0.055em; text-transform: uppercase; color: var(--ink-3); }
+  .tHead .kind {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.01em;
+    padding: 2.5px 8px; border-radius: 999px;
+    background: var(--accent-bg); color: var(--accent);
+  }
+  #targetName {
+    font-size: 21px; font-weight: 600; line-height: 1.22; letter-spacing: -0.022em;
+    word-break: break-word; margin-bottom: 13px;
+  }
+  #dots { display: flex; gap: 4px; }
+  #dots .d { height: 3px; flex: 1; border-radius: 999px; background: var(--hair-2); transition: background .35s; }
+  #dots .d.done { background: var(--accent); }
+  #dots .d.active { background: var(--accent); opacity: 0.45; }
 
-  /* live readout caption */
+  /* live readout */
   #readout {
-    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
-    z-index: 3; width: max-content; max-width: min(92%, 560px);
-    display: flex; align-items: center; gap: 12px;
-    padding: 9px 16px; border-radius: var(--r-pill);
-    background: rgba(12,14,18,0.72);
-    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.09);
+    position: absolute; z-index: 4; left: 50%; transform: translateX(-50%);
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 9px;
+    max-width: min(90%, 520px);
+    padding: 7px 8px 7px 15px; border-radius: 999px;
+    background: var(--glass); border: 1px solid var(--hair);
+    -webkit-backdrop-filter: saturate(180%) blur(22px); backdrop-filter: saturate(180%) blur(22px);
+    box-shadow: var(--sh-1);
+    transition: background .3s, border-color .3s;
   }
-  #readout .rk { font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; }
   #liveName {
-    font-family: var(--f-mono); font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.94);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;
+    font-size: 14px; font-weight: 500; letter-spacing: -0.012em; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   }
-  #liveName.status { color: rgba(255,255,255,0.5); font-style: normal; font-family: var(--f-body); }
-  #liveName .loc { color: #9fb0ff; }
-  #matchDot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); position: relative; flex-shrink: 0; transition: all .25s; }
-  #readout.match { background: rgba(20,48,36,0.82); border-color: rgba(88,180,140,0.5); }
-  #readout.match #matchDot { background: #58b48c; border-color: #58b48c; }
-  #readout.match #matchDot::after { content: ""; position: absolute; left: 4.5px; top: 1.5px; width: 4px; height: 8px; border: solid #0d1a14; border-width: 0 2px 2px 0; transform: rotate(42deg); }
-  #readout.match #liveName { color: #b8ecd2; }
-  #readout.match #liveName .loc { color: #dff3e8; }
+  #liveName.idle { color: var(--ink-3); font-weight: 400; }
+  #tick {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--hair); color: transparent; transition: background .3s, color .3s;
+  }
+  #tick svg { width: 13px; height: 13px; }
+  #readout.match { background: var(--good-bg); border-color: transparent; }
+  #readout.match #liveName { color: var(--good); font-weight: 600; }
+  #readout.match #tick { background: var(--good); color: #fff; }
+
+  /* dock */
+  #dock {
+    position: absolute; z-index: 5; left: 50%; transform: translateX(-50%);
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px; border-radius: 999px;
+    background: var(--glass-2); border: 1px solid var(--hair);
+    -webkit-backdrop-filter: saturate(180%) blur(22px); backdrop-filter: saturate(180%) blur(22px);
+    box-shadow: var(--sh-2);
+  }
+  .atomBtn {
+    width: 46px; height: 46px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 16px; font-weight: 600; letter-spacing: 0;
+    color: #fff; position: relative;
+    transition: transform .14s cubic-bezier(.2,.8,.3,1), box-shadow .18s;
+  }
+  .atomBtn::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--accent); opacity: 0; transform: scale(.88);
+    transition: opacity .18s, transform .18s cubic-bezier(.2,.8,.3,1);
+  }
+  .atomBtn[data-el="C"] { background: linear-gradient(180deg, #6e6e73, #48484a); }
+  .atomBtn[data-el="N"] { background: linear-gradient(180deg, #5b8cf8, #3b6ef5); }
+  .atomBtn[data-el="O"] { background: linear-gradient(180deg, #ff6b61, #ff453a); }
+  .atomBtn:hover { transform: translateY(-1px); }
+  .atomBtn:active { transform: scale(.94); }
+  .atomBtn.on::after { opacity: 1; transform: scale(1); }
+  #dock .sep { width: 1px; height: 28px; background: var(--hair-2); margin: 0 4px; }
+  .dockBtn {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; color: var(--ink-2);
+    transition: background .18s, color .18s, transform .14s;
+  }
+  .dockBtn svg { width: 19px; height: 19px; }
+  .dockBtn:hover { background: var(--hair); color: var(--ink); }
+  .dockBtn:active { transform: scale(.92); }
+  .dockBtn[disabled] { opacity: .32; pointer-events: none; }
 
   /* floating next */
-  #floatingNextBtn {
-    position: absolute; left: 50%; bottom: 62px; transform: translateX(-50%) translateY(12px);
-    z-index: 4; padding: 12px 30px; border-radius: var(--r-pill); border: none;
-    background: var(--accent); color: #fff; font-weight: 600; font-size: 15px; letter-spacing: 0.01em;
-    box-shadow: 0 10px 28px rgba(43,63,166,0.4);
-    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+  #nextFloat {
+    position: absolute; z-index: 6; left: 50%;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(10px);
+    padding: 11px 24px; border-radius: 999px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; letter-spacing: -0.012em;
+    box-shadow: 0 8px 24px rgba(0,113,227,0.35);
+    opacity: 0; pointer-events: none; transition: opacity .28s, transform .28s cubic-bezier(.2,.8,.3,1);
   }
-  #floatingNextBtn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-  #floatingNextBtn:hover { background: var(--accent-2); }
-
-  /* ---------------- Control panel ---------------- */
-  #panel {
-    min-height: 0; overflow-y: auto;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--r-card);
-    box-shadow: var(--sh-1);
-    padding: 22px;
-    display: flex; flex-direction: column; gap: 20px;
-  }
-  .task { display: flex; flex-direction: column; }
-  .taskHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .lvlNo { font-family: var(--f-display); font-weight: 600; font-size: 15px; color: var(--ink); }
-  .lvlNo b { color: var(--brass); }
-  .tag {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-    padding: 4px 10px; border-radius: var(--r-pill);
-    background: var(--accent-weak); color: var(--accent);
-  }
-  .task .kick { font-size: 11px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-  #targetName {
-    font-family: var(--f-display); font-weight: 600; font-style: italic;
-    font-size: clamp(22px, 2vw + 14px, 27px); line-height: 1.22; letter-spacing: -0.01em;
-    color: var(--ink); word-break: break-word; margin-bottom: 18px;
-  }
-  #targetName .loc { font-style: normal; color: var(--accent); }
-  .progress { display: flex; align-items: center; gap: 8px; }
-  .pdot { width: 26px; height: 4px; border-radius: var(--r-pill); background: var(--line-2); transition: background .3s; }
-  .pdot.done { background: var(--brass); }
-  .pdot.active { background: var(--accent); }
-  .pnote { font-size: 12px; color: var(--ink-3); margin-left: 4px; }
-
-  .divider { height: 1px; background: var(--line); }
-
-  .group .glabel { font-size: 11px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
-  #palette { display: flex; gap: 12px; }
-  .atomBtn {
-    flex: 1; position: relative; border: 1px solid var(--line);
-    background: var(--surface-2); border-radius: var(--r-btn);
-    padding: 12px 6px 9px; display: flex; flex-direction: column; align-items: center; gap: 8px;
-    transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
-  }
-  .atomBtn .ball {
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 700; font-size: 17px;
-    box-shadow: inset 0 -3px 7px rgba(0,0,0,0.3), inset 0 3px 6px rgba(255,255,255,0.28), 0 2px 5px rgba(0,0,0,0.18);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-  }
-  .atomBtn[data-el="C"] .ball { background: radial-gradient(circle at 34% 28%, #7a808a, var(--c-carbon) 62%, #23272e); }
-  .atomBtn[data-el="N"] .ball { background: radial-gradient(circle at 34% 28%, #8093ea, var(--c-nitro) 60%, #1e2f8a); }
-  .atomBtn[data-el="O"] .ball { background: radial-gradient(circle at 34% 28%, #f18a7c, var(--c-oxy) 58%, #94261b); }
-  .atomBtn .nm { font-size: 11px; font-weight: 500; color: var(--ink-2); }
-  .atomBtn:hover { border-color: var(--ink-3); background: var(--surface); }
-  .atomBtn:active { transform: scale(0.97); }
-  .atomBtn.selected {
-    border-color: var(--accent); background: var(--accent-weak);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
-  .atomBtn.selected .nm { color: var(--accent); font-weight: 600; }
-
-  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .ctl {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    padding: 12px; border-radius: var(--r-btn);
-    border: 1px solid var(--line-2); background: var(--surface);
-    color: var(--ink); font-size: 13.5px; font-weight: 500;
-    transition: background .15s, border-color .15s, color .15s, transform .1s;
-  }
-  .ctl svg { width: 16px; height: 16px; }
-  .ctl:hover { background: var(--surface-2); border-color: var(--ink-3); }
-  .ctl:active { transform: scale(0.97); }
-  .ctl.wide { grid-column: 1 / -1; }
-  #modeToggle.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  .hint { font-size: 12.5px; line-height: 1.5; color: var(--ink-3); }
-  .hint b { color: var(--ink-2); font-weight: 600; }
-  .panelFoot { margin-top: auto; padding-top: 8px; font-size: 11px; color: var(--ink-3); }
-  .panelFoot b { color: var(--ink-2); font-weight: 600; }
+  #nextFloat.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  #nextFloat:hover { background: var(--accent-2); }
 
   /* ---------------- Toast ---------------- */
   #toast {
-    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px);
-    z-index: 120; background: var(--ink); color: #fff;
-    padding: 10px 18px; border-radius: var(--r-pill); font-size: 13px; font-weight: 450;
-    box-shadow: var(--sh-2); opacity: 0; pointer-events: none; transition: opacity .22s, transform .22s;
-    max-width: 88%; text-align: center; white-space: nowrap;
+    position: fixed; z-index: 120; left: 50%; transform: translateX(-50%) translateY(8px);
+    top: 68px; padding: 9px 16px; border-radius: 999px;
+    background: var(--glass-2); border: 1px solid var(--hair);
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    box-shadow: var(--sh-2); font-size: 13.5px; font-weight: 500; color: var(--ink);
+    opacity: 0; pointer-events: none; transition: opacity .22s, transform .22s; white-space: nowrap;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ---------------- Overlays ---------------- */
-  .overlay { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
-  .overlay.show { display: flex; }
-  .scrim { position: absolute; inset: 0; background: rgba(32,29,24,0.34); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade .25s ease; }
-  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  /* ---------------- Sheets ---------------- */
+  .sheet { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .sheet.show { display: flex; }
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.28); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: fade .3s ease; }
+  @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
   .card {
-    position: relative; z-index: 1; width: 100%; max-width: 420px;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 20px; box-shadow: var(--sh-2);
-    padding: 32px 30px 28px; text-align: center;
-    animation: rise .34s cubic-bezier(0.16,1,0.3,1);
+    position: relative; z-index: 1; width: 100%; max-width: 380px;
+    background: var(--bg); border: 1px solid var(--hair);
+    border-radius: 26px; box-shadow: var(--sh-3);
+    padding: 30px 28px 24px; text-align: center;
+    animation: pop .42s cubic-bezier(.2,.9,.25,1);
   }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-  .card .seal {
-    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--success-weak); color: var(--success);
+  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.97) } to { opacity: 1; transform: none } }
+  .card h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.024em; margin-bottom: 7px; }
+  .card p.sub { font-size: 14.5px; line-height: 1.5; color: var(--ink-2); margin-bottom: 22px; }
+  .seal { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center; background: var(--good-bg); color: var(--good); }
+  .seal svg { width: 30px; height: 30px; }
+  .seal svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .55s .12s cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0 } }
+  .nameBox {
+    font-size: 16px; font-weight: 600; line-height: 1.35; letter-spacing: -0.015em;
+    background: var(--bg-2); border-radius: var(--r-md);
+    padding: 13px 15px; margin-bottom: 20px; word-break: break-word;
   }
-  .card .seal svg { width: 26px; height: 26px; }
-  .card .kick { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-  .card h2 { font-family: var(--f-display); font-weight: 600; font-size: 32px; letter-spacing: -0.015em; margin-bottom: 14px; color: var(--ink); }
-  .card .molName {
-    font-family: var(--f-display); font-style: italic; font-weight: 500; font-size: 17px; line-height: 1.35;
-    color: var(--ink); background: var(--surface-2); border: 1px solid var(--line);
-    padding: 13px 16px; border-radius: 12px; margin-bottom: 22px; word-break: break-word;
-  }
-  .card .molName .loc { font-style: normal; color: var(--accent); }
-  .btnCol { display: flex; flex-direction: column; gap: 10px; }
-  .cbtn { padding: 14px; border-radius: var(--r-btn); border: none; font-size: 14.5px; font-weight: 600; transition: background .15s, transform .1s, border-color .15s; }
-  .cbtn:active { transform: scale(0.98); }
+  .btnCol { display: flex; flex-direction: column; gap: 9px; }
+  .cbtn { padding: 13px; border-radius: var(--r-md); font-size: 15.5px; font-weight: 600; letter-spacing: -0.014em; transition: background .18s, transform .12s; }
+  .cbtn:active { transform: scale(.98); }
   .cbtn.solid { background: var(--accent); color: #fff; }
   .cbtn.solid:hover { background: var(--accent-2); }
-  .cbtn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
-  .cbtn.ghost:hover { background: var(--surface-2); border-color: var(--ink-3); }
-
-  #finalOverlay .seal { background: var(--brass-weak); color: var(--brass); }
-  #finalOverlay .card h2 { color: var(--brass-2); }
-  #finalOverlay .cbtn.solid { background: var(--brass); }
-  #finalOverlay .cbtn.solid:hover { background: var(--brass-2); }
+  .cbtn.plain { color: var(--accent); }
+  .cbtn.plain:hover { background: var(--accent-bg); }
+  #finalSheet .seal { background: var(--accent-bg); color: var(--accent); }
 
   /* help */
-  #helpOverlay { z-index: 220; }
-  #helpOverlay .card { text-align: left; max-width: 440px; }
-  #helpOverlay h2 { margin-bottom: 4px; }
-  #helpOverlay .hsub { font-size: 12px; letter-spacing: 0.02em; color: var(--ink-3); margin-bottom: 22px; }
-  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
-  .step .n { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; background: var(--accent-weak); color: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--f-display); font-weight: 600; font-size: 14px; }
-  .step .t { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+  #helpSheet { z-index: 220; }
+  #helpSheet .card { text-align: left; max-width: 400px; }
+  #helpSheet h2 { margin-bottom: 20px; }
+  .step { display: flex; gap: 13px; margin-bottom: 15px; }
+  .step .n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-size: 12.5px; font-weight: 600; }
+  .step .t { font-size: 14.5px; line-height: 1.5; color: var(--ink-2); padding-top: 2px; }
   .step .t b { color: var(--ink); font-weight: 600; }
-  #closeHelpBtn { margin-top: 8px; }
+  #helpSheet .cbtn { margin-top: 10px; }
+  .credit { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hair); font-size: 12.5px; color: var(--ink-3); text-align: center; }
 
-  /* ---------------- Start screen ---------------- */
-  #startScreen {
-    position: fixed; inset: 0; z-index: 300; overflow: hidden;
-    display: grid; grid-template-columns: 1.05fr 0.95fr;
-    background: var(--paper);
-    transition: opacity .5s ease, visibility .5s ease;
+  /* ---------------- Start ---------------- */
+  #start {
+    position: fixed; inset: 0; z-index: 300;
+    display: grid; align-items: center;
+    padding: clamp(28px, 7vw, 92px);
+    padding-bottom: calc(clamp(28px, 7vw, 92px) + env(safe-area-inset-bottom));
+    transition: opacity .55s ease, visibility .55s ease;
   }
-  #startScreen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
-  .startCopy { display: flex; flex-direction: column; justify-content: center; padding: clamp(32px, 6vw, 92px); position: relative; }
-  .startCopy .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; }
-  .startCopy .eyebrow .mk2 { width: 22px; height: 22px; border-radius: 6px; }
-  .startCopy h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(40px, 5vw, 68px); line-height: 1.02; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 22px; }
-  .startCopy h1 em { font-style: italic; color: var(--accent); }
-  .startCopy .lede { font-size: clamp(16px, 1vw + 13px, 19px); line-height: 1.6; color: var(--ink-2); max-width: 30ch; margin-bottom: 34px; }
-  .startBtns { display: flex; gap: 12px; align-items: center; margin-bottom: 40px; flex-wrap: wrap; }
-  #beginBtn { padding: 15px 30px; border-radius: var(--r-btn); border: none; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 10px 28px rgba(43,63,166,0.28); transition: background .15s, transform .12s; }
-  #beginBtn:hover { background: var(--accent-2); transform: translateY(-1px); }
-  #howBtn { padding: 15px 22px; border-radius: var(--r-btn); background: transparent; border: none; color: var(--ink-2); font-size: 15px; font-weight: 500; }
-  #howBtn:hover { color: var(--ink); }
-  .startMeta { display: flex; gap: 30px; border-top: 1px solid var(--line); padding-top: 20px; max-width: 30ch; }
-  .startMeta .mi .k { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-  .startMeta .mi .v { font-family: var(--f-display); font-style: italic; font-size: 15px; color: var(--ink); }
-  .startVisual { position: relative; background: radial-gradient(120% 120% at 60% 20%, var(--stage-1), var(--stage-2) 80%); overflow: hidden; }
-  .startVisual canvas { display: block; width: 100% !important; height: 100% !important; }
-  .startVisual .vcap { position: absolute; bottom: 20px; left: 22px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-
-  /* ---------------- Confetti ---------------- */
-  #fx { position: fixed; inset: 0; z-index: 400; pointer-events: none; }
+  #start::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(100deg, var(--bg) 0%, var(--bg) 34%, color-mix(in srgb, var(--bg) 70%, transparent) 54%, transparent 78%);
+  }
+  @supports not (background: color-mix(in srgb, red, blue)) {
+    #start::before { background: linear-gradient(100deg, var(--bg) 0%, var(--bg) 40%, transparent 80%); }
+  }
+  #start.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  .sInner { max-width: 440px; }
+  .sInner .eyebrow { display: block; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .sInner h1 { font-size: clamp(34px, 5.4vw, 56px); font-weight: 600; line-height: 1.05; letter-spacing: -0.035em; margin-bottom: 18px; }
+  .sInner h1 span { color: var(--ink-2); }
+  .sInner .lede { font-size: clamp(15.5px, 1vw + 12px, 18px); line-height: 1.52; color: var(--ink-2); margin-bottom: 28px; max-width: 34ch; }
+  .sBtns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 30px; }
+  #beginBtn { padding: 13px 26px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600; letter-spacing: -0.014em; transition: background .18s, transform .14s; }
+  #beginBtn:hover { background: var(--accent-2); }
+  #beginBtn:active { transform: scale(.97); }
+  #howBtn { padding: 13px 18px; border-radius: 999px; color: var(--accent); font-size: 16px; font-weight: 500; transition: background .18s; }
+  #howBtn:hover { background: var(--accent-bg); }
+  .sMeta { display: flex; gap: 28px; font-size: 13px; }
+  .sMeta .k { color: var(--ink-3); margin-bottom: 2px; }
+  .sMeta .v { color: var(--ink); font-weight: 500; }
 
   /* ---------------- Responsive ---------------- */
-  @media (max-width: 940px) {
-    #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; gap: 12px; padding: 12px; }
-    #panel { padding: 16px; gap: 15px; overflow: visible; }
-    #targetName { margin-bottom: 14px; }
-    .panelFoot { display: none; }
-    #appbar { grid-template-columns: 1fr auto; }
-    #appbar .cls { display: none; }
-    #startScreen { grid-template-columns: 1fr; grid-template-rows: 1fr 0.7fr; }
-    .startVisual { grid-row: 1; min-height: 34vh; }
-    .startCopy { grid-row: 2; padding: 28px 26px calc(28px + env(safe-area-inset-bottom)); justify-content: flex-start; }
-    .startCopy h1 { margin-bottom: 16px; }
-    .startCopy .lede { margin-bottom: 24px; }
-    .startBtns { margin-bottom: 26px; }
+  @media (max-width: 720px) {
+    /* the class label leaves the grid here, so drop to two columns */
+    #cls { display: none; }
+    #bar { grid-template-columns: 1fr auto; }
+    .brand b { font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; }
+    #task { width: calc(100% - 28px); left: 14px; top: max(14px, env(safe-area-inset-top)); padding: 13px 15px 14px; }
+    #targetName { font-size: 19px; margin-bottom: 11px; }
+    #start { align-items: end; }
+    #start::before { background: linear-gradient(0deg, var(--bg) 0%, var(--bg) 46%, transparent 86%); }
+    .sInner h1 { font-size: clamp(30px, 8.5vw, 40px); }
+    .sInner .lede { margin-bottom: 22px; }
+    .sBtns { margin-bottom: 22px; }
   }
-  @media (max-width: 560px) {
-    .controls { grid-template-columns: 1fr 1fr; }
-    .startMeta { gap: 22px; }
+  @media (max-height: 560px) {
+    .sInner .lede { display: none; }
+    .sMeta { display: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- App bar -->
-<header id="appbar">
+<header id="bar">
   <div class="brand">
-    <svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b3fa6"/><g stroke="#fff" stroke-width="2"><line x1="16" y1="10" x2="10" y2="22"/><line x1="16" y1="10" x2="22" y2="22"/></g><circle cx="16" cy="10" r="3.4" fill="#fff"/><circle cx="10" cy="22" r="3.4" fill="#e3b34f"/><circle cx="22" cy="22" r="3.4" fill="#d2402f"/></svg>
-    <span class="wm"><b>Molecule Builder</b><span>Organic Chemistry</span></span>
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="bmk" width="32" height="32" rx="7.5"/><g stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="16" y1="11" x2="10.5" y2="21"/><line x1="16" y1="11" x2="21.5" y2="21"/></g><circle cx="16" cy="11" r="3.2" fill="#fff"/><circle cx="10.5" cy="21" r="3.2" fill="#fff"/><circle cx="21.5" cy="21" r="3.2" fill="#fff"/></svg>
+    <b>Molecule Builder</b>
   </div>
-  <div class="cls">Mr. Lalama&rsquo;s Class</div>
-  <div class="barRight">
-    <span class="lvlPill">Level <b id="barLevel">1</b> of 5</span>
-    <button class="iconBtn" id="helpBtn" title="How to play" aria-label="How to play">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 0 1 5.3.8c0 1.8-2.6 2.4-2.6 2.4"/><path d="M12 17h.01"/></svg>
+  <div id="cls">Mr.&nbsp;Lalama&rsquo;s Class</div>
+  <div class="barR">
+    <span id="barLvl">1 of 5</span>
+    <button class="ghostBtn" id="helpBtn" aria-label="How it works">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.2a2.6 2.6 0 0 1 5.1.8c0 1.7-2.5 2.3-2.5 2.3v1.2"/><path d="M12 17.2h.01"/></svg>
     </button>
   </div>
 </header>
 
-<!-- Main -->
-<div id="main">
-  <main id="bench">
-    <div class="benchTag"><span class="d"></span> Workspace</div>
-    <div id="viewport"></div>
-    <div id="readout">
-      <span class="rk">Your molecule</span>
-      <span id="liveName" class="status">Tap an atom to begin</span>
-      <span id="matchDot"></span>
+<main id="stage">
+  <div id="viewport"></div>
+
+  <section id="task">
+    <div class="tHead">
+      <span class="lv">Level <span id="levelNum">1</span></span>
+      <span class="kind" id="targetKind">Alcohol</span>
     </div>
-    <button id="floatingNextBtn">Next challenge &rarr;</button>
-  </main>
+    <h1 id="targetName">&mdash;</h1>
+    <div id="dots"></div>
+  </section>
 
-  <aside id="panel">
-    <div class="task">
-      <div class="taskHead">
-        <span class="lvlNo">Level&nbsp;<b id="levelNum">1</b></span>
-        <span class="tag" id="targetTag">Alcohol</span>
-      </div>
-      <div class="kick">Build this molecule</div>
-      <h2 id="targetName">&mdash;</h2>
-      <div class="progress" id="dots"></div>
-    </div>
+  <div id="readout">
+    <span id="liveName" class="idle">Pick an atom to begin</span>
+    <span id="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17 4 11.7"/></svg></span>
+  </div>
 
-    <div class="divider"></div>
+  <button id="nextFloat">Next challenge</button>
 
-    <div class="group">
-      <div class="glabel">Add atoms</div>
-      <div id="palette">
-        <button class="atomBtn" data-el="C" title="Carbon — forms 4 bonds"><span class="ball">C</span><span class="nm">Carbon</span></button>
-        <button class="atomBtn" data-el="N" title="Nitrogen — forms 3 bonds"><span class="ball">N</span><span class="nm">Nitrogen</span></button>
-        <button class="atomBtn" data-el="O" title="Oxygen — forms 2 bonds"><span class="ball">O</span><span class="nm">Oxygen</span></button>
-      </div>
-    </div>
+  <nav id="dock">
+    <button class="atomBtn" data-el="C" title="Carbon — 4 bonds">C</button>
+    <button class="atomBtn" data-el="N" title="Nitrogen — 3 bonds">N</button>
+    <button class="atomBtn" data-el="O" title="Oxygen — 2 bonds">O</button>
+    <span class="sep"></span>
+    <button class="dockBtn" id="undoBtn" title="Undo" aria-label="Undo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h9.5a5.5 5.5 0 1 1 0 11H7"/><path d="M7.5 4.5 4 8l3.5 3.5"/></svg>
+    </button>
+    <button class="dockBtn" id="clearBtn" title="Clear" aria-label="Clear" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V4.8h5V7"/><path d="M6.2 7l1 12.2h9.6L17.8 7"/></svg>
+    </button>
+  </nav>
+</main>
 
-    <div class="controls">
-      <button class="ctl" id="undoBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-        Undo
-      </button>
-      <button class="ctl" id="clearBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
-        Clear
-      </button>
-      <button class="ctl wide" id="modeToggle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2"/><path d="M12 19v2"/><path d="M3 12h2"/><path d="M19 12h2"/><circle cx="12" cy="12" r="3.4"/></svg>
-        <span id="modeLabel">Inspect in 3D</span>
-      </button>
-    </div>
-
-    <p class="hint">Pick an atom, then tap the workspace to place it. Tap an existing atom to grow the chain, or tap two atoms to bond them. <b>Hydrogens fill in automatically.</b></p>
-
-    <div class="panelFoot">Built by <b>Yazan Ali</b></div>
-  </aside>
-</div>
-
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- Win -->
-<div id="winOverlay" class="overlay">
+<div id="winSheet" class="sheet">
   <div class="scrim"></div>
   <div class="card">
-    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-    <div class="kick">Structure confirmed</div>
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17 4 11.7"/></svg></div>
     <h2>Correct</h2>
-    <div class="molName" id="winName">&mdash;</div>
+    <p class="sub">You matched the structure.</p>
+    <div class="nameBox" id="winName">&mdash;</div>
     <div class="btnCol">
-      <button class="cbtn ghost" id="viewMoleculeBtn">Inspect in 3D</button>
-      <button class="cbtn solid" id="nextChallengeBtn">Next challenge &rarr;</button>
+      <button class="cbtn solid" id="nextBtn">Next challenge</button>
+      <button class="cbtn plain" id="inspectBtn">Keep looking at it</button>
     </div>
   </div>
 </div>
 
-<!-- Final -->
-<div id="finalOverlay" class="overlay">
+<div id="finalSheet" class="sheet">
   <div class="scrim"></div>
   <div class="card">
-    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg></div>
-    <div class="kick">All five complete</div>
-    <h2>Course mastered</h2>
-    <p class="molName" id="finalMsg" style="font-style:normal;font-family:var(--f-body);font-size:15px;color:var(--ink-2)">You built and correctly named every molecule. Nicely done.</p>
-    <div class="btnCol"><button class="cbtn solid" id="playAgainBtn">Start over</button></div>
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20.5h8"/><path d="M12 16.5v4"/><path d="M7 4h10v4.8a5 5 0 0 1-10 0z"/><path d="M17 5.2h3v1.6a3 3 0 0 1-3 3"/><path d="M7 5.2H4v1.6a3 3 0 0 0 3 3"/></svg></div>
+    <h2>All five complete</h2>
+    <p class="sub">You built and correctly named every molecule.</p>
+    <div class="btnCol"><button class="cbtn solid" id="againBtn">Start over</button></div>
   </div>
 </div>
 
-<!-- Help -->
-<div id="helpOverlay" class="overlay">
+<div id="helpSheet" class="sheet">
   <div class="scrim"></div>
   <div class="card">
     <h2>How it works</h2>
-    <div class="hsub">Assemble the target molecule, atom by atom</div>
-    <div class="step"><div class="n">1</div><div class="t"><b>Choose an atom</b> — Carbon, Nitrogen, or Oxygen. Hydrogens are added for you automatically.</div></div>
-    <div class="step"><div class="n">2</div><div class="t"><b>Place it</b> — tap empty workspace for your first atom, then tap an existing atom to extend the chain.</div></div>
-    <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> — with no atom selected, tap one atom then another to link them.</div></div>
-    <div class="step"><div class="n">4</div><div class="t"><b>Match the name</b> — your molecule is named live by IUPAC rules. Match the target to advance.</div></div>
-    <div class="step"><div class="n">5</div><div class="t"><b>Inspect in 3D</b> — switch to Inspect to orbit, pinch, and pan your structure.</div></div>
+    <div class="step"><div class="n">1</div><div class="t"><b>Pick an element</b> from the dock, then tap the stage for your first atom.</div></div>
+    <div class="step"><div class="n">2</div><div class="t"><b>Tap any atom</b> to grow the chain from it. Hydrogens fill in on their own.</div></div>
+    <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> by deselecting the dock, then tapping one atom and another.</div></div>
+    <div class="step"><div class="n">4</div><div class="t"><b>Drag to orbit</b>, scroll or pinch to zoom. Bond angles relax to real sp³ geometry as you build.</div></div>
     <button class="cbtn solid" id="closeHelpBtn">Start building</button>
+    <div class="credit">Mr. Lalama&rsquo;s Class &middot; built by Yazan Ali</div>
   </div>
 </div>
 
-<!-- Start screen -->
-<div id="startScreen">
-  <div class="startCopy">
-    <span class="eyebrow"><svg class="mk2" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b3fa6"/><g stroke="#fff" stroke-width="2"><line x1="16" y1="10" x2="10" y2="22"/><line x1="16" y1="10" x2="22" y2="22"/></g><circle cx="16" cy="10" r="3.4" fill="#fff"/><circle cx="10" cy="22" r="3.4" fill="#e3b34f"/><circle cx="22" cy="22" r="3.4" fill="#d2402f"/></svg> Organic Chemistry</span>
-    <h1>Build the molecule.<br><em>Learn its name.</em></h1>
-    <p class="lede">Assemble real organic structures atom by atom and watch them named live by IUPAC rules — in interactive 3D.</p>
-    <div class="startBtns">
-      <button id="beginBtn">Start building &rarr;</button>
+<div id="start">
+  <div class="sInner">
+    <span class="eyebrow">Organic Chemistry</span>
+    <h1>Build the molecule.<br><span>Learn its name.</span></h1>
+    <p class="lede">Assemble real organic structures atom by atom, in true three-dimensional geometry, and watch them named live by IUPAC rules.</p>
+    <div class="sBtns">
+      <button id="beginBtn">Start building</button>
       <button id="howBtn">How it works</button>
     </div>
-    <div class="startMeta">
-      <div class="mi"><div class="k">Class</div><div class="v">Mr. Lalama&rsquo;s Class</div></div>
-      <div class="mi"><div class="k">Built by</div><div class="v">Yazan Ali</div></div>
+    <div class="sMeta">
+      <div><div class="k">Class</div><div class="v">Mr. Lalama&rsquo;s Class</div></div>
+      <div><div class="k">Built by</div><div class="v">Yazan Ali</div></div>
     </div>
   </div>
-  <div class="startVisual">
-    <div id="heroViewport"></div>
-    <div class="vcap">Ball-and-stick · live IUPAC naming</div>
-  </div>
 </div>
-
-<canvas id="fx"></canvas>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu"
@@ -522,8 +440,8 @@
 <script>
 /* =========================================================================
    MOLECULE BUILDER
-   Editorial-science redesign. IUPAC naming engine + interaction logic
-   preserved verbatim from the working build; only presentation changed.
+   Heavy-atom graph drives IUPAC naming; a small molecular-mechanics
+   relaxer (bond, angle and steric terms) drives the 3D geometry.
    ========================================================================= */
 
 const LEVELS = [
@@ -534,15 +452,459 @@ const LEVELS = [
   { level: 5, target: '5-ethyl-4-(N-methylamino)-2-heptanol' },
 ];
 let currentLevel = 1;
-let currentName = '';
 function currentTarget() { return LEVELS[currentLevel - 1].target; }
 
+/* ---------- Chemistry constants ---------- */
+const MAX_BONDS = { C: 4, N: 3, O: 2, H: 1 };
+const S = 1.35;                                  // Angstrom -> scene units
+const LEN = { CC: 1.54, CH: 1.09, CN: 1.47, CO: 1.43, HN: 1.01, HO: 0.96, NN: 1.45, NO: 1.40, OO: 1.48 };
+const ANG = { C: 109.47, N: 107.5, O: 104.5 };   // sp3 bond angles, degrees
+const RAD = { C: 0.62, N: 0.59, O: 0.56, H: 0.36 };
+const SOFT = { C: 1.08, N: 1.03, O: 0.99, H: 0.64 };  // steric contact radii
+const MASS = { C: 12, N: 14, O: 16, H: 1.8 };
+const COLOR = { C: 0x45454b, N: 0x2f62f0, O: 0xf5382c, H: 0xcfcfd6 };
+
+function pairLen(a, b) { const k = a < b ? a + b : b + a; return (LEN[k] || 1.5) * S; }
+function idealAngle(el) { return (ANG[el] || 109.47) * Math.PI / 180; }
+
+/* ---------- Scene ---------- */
+const viewport = document.getElementById('viewport');
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 500);
+const pivot = new THREE.Group();   // orbit rotation
+const frame = new THREE.Group();   // recentring
+scene.add(pivot); pivot.add(frame);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+if ('toneMapping' in renderer) { renderer.toneMapping = THREE.NoToneMapping; }
+viewport.appendChild(renderer.domElement);
+
+function makeEnvMap() {
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 128);
+  grad.addColorStop(0.00, '#d8d8de');
+  grad.addColorStop(0.40, '#9c9ca4');
+  grad.addColorStop(0.62, '#5c5c64');
+  grad.addColorStop(1.00, '#2a2a30');
+  g.fillStyle = grad; g.fillRect(0, 0, 16, 128);
+  const tex = new THREE.CanvasTexture(c);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+scene.environment = makeEnvMap();
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+scene.add(new THREE.HemisphereLight(0xffffff, 0x55555d, 0.08));
+const keyLight = new THREE.DirectionalLight(0xffffff, 0.5); keyLight.position.set(-5, 8, 11); scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight(0xdce6ff, 0.14); rimLight.position.set(7, -4, -7); scene.add(rimLight);
+
+const geoCache = {};
+function sphereGeo(el) {
+  if (!geoCache[el]) geoCache[el] = new THREE.SphereGeometry(RAD[el], 44, 30);
+  return geoCache[el];
+}
+const bondGeo = new THREE.CylinderGeometry(0.1, 0.1, 1, 22);
+const bondMat = new THREE.MeshStandardMaterial({ color: 0x9d9da6, metalness: 0.12, roughness: 0.44, envMapIntensity: 0.4 });
+const atomMat = {};
+for (const el of ['C', 'N', 'O', 'H']) {
+  atomMat[el] = new THREE.MeshStandardMaterial({
+    color: COLOR[el],
+    metalness: el === 'H' ? 0.04 : 0.12,
+    roughness: el === 'H' ? 0.4 : 0.24,
+    envMapIntensity: el === 'H' ? 0.1 : 0.12,
+  });
+}
+const haloMat = new THREE.MeshBasicMaterial({ color: 0x0a84ff, transparent: true, opacity: 0.2, depthWrite: false });
+
+/* ---------- State ---------- */
+let nextId = 1;
+const atoms  = new Map();   // heavy atoms — the graph the naming engine reads
+const bonds  = [];          // heavy-heavy bonds
+const hydros = [];          // implicit hydrogens, geometry only
+const history = [];
+
+let selectedEl = null;
+let selectedAtomId = null;
+let halo = null;
+let won = false, postWin = false, spin = true, started = false;
+
+/* ---------- Geometry helpers ---------- */
+const _t = new THREE.Vector3(), _u = new THREE.Vector3(), _w = new THREE.Vector3();
+
+function perpTo(v) {
+  const a = Math.abs(v.x) < 0.9 ? _w.set(1, 0, 0) : _w.set(0, 1, 0);
+  return new THREE.Vector3().crossVectors(v, a).normalize();
+}
+function partnersOf(a) {
+  const list = [];
+  if (a.element === 'H') { const p = atoms.get(a.parent); if (p) list.push(p); return list; }
+  for (const nid of a.neighbors) { const n = atoms.get(nid); if (n) list.push(n); }
+  for (const h of hydros) if (h.parent === a.id) list.push(h);
+  return list;
+}
+
+/* Direction for one more substituent on `a`, following VSEPR. */
+function newDir(a) {
+  const parts = partnersOf(a);
+  const dirs = parts.map(p => new THREE.Vector3().subVectors(p.p, a.p).normalize());
+  const th = idealAngle(a.element);
+
+  if (dirs.length === 0) return new THREE.Vector3(0.94, 0.34, 0).normalize();
+
+  if (dirs.length === 1) {
+    const b = dirs[0];
+    let u = null;
+    // Prefer the anti arrangement across the neighbour, giving a real zig-zag chain.
+    const grand = partnersOf(parts[0]).filter(x => x !== a)[0];
+    if (grand) {
+      _u.subVectors(grand.p, a.p);
+      _u.sub(_t.copy(b).multiplyScalar(_u.dot(b)));
+      if (_u.lengthSq() > 1e-6) u = _u.clone().normalize().negate();
+    }
+    if (!u) u = perpTo(b);
+    return b.clone().multiplyScalar(Math.cos(th)).add(u.multiplyScalar(Math.sin(th))).normalize();
+  }
+
+  if (dirs.length === 2) {
+    const s = dirs[0].clone().add(dirs[1]);
+    const n = new THREE.Vector3().crossVectors(dirs[0], dirs[1]);
+    if (s.lengthSq() < 1e-6 || n.lengthSq() < 1e-8) return perpTo(dirs[0]);
+    s.normalize(); n.normalize();
+    const half = th / 2;
+    return s.multiplyScalar(-Math.cos(half)).add(n.multiplyScalar(Math.sin(half))).normalize();
+  }
+
+  const s = new THREE.Vector3();
+  for (const d of dirs) s.add(d);
+  if (s.lengthSq() < 1e-8) return perpTo(dirs[0]);
+  return s.negate().normalize();
+}
+
+function orientBond(mesh, pa, pb) {
+  _t.addVectors(pa, pb).multiplyScalar(0.5);
+  mesh.position.copy(_t);
+  _t.subVectors(pb, pa);
+  const len = _t.length();
+  if (len < 1e-6) return;
+  mesh.scale.set(1, len, 1);
+  mesh.quaternion.setFromUnitVectors(_u.set(0, 1, 0), _t.divideScalar(len));
+}
+
+/* ---------- Graph mutation ---------- */
+function canBond(a) { return a.neighbors.size < MAX_BONDS[a.element]; }
+
+function createAtom(el, p) {
+  const a = {
+    id: nextId++, element: el,
+    p: p.clone(), v: new THREE.Vector3(), f: new THREE.Vector3(),
+    neighbors: new Set(),
+  };
+  const mesh = new THREE.Mesh(sphereGeo(el), atomMat[el]);
+  mesh.position.copy(a.p);
+  mesh.userData.atomId = a.id;
+  mesh.scale.setScalar(0.01);
+  mesh.userData.grow = 0;
+  a.mesh = mesh;
+  frame.add(mesh);
+  atoms.set(a.id, a);
+  return a;
+}
+function createBond(a, b) {
+  if (a.id === b.id || a.neighbors.has(b.id)) return null;
+  if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return null; }
+  if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return null; }
+  a.neighbors.add(b.id); b.neighbors.add(a.id);
+  const mesh = new THREE.Mesh(bondGeo, bondMat);
+  orientBond(mesh, a.p, b.p);
+  const bond = { a: a.id, b: b.id, mesh };
+  bonds.push(bond); frame.add(mesh);
+  return bond;
+}
+function removeAtom(id) {
+  const a = atoms.get(id);
+  if (!a) return;
+  for (let i = bonds.length - 1; i >= 0; i--) {
+    const b = bonds[i];
+    if (b.a === id || b.b === id) {
+      const other = atoms.get(b.a === id ? b.b : b.a);
+      if (other) other.neighbors.delete(id);
+      frame.remove(b.mesh); bonds.splice(i, 1);
+    }
+  }
+  frame.remove(a.mesh); atoms.delete(id);
+}
+function removeBondRef(ref) {
+  const i = bonds.indexOf(ref);
+  if (i === -1) return;
+  const a = atoms.get(ref.a), b = atoms.get(ref.b);
+  if (a) a.neighbors.delete(ref.b);
+  if (b) b.neighbors.delete(ref.a);
+  frame.remove(ref.mesh); bonds.splice(i, 1);
+}
+
+function addH(a) {
+  const d = newDir(a);
+  const h = {
+    parent: a.id, element: 'H',
+    p: d.multiplyScalar(pairLen(a.element, 'H')).add(a.p),
+    v: new THREE.Vector3(), f: new THREE.Vector3(),
+  };
+  h.mesh = new THREE.Mesh(sphereGeo('H'), atomMat.H);
+  h.mesh.position.copy(h.p);
+  h.mesh.scale.setScalar(0.01);
+  h.mesh.userData.grow = 0;
+  h.bond = new THREE.Mesh(bondGeo, bondMat);
+  orientBond(h.bond, a.p, h.p);
+  frame.add(h.mesh); frame.add(h.bond);
+  hydros.push(h);
+  return h;
+}
+function dropH(h) {
+  const i = hydros.indexOf(h);
+  if (i === -1) return;
+  frame.remove(h.mesh); frame.remove(h.bond);
+  hydros.splice(i, 1);
+}
+/* A new substituent takes the place of a hydrogen, so reuse that slot. */
+function freeSlot(a) {
+  let last = null;
+  for (const h of hydros) if (h.parent === a.id) last = h;
+  if (!last) return newDir(a);
+  const dir = new THREE.Vector3().subVectors(last.p, a.p).normalize();
+  dropH(last);
+  return dir;
+}
+function dropHToward(a, target) {
+  let best = null, bestDot = -2;
+  for (const h of hydros) {
+    if (h.parent !== a.id) continue;
+    const d = _u.subVectors(h.p, a.p).normalize().dot(_t.subVectors(target, a.p).normalize());
+    if (d > bestDot) { bestDot = d; best = h; }
+  }
+  if (best) dropH(best);
+}
+function syncHydrogens() {
+  for (let i = hydros.length - 1; i >= 0; i--) if (!atoms.has(hydros[i].parent)) dropH(hydros[i]);
+  for (const a of atoms.values()) {
+    const want = MAX_BONDS[a.element] - a.neighbors.size;
+    let mine = hydros.filter(h => h.parent === a.id);
+    while (mine.length > want) dropH(mine.pop());
+    while (mine.length < want) mine.push(addH(a));
+  }
+}
+
+/* ---------- Molecular mechanics ---------- */
+const K_BOND = 70, K_ANGLE = 22, K_STERIC = 16, DAMP = 0.88, MAX_V = 2.4;
+const phys = { nodes: [], springs: [], excl: new Set() };
+let settled = false;
+
+const pkey = (i, j) => (i < j ? i + ':' + j : j + ':' + i);
+
+function rebuildPhysics() {
+  phys.nodes = [];
+  for (const a of atoms.values()) { a._i = phys.nodes.length; phys.nodes.push(a); }
+  for (const h of hydros)         { h._i = phys.nodes.length; phys.nodes.push(h); }
+
+  phys.springs = [];
+  const adj = phys.nodes.map(() => []);
+  const addSpring = (i, j, len, k) => { phys.springs.push({ i, j, len, k }); };
+
+  for (const b of bonds) {
+    const A = atoms.get(b.a), B = atoms.get(b.b);
+    addSpring(A._i, B._i, pairLen(A.element, B.element), K_BOND);
+    adj[A._i].push(B._i); adj[B._i].push(A._i);
+  }
+  for (const h of hydros) {
+    const A = atoms.get(h.parent);
+    addSpring(A._i, h._i, pairLen(A.element, 'H'), K_BOND);
+    adj[A._i].push(h._i); adj[h._i].push(A._i);
+  }
+
+  phys.excl = new Set();
+  for (const s of phys.springs) phys.excl.add(pkey(s.i, s.j));
+
+  // Angle terms as 1-3 distance springs (law of cosines on the ideal angle).
+  for (let c = 0; c < phys.nodes.length; c++) {
+    const el = phys.nodes[c].element;
+    if (el === 'H' || adj[c].length < 2) continue;
+    const th = idealAngle(el);
+    for (let x = 0; x < adj[c].length; x++) {
+      for (let y = x + 1; y < adj[c].length; y++) {
+        const i = adj[c][x], j = adj[c][y];
+        const l1 = pairLen(el, phys.nodes[i].element);
+        const l2 = pairLen(el, phys.nodes[j].element);
+        const d13 = Math.sqrt(l1 * l1 + l2 * l2 - 2 * l1 * l2 * Math.cos(th));
+        addSpring(i, j, d13, K_ANGLE);
+        phys.excl.add(pkey(i, j));
+      }
+    }
+  }
+  settled = false;
+}
+
+function relaxStep(dt) {
+  const nodes = phys.nodes, n = nodes.length;
+  if (n < 2) return 0;
+  for (const nd of nodes) nd.f.set(0, 0, 0);
+
+  for (const s of phys.springs) {
+    const A = nodes[s.i], B = nodes[s.j];
+    _t.subVectors(B.p, A.p);
+    const r = _t.length();
+    if (r < 1e-6) continue;
+    _t.multiplyScalar(s.k * (r - s.len) / r);
+    A.f.add(_t); B.f.sub(_t);
+  }
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (phys.excl.has(pkey(i, j))) continue;
+      const A = nodes[i], B = nodes[j];
+      _t.subVectors(B.p, A.p);
+      let r = _t.length();
+      const rmin = SOFT[A.element] + SOFT[B.element];
+      if (r >= rmin) continue;
+      if (r < 1e-4) { _t.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5); r = _t.length(); }
+      _t.multiplyScalar(K_STERIC * (rmin - r) / r);
+      A.f.sub(_t); B.f.add(_t);
+    }
+  }
+
+  let peak = 0;
+  for (const nd of nodes) {
+    nd.v.addScaledVector(nd.f, dt / MASS[nd.element]);
+    nd.v.multiplyScalar(DAMP);
+    const sp = nd.v.length();
+    if (sp > MAX_V) nd.v.multiplyScalar(MAX_V / sp);
+    if (sp > peak) peak = sp;
+    nd.p.addScaledVector(nd.v, dt);
+  }
+  return peak;
+}
+const REST_V = 1e-2;   // ~0.01 px/frame on screen: visually at rest
+function settle(iterations) {
+  for (let i = 0; i < iterations; i++) if (relaxStep(1 / 60) < REST_V) break;
+}
+function syncMeshes() {
+  for (const a of atoms.values()) a.mesh.position.copy(a.p);
+  for (const b of bonds) orientBond(b.mesh, atoms.get(b.a).p, atoms.get(b.b).p);
+  for (const h of hydros) {
+    h.mesh.position.copy(h.p);
+    orientBond(h.bond, atoms.get(h.parent).p, h.p);
+  }
+  if (halo && selectedAtomId !== null && atoms.has(selectedAtomId)) halo.position.copy(atoms.get(selectedAtomId).p);
+}
+
+/* ---------- Framing ---------- */
+const centerTarget = new THREE.Vector3();
+let fitDist = 14, zoom = 1;
+function updateFraming() {
+  const nodes = phys.nodes;
+  if (!nodes.length) { centerTarget.set(0, 0, 0); fitDist = 13; return; }
+  const min = new THREE.Vector3(Infinity, Infinity, Infinity);
+  const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+  for (const nd of nodes) {
+    const r = RAD[nd.element];
+    min.set(Math.min(min.x, nd.p.x - r), Math.min(min.y, nd.p.y - r), Math.min(min.z, nd.p.z - r));
+    max.set(Math.max(max.x, nd.p.x + r), Math.max(max.y, nd.p.y + r), Math.max(max.z, nd.p.z + r));
+  }
+  centerTarget.addVectors(min, max).multiplyScalar(0.5);
+  const radius = Math.max(0.5 * min.distanceTo(max), 1.6);
+  const vFov = camera.fov * Math.PI / 180;
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  fitDist = radius / Math.sin(Math.min(vFov, hFov) / 2) * 0.84;
+}
+function resize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  updateFraming();
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+
+/* ---------- Actions ---------- */
+function actAddFirst(el) {
+  const a = createAtom(el, new THREE.Vector3(0, 0, 0));
+  history.push({ type: 'addAtom', atomId: a.id, bondRef: null });
+  onStateChanged();
+}
+function actAddBonded(el, parent) {
+  if (!canBond(parent)) { toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`); return; }
+  const p = freeSlot(parent).multiplyScalar(pairLen(parent.element, el)).add(parent.p);
+  const a = createAtom(el, p);
+  const bondRef = createBond(parent, a);
+  history.push({ type: 'addAtom', atomId: a.id, bondRef });
+  onStateChanged();
+}
+function actBond(a, b) {
+  if (a.id === b.id || a.neighbors.has(b.id)) return;
+  if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return; }
+  if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return; }
+  dropHToward(a, b.p); dropHToward(b, a.p);
+  const bondRef = createBond(a, b);
+  if (bondRef) { history.push({ type: 'addBond', bondRef }); onStateChanged(); }
+}
+function undo() {
+  const act = history.pop();
+  if (!act) return;
+  if (act.type === 'addAtom') removeAtom(act.atomId);
+  else if (act.type === 'addBond') removeBondRef(act.bondRef);
+  clearHalo();
+  onStateChanged();
+}
+function clearAll() {
+  for (const id of [...atoms.keys()]) removeAtom(id);
+  for (let i = hydros.length - 1; i >= 0; i--) dropH(hydros[i]);
+  history.length = 0;
+  clearHalo();
+  won = false; postWin = false; spin = false;
+  pivot.rotation.set(0, 0, 0);
+  zoom = 1;
+  document.getElementById('winSheet').classList.remove('show');
+  onStateChanged();
+}
+function advanceLevel() {
+  if (currentLevel >= LEVELS.length) { showFinal(); return; }
+  currentLevel++;
+  updateTargetLabel();
+  clearAll();
+}
+function resetGame() {
+  currentLevel = 1;
+  updateTargetLabel();
+  document.getElementById('finalSheet').classList.remove('show');
+  clearAll();
+}
+
+function clearHalo() {
+  selectedAtomId = null;
+  if (halo) { frame.remove(halo); halo = null; }
+}
+function showHalo(a) {
+  clearHalo();
+  selectedAtomId = a.id;
+  halo = new THREE.Mesh(sphereGeo(a.element), haloMat.clone());
+  halo.scale.setScalar(1.42);
+  halo.position.copy(a.p);
+  frame.add(halo);
+}
+
+/* ---------- UI ---------- */
 function fmtFormula(str) {
   return str
     .replace(/\d+/g, m => `<span class="loc">${m}</span>`)
     .replace(/N(?=[-,])/g, `<span class="loc">N</span>`);
 }
-function molTag(name) {
+function molKind(name) {
   if (/ol$/.test(name)) return 'Alcohol';
   if (/amine$/.test(name) || /amino/.test(name)) return 'Amine';
   return 'Alkane';
@@ -550,390 +912,55 @@ function molTag(name) {
 function updateTargetLabel() {
   const t = currentTarget();
   document.getElementById('levelNum').textContent = currentLevel;
-  document.getElementById('barLevel').textContent = currentLevel;
+  document.getElementById('barLvl').textContent = currentLevel + ' of ' + LEVELS.length;
   document.getElementById('targetName').innerHTML = fmtFormula(t);
-  document.getElementById('targetTag').textContent = molTag(t);
-  renderProgress();
-}
-function renderProgress() {
+  document.getElementById('targetKind').textContent = molKind(t);
   const dots = document.getElementById('dots');
   dots.innerHTML = '';
   for (let i = 1; i <= LEVELS.length; i++) {
     const d = document.createElement('div');
-    d.className = 'pdot' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
+    d.className = 'd' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
     dots.appendChild(d);
   }
-  const note = document.createElement('span');
-  note.className = 'pnote';
-  note.textContent = (currentLevel - 1) + ' of ' + LEVELS.length + ' solved';
-  dots.appendChild(note);
 }
-
-const MAX_BONDS   = { C: 4, N: 3, O: 2, H: 1 };
-const ATOM_COLOR  = { C: 0x3b4048, N: 0x2f4cc4, O: 0xd2402f, H: 0xf0eee7 };
-const ATOM_EMISS  = { C: 0x0c0e12, N: 0x0a1030, O: 0x2a0806, H: 0x0d0d10 };
-const ATOM_RADIUS = { C: 0.50,     N: 0.48,     O: 0.45,     H: 0.30 };
-
-/* ---------- Three.js scene factory (used for bench + hero) ---------- */
-function makeEnvMap() {
-  const c = document.createElement('canvas');
-  c.width = 16; c.height = 128;
-  const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 0, 128);
-  grad.addColorStop(0.00, '#3a4256');
-  grad.addColorStop(0.45, '#1a1e26');
-  grad.addColorStop(0.58, '#12141a');
-  grad.addColorStop(1.00, '#070a0e');
-  g.fillStyle = grad; g.fillRect(0, 0, 16, 128);
-  g.fillStyle = 'rgba(255,255,255,0.14)'; g.fillRect(0, 0, 16, 16);
-  const tex = new THREE.CanvasTexture(c);
-  tex.mapping = THREE.EquirectangularReflectionMapping;
-  if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
-  return tex;
-}
-const sharedEnv = makeEnvMap();
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
-camera.position.set(0, 0, 18);
-camera.lookAt(0, 0, 0);
-
-const viewport = document.getElementById('viewport');
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
-if ('toneMapping' in renderer) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; }
-viewport.appendChild(renderer.domElement);
-scene.environment = sharedEnv;
-
-function resize() {
-  const w = viewport.clientWidth, h = viewport.clientHeight;
-  if (w === 0 || h === 0) return;
-  renderer.setSize(w, h);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', () => setTimeout(resize, 100));
-
-/* Lighting — soft studio, cool key + warm fill, no colored neon */
-scene.add(new THREE.AmbientLight(0xffffff, 0.42));
-scene.add(new THREE.HemisphereLight(0xdfe7ff, 0x0b0d12, 0.5));
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-dirLight.position.set(-6, 10, 12);
-scene.add(dirLight);
-const fillLight = new THREE.DirectionalLight(0xffe8cf, 0.35);
-fillLight.position.set(8, -5, -6);
-scene.add(fillLight);
-const keyPoint = new THREE.PointLight(0xffffff, 0.55, 100);
-keyPoint.position.set(4, 6, 14);
-scene.add(keyPoint);
-
-const root = new THREE.Group();
-scene.add(root);
-const hGroup = new THREE.Group();
-root.add(hGroup);
-
-const sphereGeoCache = {};
-function getSphereGeo(el) {
-  if (!sphereGeoCache[el]) sphereGeoCache[el] = new THREE.SphereGeometry(ATOM_RADIUS[el], 40, 28);
-  return sphereGeoCache[el];
-}
-const bondGeo = new THREE.CylinderGeometry(0.085, 0.085, 1, 20);
-const bondMat = new THREE.MeshStandardMaterial({ color: 0xb9c0c8, metalness: 0.4, roughness: 0.5, envMapIntensity: 0.7 });
-const atomMats = {};
-for (const el of ['C','N','O','H']) {
-  atomMats[el] = new THREE.MeshStandardMaterial({
-    color: ATOM_COLOR[el], emissive: ATOM_EMISS[el],
-    metalness: el === 'H' ? 0.0 : 0.22, roughness: el === 'H' ? 0.45 : 0.26,
-    envMapIntensity: el === 'H' ? 0.5 : 0.9,
-  });
-}
-const ringMat = new THREE.MeshBasicMaterial({ color: 0xe3b34f, side: THREE.DoubleSide, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
-
-/* ---------- State ---------- */
-let nextId = 1;
-const atoms = new Map();
-const bonds = [];
-const history = [];
-
-let selectedPaletteEl = null;
-let selectedAtomId    = null;
-let selectionRing     = null;
-
-let mode = 'build';
-let won  = false;
-let postWinView = false;
-
-const viewCenter = new THREE.Vector3();
-const viewPan    = new THREE.Vector3();
-const _viewTmp   = new THREE.Vector3();
-function computeViewCenter() {
-  viewCenter.set(0, 0, 0);
-  if (atoms.size === 0) return;
-  for (const a of atoms.values()) { viewCenter.x += a.pos.x; viewCenter.y += a.pos.y; viewCenter.z += a.pos.z; }
-  viewCenter.divideScalar(atoms.size);
-}
-function applyViewTransform() {
-  _viewTmp.copy(viewCenter).applyEuler(root.rotation).negate().add(viewPan);
-  root.position.copy(_viewTmp);
-}
-
-function updateFloatingNext(isCorrect) {
-  const btn = document.getElementById('floatingNextBtn');
-  if (!btn) return;
-  if (postWinView && isCorrect) btn.classList.add('show');
-  else btn.classList.remove('show');
-}
-
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => t.classList.remove('show'), 2000);
+  toast._t = setTimeout(() => t.classList.remove('show'), 1900);
 }
-function canBond(atom) { return atom.neighbors.size < MAX_BONDS[atom.element]; }
-
-function makeBondMesh(pa, pb) { const m = new THREE.Mesh(bondGeo, bondMat); orientBond(m, pa, pb); return m; }
-function orientBond(mesh, pa, pb) {
-  const mid = new THREE.Vector3().addVectors(pa, pb).multiplyScalar(0.5);
-  const diff = new THREE.Vector3().subVectors(pb, pa);
-  const len = diff.length();
-  mesh.position.copy(mid);
-  mesh.scale.set(1, len, 1);
-  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), diff.clone().normalize());
-}
-
-function findPositionForNewAtom(parent) {
-  const neighborAngles = [];
-  for (const nid of parent.neighbors) {
-    const n = atoms.get(nid);
-    const dx = n.pos.x - parent.pos.x, dy = n.pos.y - parent.pos.y;
-    if (dx*dx + dy*dy > 0.0001) neighborAngles.push(Math.atan2(dy, dx));
-  }
-  let angle;
-  if (neighborAngles.length === 0) angle = 0;
-  else if (neighborAngles.length === 1) angle = neighborAngles[0] + Math.PI;
-  else {
-    neighborAngles.sort((a,b) => a - b);
-    let maxGap = -1, chosen = 0;
-    for (let i = 0; i < neighborAngles.length; i++) {
-      const a1 = neighborAngles[i];
-      const a2 = neighborAngles[(i+1) % neighborAngles.length] + (i === neighborAngles.length - 1 ? Math.PI*2 : 0);
-      const gap = a2 - a1;
-      if (gap > maxGap) { maxGap = gap; chosen = a1 + gap/2; }
-    }
-    angle = chosen;
-  }
-  const dist = 2.0;
-  return new THREE.Vector3(parent.pos.x + Math.cos(angle) * dist, parent.pos.y + Math.sin(angle) * dist, 0);
-}
-
-function createAtom(el, pos) {
-  const atom = { id: nextId++, element: el, pos: pos.clone(), neighbors: new Set() };
-  const mesh = new THREE.Mesh(getSphereGeo(el), atomMats[el]);
-  mesh.position.copy(pos);
-  mesh.userData.atomId = atom.id;
-  mesh.scale.setScalar(0.01);
-  mesh.userData.spawn = 0;
-  atom.mesh = mesh;
-  root.add(mesh);
-  atoms.set(atom.id, atom);
-  return atom;
-}
-function createBond(a, b) {
-  if (a.id === b.id) return null;
-  if (a.neighbors.has(b.id)) return null;
-  if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return null; }
-  if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return null; }
-  a.neighbors.add(b.id); b.neighbors.add(a.id);
-  const mesh = makeBondMesh(a.pos, b.pos);
-  const bond = { a: a.id, b: b.id, mesh };
-  bonds.push(bond); root.add(mesh);
-  return bond;
-}
-function removeAtom(atomId) {
-  const atom = atoms.get(atomId);
-  if (!atom) return;
-  for (let i = bonds.length - 1; i >= 0; i--) {
-    const b = bonds[i];
-    if (b.a === atomId || b.b === atomId) {
-      const other = atoms.get(b.a === atomId ? b.b : b.a);
-      if (other) other.neighbors.delete(atomId);
-      root.remove(b.mesh); bonds.splice(i, 1);
-    }
-  }
-  root.remove(atom.mesh); atoms.delete(atomId);
-}
-function removeBondRef(bondRef) {
-  const idx = bonds.indexOf(bondRef);
-  if (idx === -1) return;
-  const a = atoms.get(bondRef.a), b = atoms.get(bondRef.b);
-  if (a) a.neighbors.delete(bondRef.b);
-  if (b) b.neighbors.delete(bondRef.a);
-  root.remove(bondRef.mesh); bonds.splice(idx, 1);
-}
-
-function clearHydrogens() { while (hGroup.children.length) hGroup.remove(hGroup.children[0]); }
-function renderHydrogens() {
-  clearHydrogens();
-  for (const atom of atoms.values()) {
-    const hCount = MAX_BONDS[atom.element] - atom.neighbors.size;
-    if (hCount <= 0) continue;
-    const taken = [];
-    for (const nid of atom.neighbors) {
-      const n = atoms.get(nid);
-      taken.push(Math.atan2(n.pos.y - atom.pos.y, n.pos.x - atom.pos.x));
-    }
-    const picks = [];
-    if (taken.length === 0) { for (let i = 0; i < hCount; i++) picks.push((Math.PI * 2 * i) / hCount); }
-    else {
-      taken.sort((a,b) => a - b);
-      let gaps = [];
-      for (let i = 0; i < taken.length; i++) {
-        const s = taken[i];
-        const e = (i < taken.length - 1) ? taken[i+1] : taken[0] + Math.PI*2;
-        gaps.push({ start: s, end: e, size: e - s });
-      }
-      for (let i = 0; i < hCount; i++) {
-        gaps.sort((a,b) => b.size - a.size);
-        const g = gaps.shift();
-        const mid = g.start + g.size / 2;
-        picks.push(mid);
-        gaps.push({ start: g.start, end: mid, size: g.size / 2 });
-        gaps.push({ start: mid,     end: g.end, size: g.size / 2 });
-      }
-    }
-    for (const ang of picks) {
-      const hPos = new THREE.Vector3(atom.pos.x + Math.cos(ang) * 1.1, atom.pos.y + Math.sin(ang) * 1.1, atom.pos.z);
-      const hMesh = new THREE.Mesh(getSphereGeo('H'), atomMats.H);
-      hMesh.position.copy(hPos);
-      hGroup.add(hMesh);
-      hGroup.add(makeBondMesh(atom.pos, hPos));
-    }
-  }
-}
-
-function clearSelectionRing() { if (selectionRing) { root.remove(selectionRing); selectionRing = null; } }
-function showSelectionRing(atom) {
-  clearSelectionRing();
-  const r0 = ATOM_RADIUS[atom.element] * 1.35, r1 = ATOM_RADIUS[atom.element] * 1.62;
-  const geo = new THREE.RingGeometry(r0, r1, 40);
-  const ring = new THREE.Mesh(geo, ringMat.clone());
-  ring.position.copy(atom.pos);
-  ring.position.z += 0.05;
-  selectionRing = ring;
-  root.add(ring);
-}
-
-const raycaster = new THREE.Raycaster();
-const ndc = new THREE.Vector2();
-function setRayFromClient(x, y) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  ndc.x =  ((x - rect.left) / rect.width)  * 2 - 1;
-  ndc.y = -((y - rect.top)  / rect.height) * 2 + 1;
-  raycaster.setFromCamera(ndc, camera);
-}
-function pickAtom(x, y) {
-  setRayFromClient(x, y);
-  const meshes = [];
-  for (const a of atoms.values()) meshes.push(a.mesh);
-  const hits = raycaster.intersectObjects(meshes, false);
-  if (hits.length) return atoms.get(hits[0].object.userData.atomId);
-  return null;
-}
-
-function autoFrame() {
-  if (atoms.size === 0 || mode !== 'build') {
-    if (mode === 'build') { camera.position.set(0, 0, 18); camera.lookAt(0, 0, 0); }
-    return;
-  }
-  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
-  for (const a of atoms.values()) {
-    if (a.pos.x < minX) minX = a.pos.x; if (a.pos.x > maxX) maxX = a.pos.x;
-    if (a.pos.y < minY) minY = a.pos.y; if (a.pos.y > maxY) maxY = a.pos.y;
-  }
-  minX -= 2; maxX += 2; minY -= 2; maxY += 2;
-  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-  const w = maxX - minX, h = maxY - minY;
-  const aspect = Math.max(0.0001, renderer.domElement.width / Math.max(1, renderer.domElement.height));
-  const fovY = camera.fov * Math.PI / 180;
-  const distY = (h / 2) / Math.tan(fovY / 2);
-  const distX = (w / 2) / Math.tan(fovY / 2) / aspect;
-  const dist = Math.max(distX, distY, 8) + 2;
-  camera.position.set(cx, cy, dist);
-  camera.lookAt(cx, cy, 0);
-}
+const IDLE_COPY = { 'Tap an atom to begin': 'Pick an atom to begin', 'Building...': 'Keep going…' };
 
 function onStateChanged() {
-  renderHydrogens();
-  if (mode === 'build') autoFrame();
+  syncHydrogens();
+  rebuildPhysics();
+  updateFraming();
+
+  settle(20);
+
   const name = generateName();
-  currentName = name;
-  const target = currentTarget();
-  const isCorrect = (name === target);
-  const liveEl = document.getElementById('liveName');
-  const readout = document.getElementById('readout');
+  const isCorrect = (name === currentTarget());
   const isStatus = /^(Tap an atom|Building|Invalid|Structure)/.test(name);
-  liveEl.innerHTML = isStatus ? name : fmtFormula(name);
-  liveEl.classList.toggle('status', isStatus);
-  readout.classList.toggle('match', isCorrect);
+
+  const live = document.getElementById('liveName');
+  live.innerHTML = isStatus ? (IDLE_COPY[name] || name) : fmtFormula(name);
+  live.classList.toggle('idle', isStatus);
+  document.getElementById('readout').classList.toggle('match', isCorrect);
+
+  document.getElementById('undoBtn').disabled = history.length === 0;
+  document.getElementById('clearBtn').disabled = atoms.size === 0;
+
   if (!won && isCorrect) showWin();
-  updateFloatingNext(isCorrect);
+  document.getElementById('nextFloat').classList.toggle('show', postWin && isCorrect);
 }
 
-function actAddFirstAtom(el, pos) {
-  const atom = createAtom(el, pos);
-  history.push({ type: 'addAtom', atomId: atom.id, bondRef: null });
-  if (mode === 'build') { camera.position.set(0, 0, 18); camera.lookAt(0, 0, 0); root.position.set(0, 0, 0); root.rotation.set(0, 0, 0); }
-  onStateChanged();
+function showWin() {
+  won = true;
+  document.getElementById('winName').innerHTML = fmtFormula(currentTarget());
+  document.getElementById('winSheet').classList.add('show');
 }
-function actAddAtomBonded(el, parent) {
-  if (!canBond(parent)) { toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`); return; }
-  const pos = findPositionForNewAtom(parent);
-  const atom = createAtom(el, pos);
-  const bondRef = createBond(parent, atom);
-  history.push({ type: 'addAtom', atomId: atom.id, bondRef });
-  onStateChanged();
-}
-function actAddBond(a, b) {
-  const bondRef = createBond(a, b);
-  if (bondRef) { history.push({ type: 'addBond', bondRef }); onStateChanged(); }
-}
-function undo() {
-  const action = history.pop();
-  if (!action) return;
-  if (action.type === 'addAtom') removeAtom(action.atomId);
-  else if (action.type === 'addBond') removeBondRef(action.bondRef);
-  selectedAtomId = null; clearSelectionRing();
-  onStateChanged();
-}
-function clearAll() {
-  const ids = [...atoms.keys()];
-  for (const id of ids) removeAtom(id);
-  history.length = 0;
-  selectedAtomId = null; clearSelectionRing();
-  won = false; postWinView = false;
-  document.getElementById('winOverlay').classList.remove('show');
-  onStateChanged();
-}
-function advanceLevel() {
-  if (currentLevel >= LEVELS.length) { showFinal(); return; }
-  currentLevel++;
-  updateTargetLabel();
-  if (mode === 'view') setMode('build');
-  clearAll();
-}
-function resetGame() {
-  currentLevel = 1;
-  updateTargetLabel();
-  if (mode === 'view') setMode('build');
-  document.getElementById('finalOverlay').classList.remove('show');
-  clearAll();
-}
-
+function showFinal() { document.getElementById('finalSheet').classList.add('show'); }
 /* ===========================================================
    NAMING ENGINE — old-style IUPAC  (preserved verbatim)
    =========================================================== */
@@ -1208,289 +1235,220 @@ function generateName() {
   return name;
 }
 
-/* ===========================================================
+
+/* =========================================================================
    INTERACTION
-   =========================================================== */
+   ========================================================================= */
 document.querySelectorAll('.atomBtn').forEach(btn => {
   btn.addEventListener('click', () => {
     const el = btn.dataset.el;
-    selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
-    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('selected', b.dataset.el === selectedPaletteEl));
-    selectedAtomId = null; clearSelectionRing();
+    selectedEl = (selectedEl === el) ? null : el;
+    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('on', b.dataset.el === selectedEl));
+    clearHalo();
   });
 });
-
 document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('clearBtn').addEventListener('click', clearAll);
 
-document.getElementById('viewMoleculeBtn').addEventListener('click', () => {
-  document.getElementById('winOverlay').classList.remove('show');
-  postWinView = true;
-  if (mode !== 'view') setMode('view');
-  updateFloatingNext(true);
-});
-document.getElementById('nextChallengeBtn').addEventListener('click', () => {
-  document.getElementById('winOverlay').classList.remove('show');
+document.getElementById('nextBtn').addEventListener('click', () => {
+  document.getElementById('winSheet').classList.remove('show');
   advanceLevel();
 });
-document.getElementById('floatingNextBtn').addEventListener('click', advanceLevel);
-document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+document.getElementById('inspectBtn').addEventListener('click', () => {
+  document.getElementById('winSheet').classList.remove('show');
+  postWin = true; spin = true;
+  document.getElementById('nextFloat').classList.add('show');
+});
+document.getElementById('nextFloat').addEventListener('click', advanceLevel);
+document.getElementById('againBtn').addEventListener('click', resetGame);
 
-const modeBtn = document.getElementById('modeToggle');
-const modeLabel = document.getElementById('modeLabel');
-function setMode(next) {
-  mode = next;
-  modeLabel.textContent = mode === 'build' ? 'Inspect in 3D' : 'Back to build';
-  modeBtn.classList.toggle('on', mode === 'view');
-  selectedAtomId = null; clearSelectionRing();
-  updateFloatingNext(currentName === currentTarget());
-  if (mode === 'build') {
-    root.rotation.set(0, 0, 0); root.position.set(0, 0, 0); viewPan.set(0, 0, 0);
-    autoFrame();
-  } else if (atoms.size > 0) {
-    computeViewCenter(); viewPan.set(0, 0, 0); root.rotation.set(0, 0, 0);
-    applyViewTransform();
-    camera.position.set(0, 0, Math.max(14, camera.position.z)); camera.lookAt(0, 0, 0);
-  }
-}
-modeBtn.addEventListener('click', () => setMode(mode === 'build' ? 'view' : 'build'));
-
-const helpOverlay = document.getElementById('helpOverlay');
-document.getElementById('helpBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
-document.getElementById('howBtn').addEventListener('click', () => helpOverlay.classList.add('show'));
-document.getElementById('closeHelpBtn').addEventListener('click', () => { helpOverlay.classList.remove('show'); dismissStart(); });
-helpOverlay.addEventListener('click', (e) => { if (e.target === helpOverlay || e.target.classList.contains('scrim')) helpOverlay.classList.remove('show'); });
+const helpSheet = document.getElementById('helpSheet');
+document.getElementById('helpBtn').addEventListener('click', () => helpSheet.classList.add('show'));
+document.getElementById('howBtn').addEventListener('click', () => helpSheet.classList.add('show'));
+document.getElementById('closeHelpBtn').addEventListener('click', () => { helpSheet.classList.remove('show'); dismissStart(); });
+helpSheet.addEventListener('click', e => { if (e.target === helpSheet || e.target.classList.contains('scrim')) helpSheet.classList.remove('show'); });
 
 function dismissStart() {
-  const s = document.getElementById('startScreen');
-  if (!s.classList.contains('hide')) { s.classList.add('hide'); setTimeout(resize, 80); setTimeout(resize, 480); }
+  if (started) return;
+  started = true;
+  document.getElementById('start').classList.add('hide');
+  document.body.classList.remove('pre');
+  setTimeout(() => { clearAll(); resize(); }, 360);
 }
 document.getElementById('beginBtn').addEventListener('click', dismissStart);
 
-window.addEventListener('keydown', (e) => {
+window.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
+  if (k === 'escape') { helpSheet.classList.remove('show'); return; }
+  if (!started) { if (k === 'enter' || k === ' ') dismissStart(); return; }
   const map = { c: 'C', n: 'N', o: 'O' };
   if (map[k]) {
-    const el = map[k];
-    selectedPaletteEl = (selectedPaletteEl === el) ? null : el;
-    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('selected', b.dataset.el === selectedPaletteEl));
-    selectedAtomId = null; clearSelectionRing();
-  } else if (k === 'u' || k === 'z') undo();
-  else if (k === 'v') setMode(mode === 'build' ? 'view' : 'build');
-  else if (k === 'escape') helpOverlay.classList.remove('show');
+    selectedEl = (selectedEl === map[k]) ? null : map[k];
+    document.querySelectorAll('.atomBtn').forEach(b => b.classList.toggle('on', b.dataset.el === selectedEl));
+    clearHalo();
+  } else if (k === 'z' || k === 'u') undo();
 });
 
-/* ---------- Canvas pointer / touch ---------- */
+/* ---------- Pointer: drag orbits, tap builds ---------- */
 const canvas = renderer.domElement;
-const ts = { active: false, moved: false, panning: false, startX: 0, startY: 0, lastX: 0, lastY: 0, pinchStart: 0, pinchCamStart: 0, pinchMidX: 0, pinchMidY: 0, twoFinger: false };
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const drag = { on: false, moved: false, x: 0, y: 0, lx: 0, ly: 0, pinch: 0, pinchZoom: 1, two: false };
 
-function pxToWorld() {
-  const h = renderer.domElement.clientHeight || 1;
-  const worldH = 2 * Math.abs(camera.position.z) * Math.tan((camera.fov * Math.PI / 180) / 2);
-  return worldH / h;
+function pickAtom(cx, cy) {
+  const rect = canvas.getBoundingClientRect();
+  ndc.x =  ((cx - rect.left) / rect.width)  * 2 - 1;
+  ndc.y = -((cy - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+  const meshes = [];
+  for (const a of atoms.values()) meshes.push(a.mesh);
+  const hits = raycaster.intersectObjects(meshes, false);
+  return hits.length ? atoms.get(hits[0].object.userData.atomId) : null;
 }
-function pointerDown(x, y, shift) { ts.active = true; ts.moved = false; ts.panning = !!shift; ts.startX = ts.lastX = x; ts.startY = ts.lastY = y; idleT = 0; }
-function pointerMove(x, y) {
-  if (!ts.active) return;
-  const dx = x - ts.startX, dy = y - ts.startY;
-  if (!ts.moved && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) ts.moved = true;
-  if (mode === 'view' && ts.moved) {
-    const ddx = x - ts.lastX, ddy = y - ts.lastY;
-    if (ts.panning) { const k = pxToWorld(); viewPan.x += ddx * k; viewPan.y -= ddy * k; }
-    else { root.rotation.y += ddx * 0.01; root.rotation.x += ddy * 0.01; }
-    applyViewTransform();
-  }
-  ts.lastX = x; ts.lastY = y;
-}
-function pointerUp(x, y) { if (!ts.active) return; ts.active = false; if (ts.moved) return; handleTap(x, y); }
-
-function handleTap(clientX, clientY) {
-  if (mode !== 'build') return;
-  const hit = pickAtom(clientX, clientY);
+function handleTap(cx, cy) {
+  const hit = pickAtom(cx, cy);
   if (hit) {
-    if (selectedPaletteEl) actAddAtomBonded(selectedPaletteEl, hit);
-    else {
-      if (selectedAtomId === null) { selectedAtomId = hit.id; showSelectionRing(hit); }
-      else if (selectedAtomId === hit.id) { selectedAtomId = null; clearSelectionRing(); }
-      else { const a = atoms.get(selectedAtomId); actAddBond(a, hit); selectedAtomId = null; clearSelectionRing(); }
-    }
+    if (selectedEl) { actAddBonded(selectedEl, hit); return; }
+    if (selectedAtomId === null) showHalo(hit);
+    else if (selectedAtomId === hit.id) clearHalo();
+    else { const a = atoms.get(selectedAtomId); clearHalo(); if (a) actBond(a, hit); }
     return;
   }
-  if (selectedPaletteEl && atoms.size === 0) actAddFirstAtom(selectedPaletteEl, new THREE.Vector3(0, 0, 0));
-  else if (selectedAtomId !== null) { selectedAtomId = null; clearSelectionRing(); }
+  if (selectedEl && atoms.size === 0) actAddFirst(selectedEl);
+  else clearHalo();
 }
 
-canvas.addEventListener('mousedown', e => pointerDown(e.clientX, e.clientY, e.shiftKey || e.button === 2));
-canvas.addEventListener('mousemove', e => pointerMove(e.clientX, e.clientY));
-canvas.addEventListener('mouseup',   e => pointerUp(e.clientX, e.clientY));
+function down(x, y) { drag.on = true; drag.moved = false; drag.x = drag.lx = x; drag.y = drag.ly = y; }
+function move(x, y) {
+  if (!drag.on) return;
+  if (!drag.moved && (Math.abs(x - drag.x) > 6 || Math.abs(y - drag.y) > 6)) drag.moved = true;
+  if (drag.moved) {
+    pivot.rotation.y += (x - drag.lx) * 0.0085;
+    pivot.rotation.x = Math.max(-1.35, Math.min(1.35, pivot.rotation.x + (y - drag.ly) * 0.0085));
+    spin = false;
+  }
+  drag.lx = x; drag.ly = y;
+}
+function up(x, y) {
+  if (!drag.on) return;
+  drag.on = false;
+  if (!drag.moved) handleTap(x, y);
+}
+function setZoom(z) { zoom = Math.max(0.45, Math.min(2.6, z)); }
+
+canvas.addEventListener('mousedown', e => down(e.clientX, e.clientY));
+canvas.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+canvas.addEventListener('mouseup',   e => up(e.clientX, e.clientY));
+canvas.addEventListener('mouseleave', () => { drag.on = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
-canvas.addEventListener('wheel', e => {
-  if (mode !== 'view') return;
-  const factor = Math.exp(e.deltaY * 0.001);
-  camera.position.z = Math.max(5, Math.min(120, camera.position.z * factor));
-  e.preventDefault();
-}, { passive: false });
+canvas.addEventListener('wheel', e => { setZoom(zoom * Math.exp(e.deltaY * 0.0012)); e.preventDefault(); }, { passive: false });
 
 canvas.addEventListener('touchstart', e => {
-  if (e.touches.length === 1) { ts.twoFinger = false; pointerDown(e.touches[0].clientX, e.touches[0].clientY, false); }
+  if (e.touches.length === 1) { drag.two = false; down(e.touches[0].clientX, e.touches[0].clientY); }
   else if (e.touches.length === 2) {
-    ts.active = false; ts.twoFinger = true;
-    const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
-    ts.pinchStart = Math.hypot(dx, dy);
-    ts.pinchCamStart = camera.position.z;
-    ts.pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    ts.pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    drag.on = false; drag.two = true;
+    drag.pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    drag.pinchZoom = zoom;
   }
   e.preventDefault();
 }, { passive: false });
 canvas.addEventListener('touchmove', e => {
-  if (e.touches.length === 1 && !ts.twoFinger) pointerMove(e.touches[0].clientX, e.touches[0].clientY);
-  else if (e.touches.length === 2 && mode === 'view') {
-    const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
-    const dist = Math.hypot(dx, dy);
-    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2, midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (dist > 0 && ts.pinchStart > 0) { const ratio = ts.pinchStart / dist; camera.position.z = Math.max(5, Math.min(120, ts.pinchCamStart * ratio)); }
-    const k = pxToWorld();
-    viewPan.x += (midX - ts.pinchMidX) * k; viewPan.y -= (midY - ts.pinchMidY) * k;
-    ts.pinchMidX = midX; ts.pinchMidY = midY;
-    applyViewTransform();
+  if (e.touches.length === 1 && !drag.two) move(e.touches[0].clientX, e.touches[0].clientY);
+  else if (e.touches.length === 2 && drag.pinch > 0) {
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (d > 0) setZoom(drag.pinchZoom * drag.pinch / d);
+    spin = false;
   }
   e.preventDefault();
 }, { passive: false });
 canvas.addEventListener('touchend', e => {
-  if (e.touches.length === 0 && !ts.twoFinger && e.changedTouches.length > 0) pointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-  if (e.touches.length === 0) ts.twoFinger = false;
+  if (e.touches.length === 0 && !drag.two && e.changedTouches.length) up(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  if (e.touches.length === 0) drag.two = false;
   e.preventDefault();
 }, { passive: false });
 document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-/* ---------- Win / celebration ---------- */
-function showWin() {
-  won = true;
-  document.getElementById('winName').innerHTML = fmtFormula(currentTarget());
-  document.getElementById('winOverlay').classList.add('show');
-  burstConfetti();
-}
-function showFinal() { document.getElementById('finalOverlay').classList.add('show'); burstConfetti(true); }
-
-const fx = document.getElementById('fx');
-const fxCtx = fx.getContext('2d');
-let confetti = [];
-function sizeFx() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; fxCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
-window.addEventListener('resize', sizeFx);
-function burstConfetti(big) {
-  sizeFx();
-  const colors = ['#2b3fa6', '#b07a2b', '#2f7d5b', '#d2402f', '#2f4cc4', '#e3b34f'];
-  const n = big ? 200 : 130;
-  const cx = innerWidth / 2, cy = innerHeight * 0.4;
-  for (let i = 0; i < n; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const sp = 5 + Math.random() * (big ? 14 : 10);
-    confetti.push({ x: cx + (Math.random()-0.5)*60, y: cy + (Math.random()-0.5)*40, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4, g: 0.22 + Math.random()*0.12, rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.4, w: 6 + Math.random()*6, h: 4 + Math.random()*5, color: colors[(Math.random()*colors.length)|0], life: 0, max: 90 + Math.random()*50 });
-  }
-}
-function updateConfetti() {
-  if (!confetti.length) { if (fx.width) fxCtx.clearRect(0,0,fx.width,fx.height); return; }
-  fxCtx.clearRect(0, 0, innerWidth, innerHeight);
-  for (let i = confetti.length - 1; i >= 0; i--) {
-    const p = confetti[i];
-    p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.rot += p.vr; p.life++;
-    const alpha = Math.max(0, 1 - p.life / p.max);
-    fxCtx.save(); fxCtx.translate(p.x, p.y); fxCtx.rotate(p.rot); fxCtx.globalAlpha = alpha; fxCtx.fillStyle = p.color;
-    fxCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h); fxCtx.restore();
-    if (p.life >= p.max || p.y > innerHeight + 40) confetti.splice(i, 1);
-  }
-}
-
-/* ---------- Hero scene (start screen decoration) ---------- */
-let heroRenderer = null, heroScene = null, heroCamera = null, heroRoot = null;
-function initHero() {
-  const hv = document.getElementById('heroViewport');
-  if (!hv || typeof THREE === 'undefined') return;
-  heroRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  heroRenderer.setClearColor(0x000000, 0);
-  heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  if ('outputEncoding' in heroRenderer) heroRenderer.outputEncoding = THREE.sRGBEncoding;
-  if ('toneMapping' in heroRenderer) { heroRenderer.toneMapping = THREE.ACESFilmicToneMapping; heroRenderer.toneMappingExposure = 1.15; }
-  hv.appendChild(heroRenderer.domElement);
-  heroScene = new THREE.Scene();
-  heroScene.environment = sharedEnv;
-  heroCamera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  heroCamera.position.set(0, 0, 12);
-  heroScene.add(new THREE.AmbientLight(0xffffff, 0.42));
-  heroScene.add(new THREE.HemisphereLight(0xdfe7ff, 0x0b0d12, 0.5));
-  const dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(-6, 10, 12); heroScene.add(dl);
-  const fl = new THREE.DirectionalLight(0xffe8cf, 0.35); fl.position.set(8, -5, -6); heroScene.add(fl);
-  heroRoot = new THREE.Group(); heroScene.add(heroRoot);
-
-  // isopropanol-ish showcase: C-C(-C)-O with hydrogens
-  const P = (x,y,z)=>new THREE.Vector3(x,y,z);
-  const nodes = [
-    { el:'C', p:P(-2.1, 0.2, 0) },
-    { el:'C', p:P(0, -0.4, 0.3) },
-    { el:'C', p:P(2.1, 0.3, -0.2) },
-    { el:'O', p:P(0, 1.7, -0.4) },
-  ];
-  const edges = [[0,1],[1,2],[1,3]];
-  const meshes = nodes.map(nd => { const m = new THREE.Mesh(getSphereGeo(nd.el), atomMats[nd.el]); m.position.copy(nd.p); heroRoot.add(m); return m; });
-  edges.forEach(([a,b]) => heroRoot.add(makeBondMesh(nodes[a].p, nodes[b].p)));
-  // a few hydrogens for fullness
-  const hAngles = [ [0,[-2.1,0.2,0],[[-1,0.9],[-1,-1]]] ];
-  [[-3.4,0.6,0.5],[-2.6,-1.1,-0.4],[1.0,-1.4,0.8],[2.9,-0.6,0.4],[3.1,1.2,-0.9],[0.9,2.4,-0.2]].forEach(pt => {
-    const h = new THREE.Mesh(getSphereGeo('H'), atomMats.H); h.position.set(pt[0],pt[1],pt[2]); heroRoot.add(h);
-  });
-
-  function hres() {
-    const w = hv.clientWidth, h = hv.clientHeight;
-    if (!w || !h) return;
-    heroRenderer.setSize(w, h); heroCamera.aspect = w / h; heroCamera.updateProjectionMatrix();
-  }
-  hres(); setTimeout(hres, 60);
-  window.addEventListener('resize', hres);
-}
-
-/* ---------- Animation loop ---------- */
-let idleT = 0;
+/* =========================================================================
+   LOOP
+   ========================================================================= */
+const framePos = new THREE.Vector3();
+const _off = new THREE.Vector3();
 const clock = new THREE.Clock();
+
+/* While the intro is up, sit the molecule clear of the headline. */
+function introOffset() {
+  if (started) return _off.set(0, 0, 0);
+  const halfH = Math.tan(camera.fov * Math.PI / 360) * camera.position.z;
+  return camera.aspect > 1.1
+    ? _off.set(halfH * camera.aspect * 0.34, 0, 0)
+    : _off.set(0, halfH * 0.42, 0);
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
-  for (const a of atoms.values()) {
-    if (a.mesh.userData.spawn < 1) {
-      a.mesh.userData.spawn = Math.min(1, a.mesh.userData.spawn + dt * 6);
-      const t = a.mesh.userData.spawn;
-      a.mesh.scale.setScalar(Math.max(0.01, t * (1 + 0.12 * Math.sin(t * Math.PI))));
+  if (!settled) {
+    // Relax on a time budget so slower devices still reach rest quickly.
+    const t0 = performance.now();
+    let peak = 0, steps = 0;
+    do { peak = relaxStep(1 / 60); steps++; }
+    while (steps < 24 && peak >= REST_V && performance.now() - t0 < 2.5);
+    if (peak < REST_V) settled = true;
+    updateFraming();
+  }
+
+  for (const nd of phys.nodes) {
+    const m = nd.mesh;
+    if (m.userData.grow < 1) {
+      m.userData.grow = Math.min(1, m.userData.grow + dt * 5.5);
+      const t = m.userData.grow;
+      m.scale.setScalar(Math.max(0.01, t * (1 + 0.11 * Math.sin(t * Math.PI))));
     }
   }
-  if (selectionRing) {
-    const t = clock.elapsedTime;
-    selectionRing.scale.setScalar(1 + Math.sin(t * 4) * 0.07);
-    selectionRing.material.opacity = 0.6 + Math.abs(Math.sin(t * 4)) * 0.35;
-  }
-  if (mode === 'view' && atoms.size > 0 && !ts.active && !ts.twoFinger) {
-    idleT += dt;
-    if (idleT > 0.5) { root.rotation.y += dt * 0.26; applyViewTransform(); }
-  }
-  updateConfetti();
-  renderer.render(scene, camera);
 
-  if (heroRenderer && !document.getElementById('startScreen').classList.contains('hide')) {
-    heroRoot.rotation.y += dt * 0.35;
-    heroRoot.rotation.x = Math.sin(clock.elapsedTime * 0.3) * 0.12;
-    heroRenderer.render(heroScene, heroCamera);
+  syncMeshes();
+
+  if (spin) pivot.rotation.y += dt * 0.2;
+  if (halo) halo.material.opacity = 0.14 + Math.abs(Math.sin(clock.elapsedTime * 3)) * 0.14;
+
+  framePos.copy(centerTarget).negate().add(introOffset());
+  frame.position.lerp(framePos, 1 - Math.pow(0.004, dt));
+  const wantZ = fitDist * zoom;
+  camera.position.z += (wantZ - camera.position.z) * (1 - Math.pow(0.006, dt));
+
+  renderer.render(scene, camera);
+}
+
+/* ---------- Start-screen demo: 2-butanol, pre-relaxed ---------- */
+function buildDemo() {
+  const chain = [createAtom('C', new THREE.Vector3(0, 0, 0))];
+  for (let i = 0; i < 3; i++) {
+    const prev = chain[chain.length - 1];
+    chain.push(createAtom('C', newDir(prev).multiplyScalar(pairLen('C', 'C')).add(prev.p)));
+    createBond(prev, chain[chain.length - 1]);
   }
+  const o = createAtom('O', newDir(chain[1]).multiplyScalar(pairLen('C', 'O')).add(chain[1].p));
+  createBond(chain[1], o);
+  syncHydrogens();
+  rebuildPhysics();
+  settle(1200);
+  for (const nd of phys.nodes) { nd.mesh.userData.grow = 1; nd.mesh.scale.setScalar(1); }
+  updateFraming();
+  camera.position.z = fitDist;
+  pivot.rotation.set(0.25, -0.5, 0);
 }
 
 /* ---------- Init ---------- */
-sizeFx();
+document.body.classList.add('pre');
+camera.position.set(0, 0, 14);
+camera.lookAt(0, 0, 0);
 resize();
-setTimeout(resize, 50);
+setTimeout(resize, 60);
 updateTargetLabel();
-initHero();
+buildDemo();
 animate();
-onStateChanged();
 </script>
 </body>
 </html>
