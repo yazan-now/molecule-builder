@@ -454,18 +454,44 @@ const LEVELS = [
 let currentLevel = 1;
 function currentTarget() { return LEVELS[currentLevel - 1].target; }
 
-/* ---------- Chemistry constants ---------- */
+/* ---------- Force field ----------
+   Geometry parameters are experimental values; the energy terms are the
+   usual molecular-mechanics ones. Positions are held in Angstroms and
+   scaled to scene units only when drawn.                               */
 const MAX_BONDS = { C: 4, N: 3, O: 2, H: 1 };
-const S = 1.35;                                  // Angstrom -> scene units
-const LEN = { CC: 1.54, CH: 1.09, CN: 1.47, CO: 1.43, HN: 1.01, HO: 0.96, NN: 1.45, NO: 1.40, OO: 1.48 };
-const ANG = { C: 109.47, N: 107.5, O: 104.5 };   // sp3 bond angles, degrees
-const RAD = { C: 0.62, N: 0.59, O: 0.56, H: 0.36 };
-const SOFT = { C: 1.08, N: 1.03, O: 0.99, H: 0.64 };  // steric contact radii
-const MASS = { C: 12, N: 14, O: 16, H: 1.8 };
+const S = 1.35;                     // Angstrom -> scene units (display only)
+const DEG = Math.PI / 180;
+
+const LEN = { CC: 1.526, CH: 1.093, CN: 1.469, CO: 1.425, HN: 1.014, HO: 0.963,
+              NN: 1.449, NO: 1.40, OO: 1.48 };
+/* Equilibrium angle at a centre depends on what is on either side of it:
+   C-C-C opens up while H-C-H closes, and the lone pairs on N and O squeeze
+   those centres further. These are the parameters, not the outcome: the
+   angles at a centre compete, so C-C-C is set at 113.9 to land propane on
+   its measured 112.4 once everything else has pulled on it. */
+const ANGLE0 = {
+  C: { CC: 113.9, CH: 110.7, HH: 107.8, CN: 110.0, HN: 109.8, CO: 107.8, HO: 110.3 },
+  N: { CC: 110.9, CH: 110.3, HH: 107.1 },
+  O: { CC: 111.7, CH: 108.9, HH: 104.5 },
+};
+const ANGLE_DEF = { C: 109.5, N: 108.8, O: 108.5 };
+const VDW  = { C: 1.70, N: 1.55, O: 1.52, H: 1.20 };     // van der Waals radii
+const MASS = { C: 12.011, N: 14.007, O: 15.999, H: 1.008 };
+const RAD  = { C: 0.62, N: 0.59, O: 0.56, H: 0.36 };     // drawn radii, scene units
 const COLOR = { C: 0x45454b, N: 0x2f62f0, O: 0xf5382c, H: 0xcfcfd6 };
 
-function pairLen(a, b) { const k = a < b ? a + b : b + a; return (LEN[k] || 1.5) * S; }
-function idealAngle(el) { return (ANG[el] || 109.47) * Math.PI / 180; }
+const K_BOND   = 600;    // kcal/mol/A^2
+const K_ANGLE  = 65;     // kcal/mol/rad^2
+const V_TORS   = 0.33;   // kcal/mol per quadruple (ethane's ~2.9 over 9 of them)
+const EPS_VDW  = 0.07;   // kcal/mol well depth
+const SCALE_14 = 0.5;    // 1-4 pairs are softened; the torsion covers them
+
+function pairLen(a, b) { const k = a < b ? a + b : b + a; return LEN[k] || 1.5; }
+function angle0(centre, a, b) {
+  const k = a < b ? a + b : b + a, t = ANGLE0[centre];
+  return ((t && t[k]) || ANGLE_DEF[centre] || 109.5) * DEG;
+}
+function idealAngle(el) { return (ANGLE_DEF[el] || 109.5) * DEG; }
 
 /* ---------- Scene ---------- */
 const viewport = document.getElementById('viewport');
@@ -549,9 +575,16 @@ function partnersOf(a) {
   return list;
 }
 
-/* Direction for one more substituent on `a`, following VSEPR. */
-function newDir(a) {
-  const parts = partnersOf(a);
+function heavyPartners(a) {
+  const out = [];
+  for (const nid of a.neighbors) { const n = atoms.get(nid); if (n) out.push(n); }
+  return out;
+}
+/* Where the next substituent on `a` goes, by VSEPR, avoiding `parts`.
+   With one neighbour it is placed anti to whatever is two bonds back, so
+   chains are born extended rather than coiled — a local minimiser cannot
+   climb the ~3 kcal/mol torsion barrier to fix a gauche start by itself. */
+function slotDir(a, parts) {
   const dirs = parts.map(p => new THREE.Vector3().subVectors(p.p, a.p).normalize());
   const th = idealAngle(a.element);
 
@@ -561,7 +594,8 @@ function newDir(a) {
     const b = dirs[0];
     let u = null;
     // Prefer the anti arrangement across the neighbour, giving a real zig-zag chain.
-    const grand = partnersOf(parts[0]).filter(x => x !== a)[0];
+    const near = parts[0];
+    const grand = (near.element === 'H' ? partnersOf(near) : heavyPartners(near)).filter(x => x !== a)[0];
     if (grand) {
       _u.subVectors(grand.p, a.p);
       _u.sub(_t.copy(b).multiplyScalar(_u.dot(b)));
@@ -585,11 +619,13 @@ function newDir(a) {
   if (s.lengthSq() < 1e-8) return perpTo(dirs[0]);
   return s.negate().normalize();
 }
+const newDir    = a => slotDir(a, partnersOf(a));     // for implicit hydrogens
+const growthDir = a => slotDir(a, heavyPartners(a));  // for a real substituent
 
 function orientBond(mesh, pa, pb) {
-  _t.addVectors(pa, pb).multiplyScalar(0.5);
+  _t.addVectors(pa, pb).multiplyScalar(0.5 * S);
   mesh.position.copy(_t);
-  _t.subVectors(pb, pa);
+  _t.subVectors(pb, pa).multiplyScalar(S);
   const len = _t.length();
   if (len < 1e-6) return;
   mesh.scale.set(1, len, 1);
@@ -656,7 +692,7 @@ function addH(a) {
     v: new THREE.Vector3(), f: new THREE.Vector3(),
   };
   h.mesh = new THREE.Mesh(sphereGeo('H'), atomMat.H);
-  h.mesh.position.copy(h.p);
+  h.mesh.position.copy(h.p).multiplyScalar(S);
   h.mesh.scale.setScalar(0.01);
   h.mesh.userData.grow = 0;
   h.bond = new THREE.Mesh(bondGeo, bondMat);
@@ -670,15 +706,6 @@ function dropH(h) {
   if (i === -1) return;
   frame.remove(h.mesh); frame.remove(h.bond);
   hydros.splice(i, 1);
-}
-/* A new substituent takes the place of a hydrogen, so reuse that slot. */
-function freeSlot(a) {
-  let last = null;
-  for (const h of hydros) if (h.parent === a.id) last = h;
-  if (!last) return newDir(a);
-  const dir = new THREE.Vector3().subVectors(last.p, a.p).normalize();
-  dropH(last);
-  return dir;
 }
 function dropHToward(a, target) {
   let best = null, bestDot = -2;
@@ -699,9 +726,13 @@ function syncHydrogens() {
   }
 }
 
-/* ---------- Molecular mechanics ---------- */
-const K_BOND = 70, K_ANGLE = 22, K_STERIC = 16, DAMP = 0.88, MAX_V = 2.4;
-const phys = { nodes: [], springs: [], excl: new Set() };
+/* ---------- Molecular mechanics ----------
+   Damped minimisation of bond, angle, torsion and van der Waals terms.
+   The torsion term is what makes conformations behave: without it,
+   rotation about a single bond is free and chains settle at arbitrary
+   dihedrals instead of staggered ones.                                 */
+const DT = 0.02, DAMP = 0.9, MAX_V = 1.5, REST_V = 4e-3;
+const phys = { nodes: [], bonds: [], angles: [], tors: [], pairs: [] };
 let settled = false;
 
 const pkey = (i, j) => (i < j ? i + ':' + j : j + ':' + i);
@@ -710,70 +741,129 @@ function rebuildPhysics() {
   phys.nodes = [];
   for (const a of atoms.values()) { a._i = phys.nodes.length; phys.nodes.push(a); }
   for (const h of hydros)         { h._i = phys.nodes.length; phys.nodes.push(h); }
-
-  phys.springs = [];
+  const n = phys.nodes.length;
   const adj = phys.nodes.map(() => []);
-  const addSpring = (i, j, len, k) => { phys.springs.push({ i, j, len, k }); };
 
+  phys.bonds = [];
   for (const b of bonds) {
     const A = atoms.get(b.a), B = atoms.get(b.b);
-    addSpring(A._i, B._i, pairLen(A.element, B.element), K_BOND);
+    phys.bonds.push({ i: A._i, j: B._i, len: pairLen(A.element, B.element) });
     adj[A._i].push(B._i); adj[B._i].push(A._i);
   }
   for (const h of hydros) {
     const A = atoms.get(h.parent);
-    addSpring(A._i, h._i, pairLen(A.element, 'H'), K_BOND);
+    phys.bonds.push({ i: A._i, j: h._i, len: pairLen(A.element, 'H') });
     adj[A._i].push(h._i); adj[h._i].push(A._i);
   }
 
-  phys.excl = new Set();
-  for (const s of phys.springs) phys.excl.add(pkey(s.i, s.j));
+  const excl = new Set(), p14 = new Set();
+  for (const b of phys.bonds) excl.add(pkey(b.i, b.j));
 
-  // Angle terms as 1-3 distance springs (law of cosines on the ideal angle).
-  for (let c = 0; c < phys.nodes.length; c++) {
+  phys.angles = [];
+  for (let c = 0; c < n; c++) {
     const el = phys.nodes[c].element;
     if (el === 'H' || adj[c].length < 2) continue;
-    const th = idealAngle(el);
     for (let x = 0; x < adj[c].length; x++) {
       for (let y = x + 1; y < adj[c].length; y++) {
-        const i = adj[c][x], j = adj[c][y];
-        const l1 = pairLen(el, phys.nodes[i].element);
-        const l2 = pairLen(el, phys.nodes[j].element);
-        const d13 = Math.sqrt(l1 * l1 + l2 * l2 - 2 * l1 * l2 * Math.cos(th));
-        addSpring(i, j, d13, K_ANGLE);
-        phys.excl.add(pkey(i, j));
+        const i = adj[c][x], k = adj[c][y];
+        phys.angles.push({ i, j: c, k, th0: angle0(el, phys.nodes[i].element, phys.nodes[k].element) });
+        excl.add(pkey(i, k));
       }
+    }
+  }
+
+  phys.tors = [];
+  for (const b of phys.bonds) {
+    const j = b.i, k = b.j;
+    if (adj[j].length < 2 || adj[k].length < 2) continue;
+    for (const i of adj[j]) {
+      if (i === k) continue;
+      for (const l of adj[k]) {
+        if (l === j || l === i) continue;
+        phys.tors.push({ i, j, k, l });
+        if (!excl.has(pkey(i, l))) p14.add(pkey(i, l));
+      }
+    }
+  }
+
+  phys.pairs = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const key = pkey(i, j);
+      if (excl.has(key)) continue;
+      const A = phys.nodes[i], B = phys.nodes[j];
+      phys.pairs.push({
+        i, j,
+        rm: VDW[A.element] + VDW[B.element],
+        eps: EPS_VDW * (p14.has(key) ? SCALE_14 : 1),
+      });
     }
   }
   settled = false;
 }
+
+const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3();
+const _n1 = new THREE.Vector3(), _n2 = new THREE.Vector3();
+const _g1 = new THREE.Vector3(), _g2 = new THREE.Vector3();
+const _g3 = new THREE.Vector3(), _g4 = new THREE.Vector3();
 
 function relaxStep(dt) {
   const nodes = phys.nodes, n = nodes.length;
   if (n < 2) return 0;
   for (const nd of nodes) nd.f.set(0, 0, 0);
 
-  for (const s of phys.springs) {
-    const A = nodes[s.i], B = nodes[s.j];
-    _t.subVectors(B.p, A.p);
-    const r = _t.length();
-    if (r < 1e-6) continue;
-    _t.multiplyScalar(s.k * (r - s.len) / r);
-    A.f.add(_t); B.f.sub(_t);
+  /* bond stretch: E = 1/2 k (r - r0)^2 */
+  for (const bd of phys.bonds) {
+    const A = nodes[bd.i], B = nodes[bd.j];
+    _a.subVectors(B.p, A.p);
+    const r = _a.length();
+    if (r < 1e-9) continue;
+    _a.multiplyScalar(K_BOND * (r - bd.len) / r);
+    A.f.add(_a); B.f.sub(_a);
   }
 
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (phys.excl.has(pkey(i, j))) continue;
-      const A = nodes[i], B = nodes[j];
-      _t.subVectors(B.p, A.p);
-      let r = _t.length();
-      const rmin = SOFT[A.element] + SOFT[B.element];
-      if (r >= rmin) continue;
-      if (r < 1e-4) { _t.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5); r = _t.length(); }
-      _t.multiplyScalar(K_STERIC * (rmin - r) / r);
-      A.f.sub(_t); B.f.add(_t);
-    }
+  /* angle bend: E = 1/2 k (theta - theta0)^2 */
+  for (const an of phys.angles) {
+    const I = nodes[an.i], J = nodes[an.j], K = nodes[an.k];
+    _a.subVectors(I.p, J.p); _b.subVectors(K.p, J.p);
+    const na = _a.length(), nb = _b.length();
+    if (na < 1e-9 || nb < 1e-9) continue;
+    const cs = Math.max(-1, Math.min(1, _a.dot(_b) / (na * nb)));
+    const sn = Math.sqrt(Math.max(1e-8, 1 - cs * cs));
+    const coef = K_ANGLE * (Math.acos(cs) - an.th0) / sn;
+    _g1.copy(_b).multiplyScalar(1 / (na * nb)).addScaledVector(_a, -cs / (na * na)).multiplyScalar(coef);
+    _g3.copy(_a).multiplyScalar(1 / (na * nb)).addScaledVector(_b, -cs / (nb * nb)).multiplyScalar(coef);
+    I.f.add(_g1); K.f.add(_g3); J.f.sub(_g1); J.f.sub(_g3);
+  }
+
+  /* torsion: E = 1/2 V3 (1 + cos 3phi), minima at the staggered dihedrals */
+  for (const t of phys.tors) {
+    const I = nodes[t.i], J = nodes[t.j], K = nodes[t.k], L = nodes[t.l];
+    _a.subVectors(J.p, I.p); _b.subVectors(K.p, J.p); _c.subVectors(L.p, K.p);
+    _n1.crossVectors(_a, _b); _n2.crossVectors(_b, _c);
+    const n1s = _n1.lengthSq(), n2s = _n2.lengthSq(), nb = _b.length();
+    if (n1s < 1e-10 || n2s < 1e-10 || nb < 1e-9) continue;
+    const phi = Math.atan2(_g1.crossVectors(_n1, _n2).dot(_b) / nb, _n1.dot(_n2));
+    const dEdp = 1.5 * V_TORS * Math.sin(3 * phi);   // sign matches the phi convention above
+    _g1.copy(_n1).multiplyScalar(-dEdp * nb / n1s);
+    _g4.copy(_n2).multiplyScalar( dEdp * nb / n2s);
+    const pr = _a.dot(_b) / (nb * nb), qr = _c.dot(_b) / (nb * nb);
+    _g2.copy(_g1).multiplyScalar(pr - 1).addScaledVector(_g4, -qr);
+    _g3.copy(_g1).multiplyScalar(-pr).addScaledVector(_g4, qr - 1);
+    I.f.add(_g1); J.f.add(_g2); K.f.add(_g3); L.f.add(_g4);
+  }
+
+  /* van der Waals: Lennard-Jones 12-6 between real radii */
+  for (const pr of phys.pairs) {
+    const A = nodes[pr.i], B = nodes[pr.j];
+    _a.subVectors(B.p, A.p);
+    let r = _a.length();
+    if (r > pr.rm * 2.5) continue;
+    if (r < 1e-4) { _a.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5); r = _a.length(); }
+    const rr = Math.max(r, pr.rm * 0.72);          // cap the r^-12 wall
+    const t6 = Math.pow(pr.rm / rr, 6);
+    _a.multiplyScalar(12 * pr.eps * (t6 * t6 - t6) / (rr * r));
+    A.f.sub(_a); B.f.add(_a);
   }
 
   let peak = 0;
@@ -787,18 +877,110 @@ function relaxStep(dt) {
   }
   return peak;
 }
-const REST_V = 1e-2;   // ~0.01 px/frame on screen: visually at rest
+
 function settle(iterations) {
-  for (let i = 0; i < iterations; i++) if (relaxStep(1 / 60) < REST_V) break;
+  for (let i = 0; i < iterations; i++) if (relaxStep(DT) < REST_V) break;
 }
+
+/* Total strain energy, same terms as the forces above. Only needed to
+   compare two candidate conformers. */
+function totalEnergy() {
+  const nodes = phys.nodes;
+  let E = 0;
+  for (const bd of phys.bonds) {
+    const d = nodes[bd.i].p.distanceTo(nodes[bd.j].p) - bd.len;
+    E += 0.5 * K_BOND * d * d;
+  }
+  for (const an of phys.angles) {
+    _a.subVectors(nodes[an.i].p, nodes[an.j].p);
+    _b.subVectors(nodes[an.k].p, nodes[an.j].p);
+    const na = _a.length(), nb = _b.length();
+    if (na < 1e-9 || nb < 1e-9) continue;
+    const d = Math.acos(Math.max(-1, Math.min(1, _a.dot(_b) / (na * nb)))) - an.th0;
+    E += 0.5 * K_ANGLE * d * d;
+  }
+  for (const t of phys.tors) {
+    _a.subVectors(nodes[t.j].p, nodes[t.i].p);
+    _b.subVectors(nodes[t.k].p, nodes[t.j].p);
+    _c.subVectors(nodes[t.l].p, nodes[t.k].p);
+    _n1.crossVectors(_a, _b); _n2.crossVectors(_b, _c);
+    const nb = _b.length();
+    if (_n1.lengthSq() < 1e-10 || _n2.lengthSq() < 1e-10 || nb < 1e-9) continue;
+    const phi = Math.atan2(_g1.crossVectors(_n1, _n2).dot(_b) / nb, _n1.dot(_n2));
+    E += 0.5 * V_TORS * (1 + Math.cos(3 * phi));
+  }
+  for (const pr of phys.pairs) {
+    const r = Math.max(nodes[pr.i].p.distanceTo(nodes[pr.j].p), pr.rm * 0.72);
+    if (r > pr.rm * 2.5) continue;
+    const t6 = Math.pow(pr.rm / r, 6);
+    E += pr.eps * (t6 * t6 - 2 * t6);
+  }
+  return E;
+}
+
+/* Closing a ring strands the structure in whatever basin the open chain
+   happened to land in: a six-ring settles as a twist-boat, some 5.5
+   kcal/mol above the chair. Perturb the heavy-atom frame, rebuild the
+   hydrogens onto it and re-minimise a few times, keeping the best. Only
+   the heavy frame is kicked — scrambling hydrogens just wrecks the
+   structure faster than the minimiser can repair it. */
+function anneal(rounds, ring) {
+  const heavy = [...atoms.values()];
+  if (heavy.length < 3) return;
+  /* The move that actually makes a chair: lift alternate ring atoms out of
+     the ring plane. Tried first, with random kicks as the fallback. */
+  const pucker = () => {
+    if (!ring || ring.length < 4) return false;
+    const nrm = new THREE.Vector3();
+    for (let i = 0; i < ring.length; i++) {
+      const u = ring[i].p, v = ring[(i + 1) % ring.length].p;
+      nrm.x += (u.y - v.y) * (u.z + v.z);
+      nrm.y += (u.z - v.z) * (u.x + v.x);
+      nrm.z += (u.x - v.x) * (u.y + v.y);
+    }
+    if (nrm.lengthSq() < 1e-9) return false;
+    nrm.normalize();
+    ring.forEach((a, i) => a.p.addScaledVector(nrm, i % 2 ? 0.45 : -0.45));
+    return true;
+  };
+  const refresh = () => {
+    for (let i = hydros.length - 1; i >= 0; i--) dropH(hydros[i]);
+    syncHydrogens();
+    rebuildPhysics();
+    settle(5000);
+  };
+  const restore = src => heavy.forEach((a, i) => { a.p.copy(src[i]); a.v.set(0, 0, 0); });
+
+  refresh();
+  let bestE = totalEnergy();
+  let best = heavy.map(a => a.p.clone());
+
+  for (let r = 0; r < rounds; r++) {
+    if (r !== 0 || !pucker()) {
+      for (const a of heavy) {
+        a.p.x += (Math.random() - 0.5) * 0.8;
+        a.p.y += (Math.random() - 0.5) * 0.8;
+        a.p.z += (Math.random() - 0.5) * 0.8;
+        a.v.set(0, 0, 0);
+      }
+    }
+    refresh();
+    const e = totalEnergy();
+    if (e < bestE - 1e-4) { bestE = e; best = heavy.map(a => a.p.clone()); }
+    else restore(best);
+  }
+  restore(best);
+  refresh();
+}
+
 function syncMeshes() {
-  for (const a of atoms.values()) a.mesh.position.copy(a.p);
+  for (const a of atoms.values()) a.mesh.position.copy(a.p).multiplyScalar(S);
   for (const b of bonds) orientBond(b.mesh, atoms.get(b.a).p, atoms.get(b.b).p);
   for (const h of hydros) {
-    h.mesh.position.copy(h.p);
+    h.mesh.position.copy(h.p).multiplyScalar(S);
     orientBond(h.bond, atoms.get(h.parent).p, h.p);
   }
-  if (halo && selectedAtomId !== null && atoms.has(selectedAtomId)) halo.position.copy(atoms.get(selectedAtomId).p);
+  if (halo && selectedAtomId !== null && atoms.has(selectedAtomId)) halo.position.copy(atoms.get(selectedAtomId).p).multiplyScalar(S);
 }
 
 /* ---------- Framing ---------- */
@@ -810,9 +992,9 @@ function updateFraming() {
   const min = new THREE.Vector3(Infinity, Infinity, Infinity);
   const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
   for (const nd of nodes) {
-    const r = RAD[nd.element];
-    min.set(Math.min(min.x, nd.p.x - r), Math.min(min.y, nd.p.y - r), Math.min(min.z, nd.p.z - r));
-    max.set(Math.max(max.x, nd.p.x + r), Math.max(max.y, nd.p.y + r), Math.max(max.z, nd.p.z + r));
+    const r = RAD[nd.element], x = nd.p.x * S, y = nd.p.y * S, z = nd.p.z * S;
+    min.set(Math.min(min.x, x - r), Math.min(min.y, y - r), Math.min(min.z, z - r));
+    max.set(Math.max(max.x, x + r), Math.max(max.y, y + r), Math.max(max.z, z + r));
   }
   centerTarget.addVectors(min, max).multiplyScalar(0.5);
   const radius = Math.max(0.5 * min.distanceTo(max), 1.6);
@@ -839,19 +1021,40 @@ function actAddFirst(el) {
 }
 function actAddBonded(el, parent) {
   if (!canBond(parent)) { toast(`${parent.element} already has ${MAX_BONDS[parent.element]} bonds`); return; }
-  const p = freeSlot(parent).multiplyScalar(pairLen(parent.element, el)).add(parent.p);
+  const dir = growthDir(parent);
+  dropHToward(parent, _t.copy(dir).add(parent.p));
+  const p = dir.multiplyScalar(pairLen(parent.element, el)).add(parent.p);
   const a = createAtom(el, p);
   const bondRef = createBond(parent, a);
   history.push({ type: 'addAtom', atomId: a.id, bondRef });
   onStateChanged();
 }
+/* The existing route between two atoms; with the new bond it is the ring. */
+function ringPath(from, to) {
+  const prev = new Map([[from.id, null]]);
+  const queue = [from.id];
+  while (queue.length) {
+    const x = queue.shift();
+    if (x === to.id) break;
+    for (const nid of atoms.get(x).neighbors) if (!prev.has(nid)) { prev.set(nid, x); queue.push(nid); }
+  }
+  if (!prev.has(to.id)) return null;
+  const path = [];
+  for (let x = to.id; x !== null && x !== undefined; x = prev.get(x)) path.push(atoms.get(x));
+  return path;
+}
 function actBond(a, b) {
   if (a.id === b.id || a.neighbors.has(b.id)) return;
   if (!canBond(a)) { toast(`${a.element} already has ${MAX_BONDS[a.element]} bonds`); return; }
   if (!canBond(b)) { toast(`${b.element} already has ${MAX_BONDS[b.element]} bonds`); return; }
+  const ring = ringPath(a, b);
   dropHToward(a, b.p); dropHToward(b, a.p);
   const bondRef = createBond(a, b);
-  if (bondRef) { history.push({ type: 'addBond', bondRef }); onStateChanged(); }
+  if (bondRef) {
+    history.push({ type: 'addBond', bondRef });
+    onStateChanged();
+    if (ring) { anneal(10, ring); settled = false; }
+  }
 }
 function undo() {
   const act = history.pop();
@@ -894,7 +1097,7 @@ function showHalo(a) {
   selectedAtomId = a.id;
   halo = new THREE.Mesh(sphereGeo(a.element), haloMat.clone());
   halo.scale.setScalar(1.42);
-  halo.position.copy(a.p);
+  halo.position.copy(a.p).multiplyScalar(S);
   frame.add(halo);
 }
 
@@ -937,7 +1140,7 @@ function onStateChanged() {
   rebuildPhysics();
   updateFraming();
 
-  settle(20);
+  settle(50);
 
   const name = generateName();
   const isCorrect = (name === currentTarget());
@@ -1393,8 +1596,8 @@ function animate() {
     // Relax on a time budget so slower devices still reach rest quickly.
     const t0 = performance.now();
     let peak = 0, steps = 0;
-    do { peak = relaxStep(1 / 60); steps++; }
-    while (steps < 24 && peak >= REST_V && performance.now() - t0 < 2.5);
+    do { peak = relaxStep(DT); steps++; }
+    while (steps < 60 && peak >= REST_V && performance.now() - t0 < 2.5);
     if (peak < REST_V) settled = true;
     updateFraming();
   }
