@@ -1144,7 +1144,7 @@ function onStateChanged() {
 
   const name = generateName();
   const isCorrect = (name === currentTarget());
-  const isStatus = /^(Tap an atom|Building|Invalid|Structure)/.test(name);
+  const isStatus = NAME_STATUS.has(name);
 
   const live = document.getElementById('liveName');
   live.innerHTML = isStatus ? (IDLE_COPY[name] || name) : fmtFormula(name);
@@ -1165,279 +1165,493 @@ function showWin() {
 }
 function showFinal() { document.getElementById('finalSheet').classList.add('show'); }
 /* ===========================================================
-   NAMING ENGINE — old-style IUPAC  (preserved verbatim)
+   IUPAC NAMING
+   Substitutive nomenclature over the heavy-atom graph: pick a
+   parent (chain or ring), number it, then name whatever hangs
+   off it recursively. Output keeps the locant-first style the
+   levels are written in ("2-octanol", not "octan-2-ol").
    =========================================================== */
-const PARENT_ROOTS = [null, 'meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct'];
-const BRANCH_NAMES = [null, 'methyl', 'ethyl', 'propyl'];
-const MULTI_PREFIX = [null, '', 'di', 'tri', 'tetra'];
+const ROOTS = [null, 'meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct', 'non', 'dec',
+  'undec', 'dodec', 'tridec', 'tetradec', 'pentadec', 'hexadec', 'heptadec', 'octadec',
+  'nonadec', 'icos', 'henicos', 'docos', 'tricos', 'tetracos', 'pentacos', 'hexacos',
+  'heptacos', 'octacos', 'nonacos', 'triacont'];
+const MULT  = [null, '', 'di', 'tri', 'tetra', 'penta', 'hexa', 'hepta', 'octa', 'nona', 'deca',
+  'undeca', 'dodeca', 'trideca', 'tetradeca', 'pentadeca'];
+const MULT_C = [null, '', 'bis', 'tris', 'tetrakis', 'pentakis', 'hexakis', 'heptakis', 'octakis'];
+const SHORT_OXY = { methyl: 'methoxy', ethyl: 'ethoxy', propyl: 'propoxy', butyl: 'butoxy' };
+/* saturated rings holding one O or one N, numbered from that atom */
+const HETERO_RINGS = {
+  O: { 3: 'oxirane', 4: 'oxetane', 5: 'oxolane', 6: 'oxane', 7: 'oxepane' },
+  N: { 3: 'aziridine', 4: 'azetidine', 5: 'pyrrolidine', 6: 'piperidine', 7: 'azepane' },
+};
 
-function generateName() {
-  if (atoms.size === 0) return 'Tap an atom to begin';
-  if (atoms.size === 1) {
-    const only = [...atoms.values()][0];
-    if (only.element === 'C') return 'methane';
-    if (only.element === 'O') return 'water';
-    if (only.element === 'N') return 'ammonia';
-  }
-  for (const a of atoms.values())
-    if (!['C','N','O'].includes(a.element)) return 'Invalid structure';
+const NAME_EMPTY   = 'Tap an atom to begin';
+const NAME_PARTIAL = 'Building...';
+const NAME_BAD     = 'Invalid structure';
+const NAME_UNKNOWN = "Can't name this one";
+const NAME_STATUS  = new Set([NAME_EMPTY, NAME_PARTIAL, NAME_BAD, NAME_UNKNOWN]);
 
-  const carbons   = [...atoms.values()].filter(a => a.element === 'C');
-  const oxygens   = [...atoms.values()].filter(a => a.element === 'O');
-  const nitrogens = [...atoms.values()].filter(a => a.element === 'N');
-  if (carbons.length === 0) return 'Invalid structure';
-  if (carbons.length > 20) return 'Structure too complex';
+const heavyOf = a => [...a.neighbors].map(id => atoms.get(id)).filter(Boolean);
+const carbonsOf = a => heavyOf(a).filter(x => x.element === 'C');
+/* -OH: an oxygen holding one heavy neighbour (the rest are hydrogens) */
+const isHydroxyl = o => o.element === 'O' && o.neighbors.size === 1;
 
-  {
-    const vis = new Set();
-    const firstId = [...atoms.values()][0].id;
-    const q = [firstId]; vis.add(firstId);
-    while (q.length) {
-      const x = q.shift();
-      for (const nid of atoms.get(x).neighbors) { if (!vis.has(nid)) { vis.add(nid); q.push(nid); } }
-    }
-    if (vis.size !== atoms.size) return 'Invalid structure';
-  }
-
-  const ohCarbons = new Set();
-  for (const o of oxygens) {
-    if (o.neighbors.size === 0) return 'Building...';
-    if (o.neighbors.size !== 1) return 'Invalid structure';
-    const nid = [...o.neighbors][0];
-    if (atoms.get(nid).element !== 'C') return 'Invalid structure';
-    ohCarbons.add(nid);
-  }
-
-  for (const nAtom of nitrogens) {
-    if (nAtom.neighbors.size === 0) return 'Building...';
-    if (nAtom.neighbors.size > 3) return 'Invalid structure';
-    for (const nid of nAtom.neighbors) { if (atoms.get(nid).element !== 'C') return 'Invalid structure'; }
-  }
-  if (nitrogens.length > 1) return 'Structure too complex';
-
-  const cIds = carbons.map(c => c.id);
-  const cSet = new Set(cIds);
-  {
-    const vis = new Set();
-    for (const cid of cIds) {
-      if (vis.has(cid)) continue;
-      const qc = [cid]; vis.add(cid);
-      let nodes = 0, halfEdges = 0;
-      while (qc.length) {
-        const x = qc.shift();
-        nodes++;
-        for (const nid of atoms.get(x).neighbors) {
-          if (!cSet.has(nid)) continue;
-          halfEdges++;
-          if (!vis.has(nid)) { vis.add(nid); qc.push(nid); }
-        }
-      }
-      if (halfEdges / 2 !== nodes - 1) return 'Invalid structure';
-    }
-  }
-
-  function pathBetween(s, e) {
-    const parent = new Map();
-    parent.set(s, null);
-    const qq = [s];
-    while (qq.length) {
-      const x = qq.shift();
-      if (x === e) break;
-      for (const nid of atoms.get(x).neighbors) {
-        if (!cSet.has(nid) || parent.has(nid)) continue;
-        parent.set(nid, x); qq.push(nid);
-      }
-    }
-    if (!parent.has(e)) return null;
-    const path = [];
-    let x = e;
-    while (x !== null) { path.push(x); x = parent.get(x); }
-    return path.reverse();
-  }
-
-  const hasOH  = ohCarbons.size > 0;
-  const hasN   = nitrogens.length > 0;
-  const amineAsParent = hasN && !hasOH;
-
-  let requiredCarbons = null;
-  if (hasOH) requiredCarbons = ohCarbons;
-  else if (amineAsParent) { requiredCarbons = new Set(); for (const nid of nitrogens[0].neighbors) requiredCarbons.add(nid); }
-
-  let bestChain = null;
-  for (let i = 0; i < cIds.length; i++) {
-    for (let j = i; j < cIds.length; j++) {
-      const path = pathBetween(cIds[i], cIds[j]);
-      if (!path) continue;
-      if (requiredCarbons) {
-        let ok = false;
-        for (const cid of path) if (requiredCarbons.has(cid)) { ok = true; break; }
-        if (!ok) continue;
-      }
-      if (!bestChain || path.length > bestChain.length) bestChain = path;
-    }
-  }
-  if (!bestChain) return 'Building...';
-
-  function measureAlkylChain(startId, excludeId) {
-    const seen = new Set([excludeId]);
-    let cur = startId, len = 0;
-    while (true) {
-      if (seen.has(cur)) return null;
-      seen.add(cur);
-      const curAtom = atoms.get(cur);
-      if (curAtom.element !== 'C') return null;
-      len++;
-      if (len > 3) return null;
-      const nexts = [];
-      for (const nid of curAtom.neighbors) {
-        if (seen.has(nid)) continue;
-        const nb = atoms.get(nid);
-        if (nb.element !== 'C') return null;
-        nexts.push(nid);
-      }
-      if (nexts.length === 0) break;
-      if (nexts.length > 1) return null;
-      cur = nexts[0];
-    }
-    return len;
-  }
-  function buildNSubPrefix(lengths) {
-    const names = lengths.map(l => BRANCH_NAMES[l]);
-    const counts = {};
-    for (const nm of names) counts[nm] = (counts[nm] || 0) + 1;
-    const sorted = Object.keys(counts).sort();
-    const parts = [];
-    for (const nm of sorted) {
-      const c = counts[nm];
-      if (c === 1) parts.push('N-' + nm);
-      else if (c === 2) parts.push('N,N-di' + nm);
-      else return null;
-    }
-    return parts.join('-');
-  }
-  function analyze(chain) {
-    const inChain = new Set(chain);
-    const subs = [];
-    let fgLocant = null;
-    let nChainAttach = 0;
-    for (let i = 0; i < chain.length; i++) {
-      const locant = i + 1;
-      const cid = chain[i];
-      const c = atoms.get(cid);
-      for (const nid of c.neighbors) {
-        if (inChain.has(nid)) continue;
-        const nb = atoms.get(nid);
-        if (nb.element === 'O') {
-          if (fgLocant !== null) return null;
-          fgLocant = locant;
-        } else if (nb.element === 'N') {
-          nChainAttach++;
-          if (nChainAttach > 1) return null;
-          const otherCs = [...nb.neighbors].filter(x => x !== cid);
-          const nSubLengths = [];
-          for (const ocid of otherCs) {
-            const len = measureAlkylChain(ocid, nid);
-            if (!len) return null;
-            nSubLengths.push(len);
-          }
-          if (amineAsParent) {
-            if (fgLocant !== null) return null;
-            fgLocant = locant;
-            for (const len of nSubLengths) subs.push({ name: BRANCH_NAMES[len], sortKey: BRANCH_NAMES[len], locant: 'N' });
-          } else {
-            if (nSubLengths.length === 0) subs.push({ name: 'amino', sortKey: 'amino', locant });
-            else {
-              const nSubStr = buildNSubPrefix(nSubLengths);
-              if (!nSubStr) return null;
-              const fullName = '(' + nSubStr + 'amino)';
-              let sortKey;
-              if (nSubLengths.length === 1) sortKey = BRANCH_NAMES[nSubLengths[0]] + 'amino';
-              else { const sortedNames = nSubLengths.map(l => BRANCH_NAMES[l]).sort(); sortKey = (sortedNames[0] === sortedNames[1] ? 'di' + sortedNames[0] : sortedNames.join('')) + 'amino'; }
-              subs.push({ name: fullName, sortKey, locant });
-            }
-          }
-        } else if (nb.element === 'C') {
-          const seen = new Set([cid]);
-          const branch = [];
-          let cur = nid;
-          while (true) {
-            if (seen.has(cur)) return null;
-            seen.add(cur);
-            const curAtom = atoms.get(cur);
-            if (curAtom.element !== 'C') return null;
-            branch.push(cur);
-            if (branch.length > 3) return null;
-            const nexts = [];
-            for (const nn of curAtom.neighbors) {
-              if (seen.has(nn)) continue;
-              const nnb = atoms.get(nn);
-              if (nnb.element !== 'C') return null;
-              nexts.push(nn);
-            }
-            if (nexts.length === 0) break;
-            if (nexts.length > 1) return null;
-            cur = nexts[0];
-          }
-          const bn = BRANCH_NAMES[branch.length];
-          subs.push({ name: bn, sortKey: bn, locant });
-        }
-      }
-    }
-    if (amineAsParent && fgLocant === null) return null;
-    if (hasOH && fgLocant === null) return null;
-    return { subs, fgLocant };
-  }
-
-  const fwd = analyze(bestChain);
-  const rev = analyze([...bestChain].reverse());
-  if (!fwd && !rev) return 'Structure too complex';
-
-  function pickBetter(a, b) {
-    if (!a) return b;
-    if (!b) return a;
-    if (a.fgLocant !== null && b.fgLocant !== null) {
-      if (a.fgLocant !== b.fgLocant) return a.fgLocant < b.fgLocant ? a : b;
-    }
-    const numLoc = s => s.subs.map(x => x.locant).filter(l => typeof l === 'number').sort((x,y)=>x-y);
-    const la = numLoc(a), lb = numLoc(b);
-    for (let i = 0; i < Math.min(la.length, lb.length); i++) { if (la[i] !== lb[i]) return la[i] < lb[i] ? a : b; }
-    return a;
-  }
-  const chosen = pickBetter(fwd, rev);
-
-  const n = bestChain.length;
-  const rootName = PARENT_ROOTS[n];
-  if (!rootName) return 'Structure too complex';
-
-  const groups = {};
-  for (const s of chosen.subs) {
-    const key = s.name;
-    if (!groups[key]) groups[key] = { sortKey: s.sortKey || s.name, locants: [] };
-    groups[key].locants.push(s.locant);
-  }
-  const sortedKeys = Object.keys(groups).sort((a, b) => groups[a].sortKey.localeCompare(groups[b].sortKey));
-  const parts = [];
-  for (const key of sortedKeys) {
-    const { locants } = groups[key];
-    locants.sort((x, y) => { if (x === 'N' && y === 'N') return 0; if (x === 'N') return -1; if (y === 'N') return 1; return x - y; });
-    const count = locants.length;
-    const prefix = count > 1 ? MULTI_PREFIX[count] : '';
-    if (!prefix && count > 1) return 'Structure too complex';
-    parts.push(`${locants.join(',')}-${prefix}${key}`);
-  }
-
-  let fgLocStr = '';
-  let suffix;
-  if (hasOH) { suffix = rootName + 'anol'; if (n >= 3) fgLocStr = `${chosen.fgLocant}-`; }
-  else if (amineAsParent) { suffix = rootName + 'anamine'; if (n >= 3) fgLocStr = `${chosen.fgLocant}-`; }
-  else suffix = rootName + 'ane';
-
-  let name = '';
-  if (parts.length) { name += parts.join('-'); if (fgLocStr) name += '-'; }
-  name += fgLocStr + suffix;
-  return name;
+function cmpLocants(a, b) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return a.length - b.length;
 }
 
+/* ---------- substituent prefixes ---------- */
+function assemblePrefixes(subs, omitLocants) {
+  const groups = new Map();
+  for (const s of subs) {
+    if (!groups.has(s.name)) groups.set(s.name, { sortKey: s.sortKey, complex: s.complex, locants: [] });
+    groups.get(s.name).locants.push(s.locant);
+  }
+  const keys = [...groups.keys()].sort((x, y) => groups.get(x).sortKey.localeCompare(groups.get(y).sortKey));
+  const parts = [];
+  for (const key of keys) {
+    const g = groups.get(key);
+    g.locants.sort((x, y) => {
+      const sx = typeof x === 'string', sy = typeof y === 'string';
+      if (sx && sy) return x.localeCompare(y);
+      if (sx) return -1;
+      if (sy) return 1;
+      return x - y;
+    });
+    const n = g.locants.length;
+    const mult = g.complex ? MULT_C[n] : MULT[n];
+    if (mult === undefined || mult === null) return null;
+    const body = g.complex && (n > 1 || /[-,]/.test(key)) ? mult + '(' + key + ')' : mult + key;
+    parts.push(omitLocants ? body : g.locants.join(',') + '-' + body);
+  }
+  return parts;
+}
+
+/* ---------- branches ---------- */
+function longestCarbonPath(start, blockedId) {
+  let best = [start];
+  const walk = (cur, path, seen) => {
+    let grew = false;
+    for (const nb of carbonsOf(cur)) {
+      if (seen.has(nb.id)) continue;
+      grew = true;
+      seen.add(nb.id);
+      path.push(nb);
+      walk(nb, path, seen);
+      path.pop();
+      seen.delete(nb.id);
+    }
+    if (!grew && path.length > best.length) best = path.slice();
+  };
+  walk(start, [start], new Set([start.id, blockedId]));
+  return best;
+}
+
+/* Name the group reached by stepping from `from` into `start`.
+   Returns { name, sortKey, complex } or null if it has no name here. */
+function nameBranch(start, from, depth) {
+  if (depth > 12) return null;
+  if (start.element === 'O') return nameOxy(start, from, depth);
+  if (start.element === 'N') return nameAmino(start, from, depth);
+
+  const path = longestCarbonPath(start, from.id);
+  const root = ROOTS[path.length];
+  if (!root) return null;
+  const inPath = new Set(path.map(a => a.id));
+  const subs = [];
+  for (let i = 0; i < path.length; i++) {
+    for (const nb of heavyOf(path[i])) {
+      if (inPath.has(nb.id) || nb.id === from.id) continue;
+      const s = nameBranch(nb, path[i], depth + 1);
+      if (!s) return null;
+      subs.push({ ...s, locant: i + 1 });
+    }
+  }
+  const base = root + 'yl';
+  if (!subs.length) return { name: base, sortKey: base, complex: false };
+  const parts = assemblePrefixes(subs);
+  if (!parts) return null;
+  const name = parts.join('-') + base;
+  return { name, sortKey: name.replace(/[0-9,()-]/g, ''), complex: true };
+}
+
+function nameOxy(o, from, depth) {
+  const others = heavyOf(o).filter(x => x.id !== from.id);
+  if (!others.length) return { name: 'hydroxy', sortKey: 'hydroxy', complex: false };
+  if (others.length > 1) return null;
+  const far = others[0];
+  if (far.element === 'O') {                       // peroxide linkage
+    const beyond = heavyOf(far).filter(x => x.id !== o.id);
+    if (!beyond.length) return { name: 'hydroperoxy', sortKey: 'hydroperoxy', complex: false };
+    if (beyond.length > 1) return null;
+    const inner = nameBranch(beyond[0], far, depth + 1);
+    if (!inner) return null;
+    const nm = inner.name + 'peroxy';
+    return { name: nm, sortKey: nm.replace(/[0-9,()-]/g, ''), complex: true };
+  }
+  if (far.element === 'N') {                       // C-O-N, an aminooxy group
+    const amino = nameAmino(far, o, depth + 1);
+    if (!amino) return null;
+    const nm = (amino.complex ? '(' + amino.name + ')' : amino.name) + 'oxy';
+    return { name: nm, sortKey: nm.replace(/[0-9,()-]/g, ''), complex: amino.complex };
+  }
+  if (far.element !== 'C') return null;
+  const inner = nameBranch(far, o, depth + 1);
+  if (!inner) return null;
+  if (!inner.complex && SHORT_OXY[inner.name]) {
+    const nm = SHORT_OXY[inner.name];
+    return { name: nm, sortKey: nm, complex: false };
+  }
+  const nm = inner.name + 'oxy';
+  return { name: nm, sortKey: nm.replace(/[0-9,()-]/g, ''), complex: true };
+}
+
+function nameAmino(n, from, depth) {
+  const others = heavyOf(n).filter(x => x.id !== from.id);
+  if (!others.length) return { name: 'amino', sortKey: 'amino', complex: false };
+
+  /* N-N is a hydrazine, which has its own prefix rather than an amino one */
+  const nitro = others.filter(x => x.element === 'N');
+  if (nitro.length) {
+    if (nitro.length > 1) return null;
+    const n2 = nitro[0];
+    if (heavyOf(n2).some(x => x.element === 'N' && x.id !== n.id)) return null;
+    const subs = [];
+    for (const o of others) if (o.id !== n2.id) {
+      const sb = nameBranch(o, n, depth + 1);
+      if (!sb) return null;
+      subs.push({ ...sb, locant: 1 });
+    }
+    for (const o of heavyOf(n2)) if (o.id !== n.id) {
+      const sb = nameBranch(o, n2, depth + 1);
+      if (!sb) return null;
+      subs.push({ ...sb, locant: 2 });
+    }
+    const pre = assemblePrefixes(subs);
+    if (!pre) return null;
+    const nm = pre.join('-') + (pre.length ? '-' : '') + 'hydrazinyl';
+    return { name: nm, sortKey: nm.replace(/[0-9,()-]/g, ''), complex: pre.length > 0 };
+  }
+
+  const found = [];
+  for (const o of others) {
+    const sb = nameBranch(o, n, depth + 1);
+    if (!sb) return null;
+    found.push(sb);
+  }
+  const counts = new Map();
+  for (const f of found) {
+    if (!counts.has(f.name)) counts.set(f.name, { n: 0, complex: f.complex });
+    counts.get(f.name).n++;
+  }
+  const keys = [...counts.keys()].sort();
+  const parts = [], sortBits = [];
+  for (const k of keys) {
+    const g = counts.get(k);
+    const wrapped = g.complex ? '(' + k + ')' : k;
+    if (g.n === 1) { parts.push('N-' + wrapped); sortBits.push(k); }
+    else if (g.n === 2) { parts.push('N,N-' + (g.complex ? 'bis' : 'di') + wrapped); sortBits.push('di' + k); }
+    else return null;
+  }
+  return { name: parts.join('-') + 'amino', sortKey: sortBits.join('').replace(/[0-9,()-]/g, '') + 'amino', complex: true };
+}
+
+/* ---------- parent skeleton ---------- */
+function treePath(s, e, adj) {
+  const prev = new Map([[s, null]]), q = [s];
+  while (q.length) {
+    const x = q.shift();
+    if (x === e) break;
+    for (const y of adj.get(x)) if (!prev.has(y)) { prev.set(y, x); q.push(y); }
+  }
+  if (!prev.has(e)) return null;
+  const out = [];
+  for (let x = e; x !== null && x !== undefined; x = prev.get(x)) out.push(x);
+  return out.reverse();
+}
+function componentsOf(ids, adj) {
+  const seen = new Set(), out = [];
+  for (const id of ids) {
+    if (seen.has(id)) continue;
+    const comp = [], q = [id];
+    seen.add(id);
+    while (q.length) {
+      const x = q.shift(); comp.push(x);
+      for (const y of adj.get(x)) if (!seen.has(y)) { seen.add(y); q.push(y); }
+    }
+    out.push(comp);
+  }
+  return out;
+}
+/* Strip terminal atoms until only the cycle is left. */
+function ringOf(comp, adj) {
+  const alive = new Set(comp), deg = new Map();
+  for (const id of comp) deg.set(id, adj.get(id).filter(x => alive.has(x)).length);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const id of [...alive]) {
+      if (deg.get(id) <= 1) {
+        alive.delete(id); changed = true;
+        for (const y of adj.get(id)) if (alive.has(y)) deg.set(y, deg.get(y) - 1);
+      }
+    }
+  }
+  if (!alive.size) return null;
+  for (const id of alive) if (deg.get(id) !== 2) return null;
+  const order = [], used = new Set();
+  let cur = [...alive][0], prev = null;
+  while (order.length < alive.size) {
+    order.push(cur); used.add(cur);
+    const next = adj.get(cur).find(y => alive.has(y) && y !== prev && !used.has(y));
+    prev = cur;
+    if (next === undefined) break;
+    cur = next;
+  }
+  return order.length === alive.size ? order.map(id => atoms.get(id)) : null;
+}
+function parentCandidates(carbons) {
+  const adj = new Map();
+  for (const c of carbons) adj.set(c.id, carbonsOf(c).map(x => x.id));
+  const out = [];
+  for (const comp of componentsOf(carbons.map(c => c.id), adj)) {
+    const inComp = new Set(comp);
+    let edges = 0;
+    for (const id of comp) edges += adj.get(id).filter(x => inComp.has(x)).length;
+    edges /= 2;
+    const paths = (ids, graph) => {
+      for (let i = 0; i < ids.length; i++)
+        for (let j = i; j < ids.length; j++) {
+          const p = treePath(ids[i], ids[j], graph);
+          if (p) out.push({ atoms: p.map(id => atoms.get(id)), ring: false });
+        }
+    };
+    if (edges === comp.length - 1) paths(comp, adj);
+    else if (edges === comp.length) {
+      const ring = ringOf(comp, adj);
+      if (!ring) return null;
+      out.push({ atoms: ring, ring: true });
+      const onRing = new Set(ring.map(a => a.id));
+      const rest = comp.filter(id => !onRing.has(id));
+      if (rest.length) {
+        const sub = new Map();
+        for (const id of rest) sub.set(id, adj.get(id).filter(x => !onRing.has(x)));
+        for (const frag of componentsOf(rest, sub)) paths(frag, sub);
+      }
+    } else return null;           // more than one ring: out of scope
+  }
+  return out;
+}
+
+/* A single saturated ring carrying exactly one O or N. */
+function findHeteroRing(all) {
+  const adj = new Map();
+  for (const a of all) adj.set(a.id, heavyOf(a).map(x => x.id));
+  for (const comp of componentsOf(all.map(a => a.id), adj)) {
+    const inComp = new Set(comp);
+    let edges = 0;
+    for (const id of comp) edges += adj.get(id).filter(x => inComp.has(x)).length;
+    if (edges / 2 !== comp.length) continue;              // not exactly one ring here
+    const ring = ringOf(comp, adj);
+    if (!ring) continue;
+    const het = ring.filter(a => a.element !== 'C');
+    if (het.length !== 1) continue;
+    const base = (HETERO_RINGS[het[0].element] || {})[ring.length];
+    if (!base) continue;
+    const start = ring.indexOf(het[0]), n = ring.length, orders = [];
+    for (const d of [1, -1]) {
+      const o = [];
+      for (let k = 0; k < n; k++) o.push(ring[((start + d * k) % n + n) % n]);
+      orders.push(o);
+    }
+    return { atoms: ring, ring: true, base, orders };
+  }
+  return null;
+}
+
+/* Does the group hanging off `from` lead back into the parent? */
+function branchEscapes(start, from, parentIds) {
+  const seen = new Set([from.id, start.id]), q = [start];
+  while (q.length) {
+    const x = q.shift();
+    if (parentIds.has(x.id)) return true;
+    for (const nb of heavyOf(x)) if (!seen.has(nb.id)) { seen.add(nb.id); q.push(nb); }
+  }
+  return false;
+}
+
+function describeParent(order, isRing, ctx) {
+  const ids = new Set(order.map(a => a.id));
+  const suffixLocants = [], subs = [];
+  for (let i = 0; i < order.length; i++) {
+    const c = order[i];
+    for (const nb of heavyOf(c)) {
+      if (ids.has(nb.id)) continue;
+      if (ctx.suffix === 'ol' && ctx.groupIds.has(nb.id)) { suffixLocants.push(i + 1); continue; }
+      if (ctx.suffix === 'amine' && ctx.groupIds.has(nb.id)) {
+        if (carbonsOf(nb).filter(x => ids.has(x.id)).length > 1) return null;   // N inside a ring
+        suffixLocants.push(i + 1);
+        const tag = ctx.groupIds.size > 1 ? 'N' + (i + 1) : 'N';
+        for (const o of heavyOf(nb).filter(x => x.id !== c.id)) {
+          if (branchEscapes(o, nb, ids)) return null;
+          const s = nameBranch(o, nb, 1);
+          if (!s) return null;
+          subs.push({ ...s, locant: tag });
+        }
+        continue;
+      }
+      if (branchEscapes(nb, c, ids)) return null;
+      const s = nameBranch(nb, c, 1);
+      if (!s) return null;
+      subs.push({ ...s, locant: i + 1 });
+    }
+  }
+  if (ctx.suffix !== 'ane' && !suffixLocants.length) return null;
+  suffixLocants.sort((a, b) => a - b);
+  return {
+    order, isRing, base: ctx.base, suffixLocants, subs,
+    subLocants: subs.map(s => s.locant).filter(x => typeof x === 'number').sort((a, b) => a - b),
+  };
+}
+
+function betterNumbering(a, b) {
+  let c = cmpLocants(a.suffixLocants, b.suffixLocants);
+  if (c) return c < 0;
+  c = cmpLocants(a.subLocants, b.subLocants);
+  if (c) return c < 0;
+  const first = r => [...r.subs].sort((x, y) => x.sortKey.localeCompare(y.sortKey))[0];
+  const fa = first(a), fb = first(b);
+  if (!fa || !fb) return false;
+  if (fa.sortKey !== fb.sortKey) return fa.sortKey < fb.sortKey;
+  return (typeof fa.locant === 'number' ? fa.locant : 0) < (typeof fb.locant === 'number' ? fb.locant : 0);
+}
+
+function evaluateParent(cand, ctx) {
+  const n = cand.atoms.length, orders = cand.orders ? [...cand.orders] : [];
+  if (cand.orders) { /* fixed numbering, e.g. a heteroatom must be position 1 */ }
+  else if (cand.ring) {
+    for (let s = 0; s < n; s++) for (const d of [1, -1]) {
+      const o = [];
+      for (let k = 0; k < n; k++) o.push(cand.atoms[((s + d * k) % n + n) % n]);
+      orders.push(o);
+    }
+  } else {
+    orders.push(cand.atoms, [...cand.atoms].reverse());
+  }
+  let best = null;
+  for (const order of orders) {
+    const r = describeParent(order, cand.ring, ctx);
+    if (r && (!best || betterNumbering(r, best))) best = r;
+  }
+  return best;
+}
+
+function assembleName(best, ctx) {
+  const n = best.order.length, root = best.base || ROOTS[n];
+  if (!root) return null;
+  /* A locant is pointless where only one position exists. */
+  const omit = !best.base && (n === 1 ||
+    (ctx.suffix === 'ane' && best.subs.length === 1 && (best.isRing || n === 2)));
+  const parts = assemblePrefixes(best.subs, omit);
+  if (!parts) return null;
+  const cyclo = best.isRing && !best.base ? 'cyclo' : '';
+  let core, locantStr = '';
+  const count = best.suffixLocants.length;
+  if (ctx.suffix !== 'ane' && (MULT[count] === undefined || MULT[count] === null)) return null;
+  if (ctx.suffix === 'ane') core = best.base ? root : cyclo + root + 'ane';
+  else if (best.base) {
+    /* piperidine + ol -> piperidinol, piperidine + diol -> piperidinediol */
+    const tail = ctx.suffix === 'ol' ? 'ol' : 'amine';
+    core = count === 1 ? root.replace(/e$/, '') + tail : root + MULT[count] + tail;
+    locantStr = best.suffixLocants.join(',') + '-';
+  } else {
+    const tail = ctx.suffix === 'ol' ? 'ol' : 'amine';
+    core = count === 1 ? cyclo + root + 'an' + tail : cyclo + root + 'ane' + MULT[count] + tail;
+    if (count > 1 || (!best.isRing && n >= 3)) locantStr = best.suffixLocants.join(',') + '-';
+  }
+  const head = parts.join('-');
+  return head + (head && locantStr ? '-' : '') + locantStr + core;
+}
+
+function nameInorganic(all) {
+  const els = all.map(a => a.element).sort().join('');
+  if (els === 'O') return 'water';
+  if (els === 'N') return 'ammonia';
+  if (els === 'OO') return 'hydrogen peroxide';
+  if (els === 'NN') return 'hydrazine';
+  if (els === 'NO') return 'hydroxylamine';
+  return NAME_UNKNOWN;
+}
+
+function generateName() {
+  if (atoms.size === 0) return NAME_EMPTY;
+  const all = [...atoms.values()];
+  for (const a of all) {
+    if (!MAX_BONDS[a.element]) return NAME_BAD;
+    if (a.neighbors.size > MAX_BONDS[a.element]) return NAME_BAD;
+  }
+  if (all.length === 1) {
+    const el = all[0].element;
+    return el === 'C' ? 'methane' : el === 'O' ? 'water' : 'ammonia';
+  }
+  {
+    const seen = new Set([all[0].id]), q = [all[0].id];
+    while (q.length) { const x = q.shift(); for (const y of atoms.get(x).neighbors) if (!seen.has(y)) { seen.add(y); q.push(y); } }
+    if (seen.size !== all.length) return NAME_BAD;
+  }
+  for (const a of all) if (a.element !== 'C' && a.neighbors.size === 0) return NAME_PARTIAL;
+
+  const carbons = all.filter(a => a.element === 'C');
+  if (!carbons.length) return nameInorganic(all);
+  /* Only the parent chain has to fit the root table; branches do not.
+     The cap here is about keeping path enumeration cheap, nothing else. */
+  if (all.length > 150) return NAME_UNKNOWN;
+
+  const het = findHeteroRing(all);
+  if (het) {
+    const onRing = new Set(het.atoms.map(a => a.id));
+    const ringOH = all.filter(a => isHydroxyl(a) && onRing.has(heavyOf(a)[0].id));
+    const hctx = { suffix: ringOH.length ? 'ol' : 'ane', groupIds: new Set(ringOH.map(a => a.id)), base: het.base };
+    const r = evaluateParent(het, hctx);
+    const nm = r && assembleName(r, hctx);
+    if (nm) return nm;
+  }
+
+  const hydroxyls = all.filter(a => isHydroxyl(a) && heavyOf(a)[0].element === 'C');
+  const amines = all.filter(a => a.element === 'N' && heavyOf(a).length > 0 && heavyOf(a).every(x => x.element === 'C'));
+  const ctx = { suffix: hydroxyls.length ? 'ol' : amines.length ? 'amine' : 'ane', groupIds: new Set() };
+  for (const a of (ctx.suffix === 'ol' ? hydroxyls : ctx.suffix === 'amine' ? amines : [])) ctx.groupIds.add(a.id);
+
+  const cands = parentCandidates(carbons);
+  if (!cands || !cands.length) return NAME_UNKNOWN;
+
+  /* parent carries the most principal groups, then is longest, then cyclic */
+  let bestScore = null, pool = [];
+  for (const cand of cands) {
+    if (!ROOTS[cand.atoms.length]) continue;
+    const ids = new Set(cand.atoms.map(a => a.id));
+    let groups = 0;
+    if (ctx.suffix === 'ol') groups = hydroxyls.filter(o => ids.has(heavyOf(o)[0].id)).length;
+    else if (ctx.suffix === 'amine') groups = amines.filter(nn => carbonsOf(nn).some(c => ids.has(c.id))).length;
+    if (ctx.suffix !== 'ane' && groups === 0) continue;
+    const score = [groups, cand.atoms.length, cand.ring ? 1 : 0];
+    const c = bestScore ? cmpLocants(score, bestScore) : 1;
+    if (!bestScore || c > 0) { bestScore = score; pool = [cand]; }
+    else if (c === 0) pool.push(cand);
+  }
+  if (!pool.length) return NAME_UNKNOWN;
+
+  let best = null;
+  for (const cand of pool) {
+    const r = evaluateParent(cand, ctx);
+    if (!r) continue;
+    if (!best || r.subs.length > best.subs.length ||
+        (r.subs.length === best.subs.length && betterNumbering(r, best))) best = r;
+  }
+  if (!best) return NAME_UNKNOWN;
+  return assembleName(best, ctx) || NAME_UNKNOWN;
+}
 
 /* =========================================================================
    INTERACTION
