@@ -2,11 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="Molecule Builder — assemble organic molecules in real 3D and learn IUPAC nomenclature live. An interactive chemistry teaching tool.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Molecule Builder">
+<meta property="og:title" content="Molecule Builder — Interactive Organic Chemistry">
+<meta property="og:description" content="Build organic molecules atom by atom in true 3D geometry and watch them named live by IUPAC rules.">
+<meta property="og:url" content="https://yazan-now.github.io/molecule-builder/">
+<meta property="og:image" content="https://yazan-now.github.io/molecule-builder/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Molecule Builder — Interactive Organic Chemistry">
+<meta name="twitter:description" content="Build organic molecules atom by atom in true 3D geometry and watch them named live by IUPAC rules.">
+<meta name="twitter:image" content="https://yazan-now.github.io/molecule-builder/preview.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-512.png">
 <title>Molecule Builder — Interactive Organic Chemistry</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230071e3'/%3E%3Cg stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Cline x1='16' y1='11' x2='10.5' y2='21'/%3E%3Cline x1='16' y1='11' x2='21.5' y2='21'/%3E%3C/g%3E%3Ccircle cx='16' cy='11' r='3.2' fill='white'/%3E%3Ccircle cx='10.5' cy='21' r='3.2' fill='white'/%3E%3Ccircle cx='21.5' cy='21' r='3.2' fill='white'/%3E%3C/svg%3E">
 <style>
@@ -78,6 +92,10 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
   .loc { color: var(--accent); }
+  .srOnly {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 
   /* ---------------- Top bar ---------------- */
   #bar {
@@ -310,6 +328,51 @@
   .sMeta .k { color: var(--ink-3); margin-bottom: 2px; }
   .sMeta .v { color: var(--ink); font-weight: 500; }
 
+  /* ---------------- Stage message (nothing to render) ---------------- */
+  #stageMsg {
+    position: absolute; inset: 0; z-index: 8;
+    display: grid; place-items: center; padding: 24px;
+    background: var(--bg);
+  }
+  #stageMsg[hidden] { display: none; }
+  #stageMsg .smCard { max-width: 380px; text-align: center; }
+  #stageMsg .ic {
+    width: 46px; height: 46px; margin: 0 auto 16px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--bg-2); color: var(--ink-3);
+  }
+  #stageMsg .ic svg { width: 24px; height: 24px; }
+  #stageMsg h2 { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
+  #stageMsg p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); margin-bottom: 18px; }
+  #stageMsg button { padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 14.5px; font-weight: 600; }
+  #stageMsg button[hidden] { display: none; }
+  body.broken #dock, body.broken #readout, body.broken #nextFloat { display: none; }
+
+  /* ---------------- Formula row ---------------- */
+  .formula {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    font-size: 12.5px; color: var(--ink-3); margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .formula b { font-weight: 500; color: var(--ink-2); }
+  .formula sub { font-size: 0.75em; vertical-align: baseline; position: relative; bottom: -0.25em; }
+  .formula .yours.hit b { color: var(--good); }
+
+  /* ---------------- Level dots as controls ---------------- */
+  #dots { display: flex; gap: 4px; }
+  #dots button {
+    flex: 1; height: 16px; padding: 0; display: flex; align-items: center;
+    background: none; border: none;
+  }
+  #dots button::after {
+    content: ""; display: block; width: 100%; height: 3px; border-radius: 999px;
+    background: var(--hair-2); transition: background .25s;
+  }
+  #dots button.done::after { background: var(--accent); }
+  #dots button.current::after { height: 5px; }                     /* you are here */
+  #dots button.current:not(.done)::after { background: var(--accent); opacity: .5; }
+  #dots button:hover::after { background: var(--ink-3); }
+  #dots button.done:hover::after, #dots button.current:hover::after { background: var(--accent-2); opacity: 1; }
+
   /* ---------------- Responsive ---------------- */
   @media (max-width: 720px) {
     /* the class label leaves the grid here, so drop to two columns */
@@ -349,16 +412,30 @@
 <main id="stage">
   <div id="viewport"></div>
 
+  <div id="stageMsg" hidden role="alert">
+    <div class="smCard">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></svg></div>
+      <h2 id="smTitle">Something went wrong</h2>
+      <p id="smBody"></p>
+      <button id="smRetry">Reload</button>
+    </div>
+  </div>
+
   <section id="task">
     <div class="tHead">
       <span class="lv">Level <span id="levelNum">1</span></span>
       <span class="kind" id="targetKind">Alcohol</span>
     </div>
-    <h1 id="targetName">&mdash;</h1>
-    <div id="dots"></div>
+    <h2 id="targetName">&mdash;</h2>
+    <div class="formula">
+      <span class="target">Formula <b id="targetFormula">&mdash;</b></span>
+      <span class="yours" id="yoursWrap" hidden>Yours <b id="yoursFormula">&mdash;</b></span>
+    </div>
+    <div id="dots" role="group" aria-label="Jump to level"></div>
   </section>
 
-  <div id="readout">
+  <div id="readout" role="status" aria-live="polite" aria-atomic="true">
+    <span class="srOnly">Your molecule:</span>
     <span id="liveName" class="idle">Pick an atom to begin</span>
     <span id="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17 4 11.7"/></svg></span>
   </div>
@@ -366,9 +443,9 @@
   <button id="nextFloat">Next challenge</button>
 
   <nav id="dock">
-    <button class="atomBtn" data-el="C" title="Carbon — 4 bonds">C</button>
-    <button class="atomBtn" data-el="N" title="Nitrogen — 3 bonds">N</button>
-    <button class="atomBtn" data-el="O" title="Oxygen — 2 bonds">O</button>
+    <button class="atomBtn" data-el="C" title="Carbon — 4 bonds" aria-label="Carbon, forms 4 bonds">C</button>
+    <button class="atomBtn" data-el="N" title="Nitrogen — 3 bonds" aria-label="Nitrogen, forms 3 bonds">N</button>
+    <button class="atomBtn" data-el="O" title="Oxygen — 2 bonds" aria-label="Oxygen, forms 2 bonds">O</button>
     <span class="sep"></span>
     <button class="dockBtn" id="undoBtn" title="Undo" aria-label="Undo" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h9.5a5.5 5.5 0 1 1 0 11H7"/><path d="M7.5 4.5 4 8l3.5 3.5"/></svg>
@@ -381,11 +458,11 @@
 
 <div id="toast"></div>
 
-<div id="winSheet" class="sheet">
+<div id="winSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="winTitle" hidden>
   <div class="scrim"></div>
   <div class="card">
     <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17 4 11.7"/></svg></div>
-    <h2>Correct</h2>
+    <h2 id="winTitle">Correct</h2>
     <p class="sub">You matched the structure.</p>
     <div class="nameBox" id="winName">&mdash;</div>
     <div class="btnCol">
@@ -395,20 +472,20 @@
   </div>
 </div>
 
-<div id="finalSheet" class="sheet">
+<div id="finalSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="finalTitle" hidden>
   <div class="scrim"></div>
   <div class="card">
     <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20.5h8"/><path d="M12 16.5v4"/><path d="M7 4h10v4.8a5 5 0 0 1-10 0z"/><path d="M17 5.2h3v1.6a3 3 0 0 1-3 3"/><path d="M7 5.2H4v1.6a3 3 0 0 0 3 3"/></svg></div>
-    <h2>All five complete</h2>
+    <h2 id="finalTitle">All five complete</h2>
     <p class="sub">You built and correctly named every molecule.</p>
     <div class="btnCol"><button class="cbtn solid" id="againBtn">Start over</button></div>
   </div>
 </div>
 
-<div id="helpSheet" class="sheet">
+<div id="helpSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
   <div class="scrim"></div>
   <div class="card">
-    <h2>How it works</h2>
+    <h2 id="helpTitle">How it works</h2>
     <div class="step"><div class="n">1</div><div class="t"><b>Pick an element</b> from the dock, then tap the stage for your first atom.</div></div>
     <div class="step"><div class="n">2</div><div class="t"><b>Tap any atom</b> to grow the chain from it. Hydrogens fill in on their own.</div></div>
     <div class="step"><div class="n">3</div><div class="t"><b>Bond two atoms</b> by deselecting the dock, then tapping one atom and another.</div></div>
@@ -434,9 +511,60 @@
   </div>
 </div>
 
+<script>
+/* Registered before anything else loads, so a blocked CDN or a machine
+   without WebGL gets an explanation instead of an empty stage. */
+window.__mbReady = false;
+window.stageMessage = function (title, body, retry) {
+  const box = document.getElementById('stageMsg');
+  if (!box || !box.hidden) return;
+  document.getElementById('smTitle').textContent = title;
+  document.getElementById('smBody').textContent = body;
+  document.getElementById('smRetry').hidden = !retry;
+  box.hidden = false;
+  document.body.classList.add('broken');
+  const intro = document.getElementById('start');
+  if (intro) { intro.classList.add('hide'); document.body.classList.remove('pre'); }
+};
+/* Ask the browser directly rather than guessing from an error string. */
+(function () {
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+    if (!gl) { window.__noWebGL = true; return; }
+    const lose = gl.getExtension && gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();                 // give the context straight back
+  } catch (err) { window.__noWebGL = true; }
+})();
+window.addEventListener('error', function (e) {
+  if (window.__mbReady) return;              // a later hiccup is not a dead page
+  /* A failed <script>/<img> arrives here too, with no message on it. */
+  const el = e && e.target;
+  if (el && el !== window && el.tagName) {
+    if (/three(\.min)?\.js/i.test(el.src || '')) window.__threeFailed = true;
+    else return;                             // some other asset: not fatal
+  }
+  const msg = String((e && e.message) || '');
+  if (window.__noWebGL || /WebGL/i.test(msg)) {
+    window.stageMessage('3D is unavailable on this device',
+      'This browser could not start WebGL, which Molecule Builder needs to draw in 3D. Turn on hardware acceleration in your browser settings, or try a different browser.', true);
+  } else if (window.__threeFailed || /THREE is not defined/.test(msg)) {
+    window.stageMessage('The 3D library did not load',
+      'Molecule Builder needs a file from a public CDN that this network or an extension seems to be blocking. Try again on another connection.', true);
+  } else {
+    window.stageMessage('Molecule Builder could not start',
+      'Something went wrong while loading the page. Reloading usually fixes it.', true);
+  }
+}, true);
+document.addEventListener('DOMContentLoaded', function () {
+  const r = document.getElementById('smRetry');
+  if (r) r.addEventListener('click', () => location.reload());
+});
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        crossorigin="anonymous" referrerpolicy="no-referrer"
+        onerror="window.__threeFailed = true"></script>
 <script>
 /* =========================================================================
    MOLECULE BUILDER
@@ -445,13 +573,26 @@
    ========================================================================= */
 
 const LEVELS = [
-  { level: 1, target: '4-amino-6-ethyl-3-methyl-2-octanol' },
-  { level: 2, target: 'N-methyl-2-pentanamine' },
-  { level: 3, target: 'N,N-dimethyl-1-butanamine' },
-  { level: 4, target: 'N-ethyl-3-methyl-2-hexanamine' },
-  { level: 5, target: '5-ethyl-4-(N-methylamino)-2-heptanol' },
+  { level: 1, target: '4-amino-6-ethyl-3-methyl-2-octanol',  formula: 'C11H25NO' },
+  { level: 2, target: 'N-methyl-2-pentanamine',              formula: 'C6H15N' },
+  { level: 3, target: 'N,N-dimethyl-1-butanamine',           formula: 'C6H15N' },
+  { level: 4, target: 'N-ethyl-3-methyl-2-hexanamine',       formula: 'C9H21N' },
+  { level: 5, target: '5-ethyl-4-(N-methylamino)-2-heptanol', formula: 'C10H23NO' },
 ];
 let currentLevel = 1;
+let solvedUpTo = 0;
+
+/* ---------- saved progress ---------- */
+const STORE_KEY = 'moleculeBuilder.v1';
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+}
+function saveProgress(patch) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...loadProgress(), ...patch })); } catch (e) { /* private mode */ }
+}
+function clearProgress() {
+  try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+}
 function currentTarget() { return LEVELS[currentLevel - 1].target; }
 
 /* ---------- Force field ----------
@@ -559,6 +700,7 @@ let selectedEl = null;
 let selectedAtomId = null;
 let halo = null;
 let won = false, postWin = false, spin = true, started = false;
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- Geometry helpers ---------- */
 const _t = new THREE.Vector3(), _u = new THREE.Vector3(), _w = new THREE.Vector3();
@@ -1072,19 +1214,22 @@ function clearAll() {
   won = false; postWin = false; spin = false;
   pivot.rotation.set(0, 0, 0);
   zoom = 1;
-  document.getElementById('winSheet').classList.remove('show');
+  closeSheet('winSheet');
   onStateChanged();
 }
 function advanceLevel() {
   if (currentLevel >= LEVELS.length) { showFinal(); return; }
   currentLevel++;
+  saveProgress({ level: currentLevel, solved: solvedUpTo });
   updateTargetLabel();
   clearAll();
 }
 function resetGame() {
   currentLevel = 1;
+  solvedUpTo = 0;
+  clearProgress();
   updateTargetLabel();
-  document.getElementById('finalSheet').classList.remove('show');
+  closeSheet('finalSheet');
   clearAll();
 }
 
@@ -1118,14 +1263,81 @@ function updateTargetLabel() {
   document.getElementById('barLvl').textContent = currentLevel + ' of ' + LEVELS.length;
   document.getElementById('targetName').innerHTML = fmtFormula(t);
   document.getElementById('targetKind').textContent = molKind(t);
+  document.getElementById('targetFormula').innerHTML = formulaHTML(LEVELS[currentLevel - 1].formula);
   const dots = document.getElementById('dots');
   dots.innerHTML = '';
   for (let i = 1; i <= LEVELS.length; i++) {
-    const d = document.createElement('div');
-    d.className = 'd' + (i < currentLevel ? ' done' : i === currentLevel ? ' active' : '');
+    const d = document.createElement('button');
+    d.type = 'button';
+    d.dataset.level = i;
+    d.className = (i <= solvedUpTo ? 'done ' : '') + (i === currentLevel ? 'current' : '');
+    d.title = 'Level ' + i + (i <= solvedUpTo ? ' — solved' : '') + (i === currentLevel ? ' — current' : '');
+    d.setAttribute('aria-label', d.title);
+    if (i === currentLevel) d.setAttribute('aria-current', 'true');
     dots.appendChild(d);
   }
 }
+document.getElementById('dots').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const lv = Number(btn.dataset.level);
+  if (!lv || lv === currentLevel) return;
+  currentLevel = lv;
+  saveProgress({ level: currentLevel });
+  updateTargetLabel();
+  clearAll();
+});
+/* ---------- dialogs ---------- */
+let sheetReturnFocus = null;
+const FOCUSABLE = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+function openSheet(id) {
+  const el = document.getElementById(id);
+  if (!el || el.classList.contains('show')) return;
+  sheetReturnFocus = document.activeElement;
+  el.hidden = false;
+  el.classList.add('show');
+  const first = el.querySelector('.cbtn.solid') || el.querySelector(FOCUSABLE);
+  if (first) first.focus();
+}
+function closeSheet(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.classList.contains('show')) return;
+  el.classList.remove('show');
+  el.hidden = true;
+  if (sheetReturnFocus && document.contains(sheetReturnFocus)) sheetReturnFocus.focus();
+  sheetReturnFocus = null;
+}
+function openSheetId() {
+  const el = document.querySelector('.sheet.show');
+  return el ? el.id : null;
+}
+/* keep Tab inside the open dialog */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const id = openSheetId();
+  if (!id) return;
+  const items = [...document.getElementById(id).querySelectorAll(FOCUSABLE)];
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---------- molecular formula ---------- */
+function formulaCounts() {
+  const c = { C: 0, N: 0, O: 0, H: 0 };
+  for (const a of atoms.values()) { c[a.element]++; c.H += MAX_BONDS[a.element] - a.neighbors.size; }
+  return c;
+}
+function formulaText(c) {
+  if (!c.C && !c.N && !c.O) return '';
+  const part = (el, n) => (n ? el + (n > 1 ? n : '') : '');
+  return part('C', c.C) + part('H', c.H) + part('N', c.N) + part('O', c.O);
+}
+function formulaHTML(text) {
+  return text.replace(/([A-Z][a-z]?)(\d*)/g, (_, el, n) => el + (n ? '<sub>' + n + '</sub>' : ''));
+}
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1151,6 +1363,14 @@ function onStateChanged() {
   live.classList.toggle('idle', isStatus);
   document.getElementById('readout').classList.toggle('match', isCorrect);
 
+  const mine = formulaText(formulaCounts());
+  const wrap = document.getElementById('yoursWrap');
+  wrap.hidden = !mine;
+  if (mine) {
+    document.getElementById('yoursFormula').innerHTML = formulaHTML(mine);
+    wrap.classList.toggle('hit', mine === LEVELS[currentLevel - 1].formula);
+  }
+
   document.getElementById('undoBtn').disabled = history.length === 0;
   document.getElementById('clearBtn').disabled = atoms.size === 0;
 
@@ -1160,10 +1380,12 @@ function onStateChanged() {
 
 function showWin() {
   won = true;
+  if (currentLevel > solvedUpTo) { solvedUpTo = currentLevel; updateTargetLabel(); }
+  saveProgress({ level: currentLevel, solved: solvedUpTo });
   document.getElementById('winName').innerHTML = fmtFormula(currentTarget());
-  document.getElementById('winSheet').classList.add('show');
+  openSheet('winSheet');
 }
-function showFinal() { document.getElementById('finalSheet').classList.add('show'); }
+function showFinal() { openSheet('finalSheet'); }
 /* ===========================================================
    IUPAC NAMING
    Substitutive nomenclature over the heavy-atom graph: pick a
@@ -1668,22 +1890,29 @@ document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('clearBtn').addEventListener('click', clearAll);
 
 document.getElementById('nextBtn').addEventListener('click', () => {
-  document.getElementById('winSheet').classList.remove('show');
+  closeSheet('winSheet');
   advanceLevel();
 });
 document.getElementById('inspectBtn').addEventListener('click', () => {
-  document.getElementById('winSheet').classList.remove('show');
+  closeSheet('winSheet');
   postWin = true; spin = true;
   document.getElementById('nextFloat').classList.add('show');
 });
 document.getElementById('nextFloat').addEventListener('click', advanceLevel);
+document.getElementById('winSheet').addEventListener('click', e => {
+  if (e.target.classList.contains('scrim')) {
+    closeSheet('winSheet');
+    postWin = true;
+    document.getElementById('nextFloat').classList.add('show');
+  }
+});
 document.getElementById('againBtn').addEventListener('click', resetGame);
 
 const helpSheet = document.getElementById('helpSheet');
-document.getElementById('helpBtn').addEventListener('click', () => helpSheet.classList.add('show'));
-document.getElementById('howBtn').addEventListener('click', () => helpSheet.classList.add('show'));
-document.getElementById('closeHelpBtn').addEventListener('click', () => { helpSheet.classList.remove('show'); dismissStart(); });
-helpSheet.addEventListener('click', e => { if (e.target === helpSheet || e.target.classList.contains('scrim')) helpSheet.classList.remove('show'); });
+document.getElementById('helpBtn').addEventListener('click', () => openSheet('helpSheet'));
+document.getElementById('howBtn').addEventListener('click', () => openSheet('helpSheet'));
+document.getElementById('closeHelpBtn').addEventListener('click', () => { closeSheet('helpSheet'); dismissStart(); });
+helpSheet.addEventListener('click', e => { if (e.target === helpSheet || e.target.classList.contains('scrim')) closeSheet('helpSheet'); });
 
 function dismissStart() {
   if (started) return;
@@ -1697,7 +1926,8 @@ document.getElementById('beginBtn').addEventListener('click', dismissStart);
 window.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
-  if (k === 'escape') { helpSheet.classList.remove('show'); return; }
+  if (k === 'escape') { const open = openSheetId(); if (open && open !== 'finalSheet') closeSheet(open); return; }
+  if (openSheetId()) return;                 // don't edit the molecule behind a dialog
   if (!started) { if (k === 'enter' || k === ' ') dismissStart(); return; }
   const map = { c: 'C', n: 'N', o: 'O' };
   if (map[k]) {
@@ -1827,7 +2057,7 @@ function animate() {
 
   syncMeshes();
 
-  if (spin) pivot.rotation.y += dt * 0.2;
+  if (spin && !reduceMotion) pivot.rotation.y += dt * 0.2;
   if (halo) halo.material.opacity = 0.14 + Math.abs(Math.sin(clock.elapsedTime * 3)) * 0.14;
 
   framePos.copy(centerTarget).negate().add(introOffset());
@@ -1859,6 +2089,16 @@ function buildDemo() {
 
 /* ---------- Init ---------- */
 document.body.classList.add('pre');
+{
+  const saved = loadProgress();
+  solvedUpTo = Math.min(Math.max(saved.solved | 0, 0), LEVELS.length);
+  const lv = Math.min(Math.max(saved.level | 0, 1), LEVELS.length);
+  currentLevel = lv;
+  if (solvedUpTo > 0) {
+    const btn = document.getElementById('beginBtn');
+    btn.textContent = solvedUpTo >= LEVELS.length ? 'Build again' : 'Continue \u00b7 Level ' + currentLevel;
+  }
+}
 camera.position.set(0, 0, 14);
 camera.lookAt(0, 0, 0);
 resize();
@@ -1866,6 +2106,7 @@ setTimeout(resize, 60);
 updateTargetLabel();
 buildDemo();
 animate();
+window.__mbReady = true;
 </script>
 </body>
 </html>

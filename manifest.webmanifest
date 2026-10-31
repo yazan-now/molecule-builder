@@ -1,0 +1,15 @@
+{
+  "name": "Molecule Builder — Interactive Organic Chemistry",
+  "short_name": "Molecule Builder",
+  "description": "Build organic molecules atom by atom in true 3D geometry and watch them named live by IUPAC rules.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0071e3",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
